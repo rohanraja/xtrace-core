@@ -1,0 +1,24 @@
+{
+  "name": "tree-sitter-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "inject": "node esbuild.config.js && node dist/out.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "clang-format": "^1.8.0",
+    "tree-sitter": "^0.21.1",
+    "tree-sitter-cpp": "^0.22.1",
+    "tree-sitter-javascript": "^0.21.3",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "esbuild": "^0.23.1"
+  }
+}
