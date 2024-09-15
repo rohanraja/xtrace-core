@@ -1,0 +1,745 @@
+{
+  "configuration" : {
+    "scope" : "SoftwareSystem"
+  },
+  "description" : "Description",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-javascript",
+  "lastModifiedDate" : "2024-09-15T15:29:42Z",
+  "model" : {
+    "people" : [ {
+      "description" : "Member in a software dev team, seeking insights into their application code using xTrace",
+      "id" : "1",
+      "location" : "Unspecified",
+      "name" : "Software Developer",
+      "properties" : {
+        "structurizr.dsl.identifier" : "dev"
+      },
+      "relationships" : [ {
+        "description" : "Views code replays, debug recordings using",
+        "destinationId" : "3",
+        "id" : "33",
+        "properties" : {
+          "structurizr.dsl.identifier" : "3a0551e0-caed-4e05-89df-7817f5b030de"
+        },
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Visits xTrace.io",
+        "destinationId" : "4",
+        "id" : "35",
+        "properties" : {
+          "structurizr.dsl.identifier" : "b942deb3-c2d5-45e1-94b0-4396bbd1f7f3"
+        },
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Views code replays, debug recordings using",
+        "destinationId" : "5",
+        "id" : "36",
+        "properties" : {
+          "structurizr.dsl.identifier" : "7598e5ae-e934-4523-bb5e-409ada1a34ed"
+        },
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "Web browser"
+      } ],
+      "tags" : "Element,Person,Customer"
+    }, {
+      "description" : "Owner of software app team, will onboard their code repo to xTrace to start tracing",
+      "id" : "2",
+      "location" : "Unspecified",
+      "name" : "Software Admin",
+      "properties" : {
+        "structurizr.dsl.identifier" : "admin"
+      },
+      "relationships" : [ {
+        "description" : "Onboards xTrace to application code",
+        "destinationId" : "3",
+        "id" : "34",
+        "properties" : {
+          "structurizr.dsl.identifier" : "05c268a4-600f-4d46-a465-a3ffb350fdf0"
+        },
+        "sourceId" : "2",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Register code repo with access token, code hooking config",
+        "destinationId" : "5",
+        "id" : "44",
+        "properties" : {
+          "structurizr.dsl.identifier" : "adeae015-dada-483a-9806-2b785589d129"
+        },
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "Web UI"
+      } ],
+      "tags" : "Element,Person,Customer"
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "description" : "Provides static content and single page application resources to web",
+        "documentation" : { },
+        "id" : "4",
+        "name" : "Web Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "webapplication"
+        },
+        "relationships" : [ {
+          "description" : "Delivers to customer's web browser",
+          "destinationId" : "5",
+          "id" : "22",
+          "properties" : {
+            "structurizr.dsl.identifier" : "b3fb7bb0-caf1-4add-8943-e577b21b1782"
+          },
+          "sourceId" : "4",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,Web Browser",
+        "technology" : "NodeJS"
+      }, {
+        "description" : "xTrace functionality to users via web browser",
+        "documentation" : { },
+        "id" : "5",
+        "name" : "Single Page Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "singlepageapplication"
+        },
+        "relationships" : [ {
+          "description" : "Makes API calls to",
+          "destinationId" : "7",
+          "id" : "23",
+          "properties" : {
+            "structurizr.dsl.identifier" : "f26d77d2-9076-45df-b15d-a9db03286a01"
+          },
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTP"
+        }, {
+          "description" : "Redirects for payment to",
+          "destinationId" : "31",
+          "id" : "37",
+          "properties" : {
+            "structurizr.dsl.identifier" : "1489dbff-dae9-4c2a-baf5-6b1528fbdbca"
+          },
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "HTTPS"
+        }, {
+          "description" : "Login/Register account using",
+          "destinationId" : "32",
+          "id" : "42",
+          "properties" : {
+            "structurizr.dsl.identifier" : "8bd74805-7576-4e36-9b99-cf52dd287a37"
+          },
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "HTTPS"
+        } ],
+        "tags" : "Element,Container,Web Browser",
+        "technology" : "Typescript and React and Redux"
+      }, {
+        "description" : "Stores user accounts, billing, plans, payment data",
+        "documentation" : { },
+        "id" : "6",
+        "name" : "Web Database",
+        "properties" : {
+          "structurizr.dsl.identifier" : "webdatabase"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "Postgres"
+      }, {
+        "components" : [ {
+          "description" : "Allows users to sign in to the Internet Banking System.",
+          "documentation" : { },
+          "id" : "8",
+          "name" : "Sign In Controller",
+          "properties" : {
+            "structurizr.dsl.identifier" : "signincontroller"
+          },
+          "relationships" : [ {
+            "description" : "Uses",
+            "destinationId" : "11",
+            "id" : "14",
+            "properties" : {
+              "structurizr.dsl.identifier" : "7e2c88e8-c2f0-4064-82db-61eeb3e7d25f"
+            },
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Rails Controller"
+        }, {
+          "description" : "Provides customers with a summary of their bank accounts.",
+          "documentation" : { },
+          "id" : "9",
+          "name" : "Accounts Summary Controller",
+          "properties" : {
+            "structurizr.dsl.identifier" : "accountssummarycontroller"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Rails Controller"
+        }, {
+          "description" : "Allows users to reset their passwords with a single use URL.",
+          "documentation" : { },
+          "id" : "10",
+          "name" : "Reset Password Controller",
+          "properties" : {
+            "structurizr.dsl.identifier" : "resetpasswordcontroller"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Rails Controller"
+        }, {
+          "description" : "Provides functionality related to signing in, changing passwords, etc.",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "Security Component",
+          "properties" : {
+            "structurizr.dsl.identifier" : "securitycomponent"
+          },
+          "relationships" : [ {
+            "description" : "uses",
+            "destinationId" : "13",
+            "id" : "15",
+            "properties" : {
+              "structurizr.dsl.identifier" : "b8f46276-7e9c-4c7e-877e-b5615345dff2"
+            },
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Rails Component"
+        }, {
+          "description" : "Sends e-mails to users.",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "E-mail Component",
+          "properties" : {
+            "structurizr.dsl.identifier" : "emailcomponent"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Rails Component"
+        }, {
+          "description" : "Data related to a user record - email, encrypted password",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "User Model",
+          "properties" : {
+            "structurizr.dsl.identifier" : "usermodel"
+          },
+          "relationships" : [ {
+            "description" : "Reads from and writes to",
+            "destinationId" : "6",
+            "id" : "16",
+            "properties" : {
+              "structurizr.dsl.identifier" : "014439d0-1202-41e9-abeb-9759e30b1612"
+            },
+            "sourceId" : "13",
+            "tags" : "Relationship",
+            "technology" : "JSON"
+          } ],
+          "tags" : "Element,Component,Rails Model",
+          "technology" : "Rails Model"
+        } ],
+        "description" : "Provides backend functionality to web clients using HTTPS/JSON",
+        "documentation" : { },
+        "id" : "7",
+        "name" : "API Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "apiapplication"
+        },
+        "relationships" : [ {
+          "description" : "Reads from and writes to",
+          "destinationId" : "6",
+          "id" : "17",
+          "linkedRelationshipId" : "16",
+          "sourceId" : "7",
+          "technology" : "JSON"
+        }, {
+          "description" : "Reads from and writes to",
+          "destinationId" : "18",
+          "id" : "24",
+          "properties" : {
+            "structurizr.dsl.identifier" : "5e6809e4-2129-4fe1-9780-f92e1eeaaeb1"
+          },
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "JSON"
+        }, {
+          "description" : "Reads from and writes to",
+          "destinationId" : "19",
+          "id" : "25",
+          "properties" : {
+            "structurizr.dsl.identifier" : "e1fc7b8f-d034-4547-be50-03c35f9e9813"
+          },
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "JSON"
+        }, {
+          "description" : "Triggers payments using",
+          "destinationId" : "31",
+          "id" : "39",
+          "properties" : {
+            "structurizr.dsl.identifier" : "661bd20c-680e-4786-9042-a96f716d6c50"
+          },
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTP"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Ruby on Rails"
+      }, {
+        "description" : "Holds live code running information, batch requests",
+        "documentation" : { },
+        "id" : "18",
+        "name" : "Message Queue",
+        "properties" : {
+          "structurizr.dsl.identifier" : "messagequeue"
+        },
+        "tags" : "Element,Container,Queue",
+        "technology" : "Redis"
+      }, {
+        "description" : "Stores processed code run recordings",
+        "documentation" : { },
+        "id" : "19",
+        "name" : "Code Recordings DB",
+        "properties" : {
+          "structurizr.dsl.identifier" : "coderecordingsdb"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "MongoDB"
+      }, {
+        "description" : "Onboards code repo to xTrace",
+        "documentation" : { },
+        "id" : "20",
+        "name" : "Code Repo Onboarding Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "coderepoonboardingservice"
+        },
+        "relationships" : [ {
+          "description" : "Reads from and writes to",
+          "destinationId" : "19",
+          "id" : "26",
+          "properties" : {
+            "structurizr.dsl.identifier" : "a0f04565-4494-4c04-8650-311f5dfda78f"
+          },
+          "sourceId" : "20",
+          "tags" : "Relationship",
+          "technology" : "JSON"
+        }, {
+          "description" : "Invokes",
+          "destinationId" : "21",
+          "id" : "27",
+          "properties" : {
+            "structurizr.dsl.identifier" : "c9d62cf5-77fc-4113-ac18-95a34bcadcf6"
+          },
+          "sourceId" : "20",
+          "tags" : "Relationship",
+          "technology" : "CLI"
+        }, {
+          "description" : "Processes requests to onboard code repo",
+          "destinationId" : "18",
+          "id" : "28",
+          "properties" : {
+            "structurizr.dsl.identifier" : "e8ddab90-ef34-41f0-aa1d-c93a5c8d7fe7"
+          },
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python"
+      }, {
+        "description" : "Parses source code and adds instrumented code and logs to capture runtime data",
+        "documentation" : { },
+        "id" : "21",
+        "name" : "Code instrumenter",
+        "properties" : {
+          "structurizr.dsl.identifier" : "codeinstrumenter"
+        },
+        "relationships" : [ {
+          "description" : "Reads and writes to",
+          "destinationId" : "30",
+          "id" : "45",
+          "properties" : {
+            "structurizr.dsl.identifier" : "7715a080-3412-4624-a874-3831e76099b2"
+          },
+          "sourceId" : "21",
+          "tags" : "Relationship",
+          "technology" : "FileSystem"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : ".Net/NodeJS"
+      } ],
+      "description" : "Views code replays, debug recordings",
+      "documentation" : { },
+      "id" : "3",
+      "location" : "Unspecified",
+      "name" : "xTrace",
+      "properties" : {
+        "structurizr.dsl.identifier" : "xtrace"
+      },
+      "relationships" : [ {
+        "description" : "Redirects for payment to",
+        "destinationId" : "31",
+        "id" : "38",
+        "linkedRelationshipId" : "37",
+        "sourceId" : "3",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Login/Register account using",
+        "destinationId" : "32",
+        "id" : "43",
+        "linkedRelationshipId" : "42",
+        "sourceId" : "3",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Reads and writes to",
+        "destinationId" : "30",
+        "id" : "46",
+        "linkedRelationshipId" : "45",
+        "sourceId" : "3",
+        "technology" : "FileSystem"
+      } ],
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Customer's application with xTrace onboarded",
+      "documentation" : { },
+      "id" : "29",
+      "location" : "Unspecified",
+      "name" : "Customer application with xTrace",
+      "properties" : {
+        "structurizr.dsl.identifier" : "customerapplication"
+      },
+      "relationships" : [ {
+        "description" : "Send code run events to",
+        "destinationId" : "7",
+        "id" : "40",
+        "properties" : {
+          "structurizr.dsl.identifier" : "0252c251-486a-4b37-8f40-38a1bf4faa9f"
+        },
+        "sourceId" : "29",
+        "tags" : "Relationship",
+        "technology" : "JSON/HTTPS"
+      }, {
+        "description" : "Send code run events to",
+        "destinationId" : "3",
+        "id" : "41",
+        "linkedRelationshipId" : "40",
+        "sourceId" : "29",
+        "technology" : "JSON/HTTPS"
+      } ],
+      "tags" : "Element,Software System,Customer,App"
+    }, {
+      "description" : "Customer's application code repository folder",
+      "documentation" : { },
+      "id" : "30",
+      "location" : "Unspecified",
+      "name" : "Customer application code repo",
+      "properties" : {
+        "structurizr.dsl.identifier" : "customercode"
+      },
+      "tags" : "Element,Software System,Customer,CodeRepo"
+    }, {
+      "description" : "Manages direct debits, card payments",
+      "documentation" : { },
+      "id" : "31",
+      "location" : "Unspecified",
+      "name" : "Payments",
+      "properties" : {
+        "structurizr.dsl.identifier" : "payments"
+      },
+      "tags" : "Element,Software System,Existing System"
+    }, {
+      "description" : "Authenticates user using their Google, Microsoft, Github accounts",
+      "documentation" : { },
+      "id" : "32",
+      "location" : "Unspecified",
+      "name" : "Oauth Identity Provider",
+      "properties" : {
+        "structurizr.dsl.identifier" : "oauthidentityprovider"
+      },
+      "tags" : "Element,Software System,Existing System"
+    } ]
+  },
+  "name" : "Name",
+  "properties" : {
+    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgZGV2ID0gcGVyc29uICJTb2Z0d2FyZSBEZXZlbG9wZXIiIHsKICAgICAgICAgICAgdGFncyAiQ3VzdG9tZXIiCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJNZW1iZXIgaW4gYSBzb2Z0d2FyZSBkZXYgdGVhbSwgc2Vla2luZyBpbnNpZ2h0cyBpbnRvIHRoZWlyIGFwcGxpY2F0aW9uIGNvZGUgdXNpbmcgeFRyYWNlIgogICAgICAgIH0KICAgICAgICBhZG1pbiA9IHBlcnNvbiAiU29mdHdhcmUgQWRtaW4iIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIk93bmVyIG9mIHNvZnR3YXJlIGFwcCB0ZWFtLCB3aWxsIG9uYm9hcmQgdGhlaXIgY29kZSByZXBvIHRvIHhUcmFjZSB0byBzdGFydCB0cmFjaW5nIgogICAgICAgICAgICB0YWdzICJDdXN0b21lciIKICAgICAgICB9CiAgICAgICAgeFRyYWNlID0gc29mdHdhcmVTeXN0ZW0gInhUcmFjZSIgewogICAgICAgICAgICBkZXNjcmlwdGlvbiAiVmlld3MgY29kZSByZXBsYXlzLCBkZWJ1ZyByZWNvcmRpbmdzIgoKICAgICAgICAgICAgd2ViQXBwbGljYXRpb24gPSBjb250YWluZXIgIldlYiBBcHBsaWNhdGlvbiIgIlByb3ZpZGVzIHN0YXRpYyBjb250ZW50IGFuZCBzaW5nbGUgcGFnZSBhcHBsaWNhdGlvbiByZXNvdXJjZXMgdG8gd2ViIiAiTm9kZUpTIiAiV2ViIEJyb3dzZXIiCiAgICAgICAgICAgIHNpbmdsZVBhZ2VBcHBsaWNhdGlvbiA9IGNvbnRhaW5lciAiU2luZ2xlIFBhZ2UgQXBwbGljYXRpb24iICJ4VHJhY2UgZnVuY3Rpb25hbGl0eSB0byB1c2VycyB2aWEgd2ViIGJyb3dzZXIiICJUeXBlc2NyaXB0IGFuZCBSZWFjdCBhbmQgUmVkdXgiICJXZWIgQnJvd3NlciIKICAgICAgICAgICAgd2ViRGF0YWJhc2UgPSBjb250YWluZXIgIldlYiBEYXRhYmFzZSIgIlN0b3JlcyB1c2VyIGFjY291bnRzLCBiaWxsaW5nLCBwbGFucywgcGF5bWVudCBkYXRhIiAiUG9zdGdyZXMiICJEYXRhYmFzZSIKICAgICAgICAgICAgYXBpQXBwbGljYXRpb24gPSBjb250YWluZXIgIkFQSSBBcHBsaWNhdGlvbiIgIlByb3ZpZGVzIGJhY2tlbmQgZnVuY3Rpb25hbGl0eSB0byB3ZWIgY2xpZW50cyB1c2luZyBIVFRQUy9KU09OIiAiUnVieSBvbiBSYWlscyIgewoKICAgICAgICAgICAgICAgIHNpZ25pbkNvbnRyb2xsZXIgPSBjb21wb25lbnQgIlNpZ24gSW4gQ29udHJvbGxlciIgIkFsbG93cyB1c2VycyB0byBzaWduIGluIHRvIHRoZSBJbnRlcm5ldCBCYW5raW5nIFN5c3RlbS4iICJSYWlscyBDb250cm9sbGVyIgogICAgICAgICAgICAgICAgYWNjb3VudHNTdW1tYXJ5Q29udHJvbGxlciA9IGNvbXBvbmVudCAiQWNjb3VudHMgU3VtbWFyeSBDb250cm9sbGVyIiAiUHJvdmlkZXMgY3VzdG9tZXJzIHdpdGggYSBzdW1tYXJ5IG9mIHRoZWlyIGJhbmsgYWNjb3VudHMuIiAiUmFpbHMgQ29udHJvbGxlciIKICAgICAgICAgICAgICAgIHJlc2V0UGFzc3dvcmRDb250cm9sbGVyID0gY29tcG9uZW50ICJSZXNldCBQYXNzd29yZCBDb250cm9sbGVyIiAiQWxsb3dzIHVzZXJzIHRvIHJlc2V0IHRoZWlyIHBhc3N3b3JkcyB3aXRoIGEgc2luZ2xlIHVzZSBVUkwuIiAiUmFpbHMgQ29udHJvbGxlciIKICAgICAgICAgICAgICAgIHNlY3VyaXR5Q29tcG9uZW50ID0gY29tcG9uZW50ICJTZWN1cml0eSBDb21wb25lbnQiICJQcm92aWRlcyBmdW5jdGlvbmFsaXR5IHJlbGF0ZWQgdG8gc2lnbmluZyBpbiwgY2hhbmdpbmcgcGFzc3dvcmRzLCBldGMuIiAiUmFpbHMgQ29tcG9uZW50IgogICAgICAgICAgICAgICAgZW1haWxDb21wb25lbnQgPSBjb21wb25lbnQgIkUtbWFpbCBDb21wb25lbnQiICJTZW5kcyBlLW1haWxzIHRvIHVzZXJzLiIgIlJhaWxzIENvbXBvbmVudCIKCiAgICAgICAgICAgICAgICB1c2VyTW9kZWwgPSBjb21wb25lbnQgIlVzZXIgTW9kZWwiICJEYXRhIHJlbGF0ZWQgdG8gYSB1c2VyIHJlY29yZCAtIGVtYWlsLCBlbmNyeXB0ZWQgcGFzc3dvcmQiICJSYWlscyBNb2RlbCIgIlJhaWxzIE1vZGVsIgoKICAgICAgICAgICAgICAgIHNpZ25pbkNvbnRyb2xsZXIgLT4gc2VjdXJpdHlDb21wb25lbnQgIlVzZXMiCiAgICAgICAgICAgICAgICBzZWN1cml0eUNvbXBvbmVudCAtPiB1c2VyTW9kZWwgInVzZXMiCiAgICAgICAgICAgICAgICB1c2VyTW9kZWwgLT4gd2ViRGF0YWJhc2UgIlJlYWRzIGZyb20gYW5kIHdyaXRlcyB0byIgIkpTT04iCgogCiAgICAgICAgICAgIH0KICAgICAgICAgICAgbWVzc2FnZVF1ZXVlID0gY29udGFpbmVyICJNZXNzYWdlIFF1ZXVlIiAiSG9sZHMgbGl2ZSBjb2RlIHJ1bm5pbmcgaW5mb3JtYXRpb24sIGJhdGNoIHJlcXVlc3RzIiAiUmVkaXMiICJRdWV1ZSIgewogICAgICAgICAgICB9CgogICAgICAgICAgICBjb2RlUmVjb3JkaW5nc0RCID0gY29udGFpbmVyICJDb2RlIFJlY29yZGluZ3MgREIiICJTdG9yZXMgcHJvY2Vzc2VkIGNvZGUgcnVuIHJlY29yZGluZ3MiICJNb25nb0RCIiAiRGF0YWJhc2UiCgogICAgICAgICAgICBjb2RlUmVwb09uYm9hcmRpbmdTZXJ2aWNlID0gY29udGFpbmVyICJDb2RlIFJlcG8gT25ib2FyZGluZyBTZXJ2aWNlIiAiT25ib2FyZHMgY29kZSByZXBvIHRvIHhUcmFjZSIgIlB5dGhvbiIgewogICAgICAgICAgICB9CgogICAgICAgICAgICBjb2RlSW5zdHJ1bWVudGVyID0gY29udGFpbmVyICJDb2RlIGluc3RydW1lbnRlciIgIlBhcnNlcyBzb3VyY2UgY29kZSBhbmQgYWRkcyBpbnN0cnVtZW50ZWQgY29kZSBhbmQgbG9ncyB0byBjYXB0dXJlIHJ1bnRpbWUgZGF0YSIgIi5OZXQvTm9kZUpTIiB7CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHdlYkFwcGxpY2F0aW9uIC0+IHNpbmdsZVBhZ2VBcHBsaWNhdGlvbiAiRGVsaXZlcnMgdG8gY3VzdG9tZXIncyB3ZWIgYnJvd3NlciIKICAgICAgICAgICAgc2luZ2xlUGFnZUFwcGxpY2F0aW9uIC0+IGFwaUFwcGxpY2F0aW9uICJNYWtlcyBBUEkgY2FsbHMgdG8iICJKU09OL0hUVFAiCiAgICAgICAgICAgICMgYXBpQXBwbGljYXRpb24gLT4gd2ViRGF0YWJhc2UgIlJlYWRzIGZyb20gYW5kIHdyaXRlcyB0byIgIkpTT04iCiAgICAgICAgICAgIGFwaUFwcGxpY2F0aW9uIC0+IG1lc3NhZ2VRdWV1ZSAiUmVhZHMgZnJvbSBhbmQgd3JpdGVzIHRvIiAiSlNPTiIKICAgICAgICAgICAgYXBpQXBwbGljYXRpb24gLT4gY29kZVJlY29yZGluZ3NEQiAiUmVhZHMgZnJvbSBhbmQgd3JpdGVzIHRvIiAiSlNPTiIKICAgICAgICAgICAgY29kZVJlcG9PbmJvYXJkaW5nU2VydmljZSAtPiBjb2RlUmVjb3JkaW5nc0RCICJSZWFkcyBmcm9tIGFuZCB3cml0ZXMgdG8iICJKU09OIgoKICAgICAgICAgICAgY29kZVJlcG9PbmJvYXJkaW5nU2VydmljZSAtPiBjb2RlSW5zdHJ1bWVudGVyICJJbnZva2VzIiAiQ0xJIgogICAgICAgICAgICBjb2RlUmVwb09uYm9hcmRpbmdTZXJ2aWNlIC0+IG1lc3NhZ2VRdWV1ZSAiUHJvY2Vzc2VzIHJlcXVlc3RzIHRvIG9uYm9hcmQgY29kZSByZXBvIgoKCiAgICAgICAgfQoKICAgICAgICBjdXN0b21lckFwcGxpY2F0aW9uID0gc29mdHdhcmVTeXN0ZW0gIkN1c3RvbWVyIGFwcGxpY2F0aW9uIHdpdGggeFRyYWNlIiB7CiAgICAgICAgICAgIHRhZ3MgIkN1c3RvbWVyIiAiQXBwIgogICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ3VzdG9tZXIncyBhcHBsaWNhdGlvbiB3aXRoIHhUcmFjZSBvbmJvYXJkZWQiCiAgICAgICAgfQoKICAgICAgICBjdXN0b21lckNvZGUgPSBzb2Z0d2FyZVN5c3RlbSAiQ3VzdG9tZXIgYXBwbGljYXRpb24gY29kZSByZXBvIiB7CiAgICAgICAgICAgIHRhZ3MgIkN1c3RvbWVyIiAiQ29kZVJlcG8iCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJDdXN0b21lcidzIGFwcGxpY2F0aW9uIGNvZGUgcmVwb3NpdG9yeSBmb2xkZXIiCiAgICAgICAgfQoKICAgICAgICBwYXltZW50cyA9IHNvZnR3YXJlU3lzdGVtICJQYXltZW50cyIgewogICAgICAgICAgICB0YWdzICJFeGlzdGluZyBTeXN0ZW0iCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJNYW5hZ2VzIGRpcmVjdCBkZWJpdHMsIGNhcmQgcGF5bWVudHMiCiAgICAgICAgfQoKICAgICAgICBvYXV0aElkZW50aXR5UHJvdmlkZXIgPSBzb2Z0d2FyZVN5c3RlbSAiT2F1dGggSWRlbnRpdHkgUHJvdmlkZXIiIHsKICAgICAgICAgICAgdGFncyAiRXhpc3RpbmcgU3lzdGVtIgogICAgICAgICAgICBkZXNjcmlwdGlvbiAiQXV0aGVudGljYXRlcyB1c2VyIHVzaW5nIHRoZWlyIEdvb2dsZSwgTWljcm9zb2Z0LCBHaXRodWIgYWNjb3VudHMiCiAgICAgICAgfQoKCiAgICAgICAgZGV2IC0+IHhUcmFjZSAiVmlld3MgY29kZSByZXBsYXlzLCBkZWJ1ZyByZWNvcmRpbmdzIHVzaW5nIgogICAgICAgIGFkbWluIC0+IHhUcmFjZSAiT25ib2FyZHMgeFRyYWNlIHRvIGFwcGxpY2F0aW9uIGNvZGUiCgogICAgICAgIGRldiAtPiB3ZWJBcHBsaWNhdGlvbiAiVmlzaXRzIHhUcmFjZS5pbyIgIkhUVFBTIgogICAgICAgIGRldiAtPiBzaW5nbGVQYWdlQXBwbGljYXRpb24gIlZpZXdzIGNvZGUgcmVwbGF5cywgZGVidWcgcmVjb3JkaW5ncyB1c2luZyIgIldlYiBicm93c2VyIgogICAgICAgIHNpbmdsZVBhZ2VBcHBsaWNhdGlvbiAtPiBwYXltZW50cyAiUmVkaXJlY3RzIGZvciBwYXltZW50IHRvIiAiSFRUUFMiCiAgICAgICAgYXBpQXBwbGljYXRpb24gLT4gcGF5bWVudHMgIlRyaWdnZXJzIHBheW1lbnRzIHVzaW5nIiAiSlNPTi9IVFRQIgogICAgICAgIGN1c3RvbWVyQXBwbGljYXRpb24gLT4gYXBpQXBwbGljYXRpb24gIlNlbmQgY29kZSBydW4gZXZlbnRzIHRvIiAiSlNPTi9IVFRQUyIKICAgICAgICBzaW5nbGVQYWdlQXBwbGljYXRpb24gLT4gb2F1dGhJZGVudGl0eVByb3ZpZGVyICJMb2dpbi9SZWdpc3RlciBhY2NvdW50IHVzaW5nIiAiSFRUUFMiCgogICAgICAgIGFkbWluIC0+IHNpbmdsZVBhZ2VBcHBsaWNhdGlvbiAiUmVnaXN0ZXIgY29kZSByZXBvIHdpdGggYWNjZXNzIHRva2VuLCBjb2RlIGhvb2tpbmcgY29uZmlnIiAiV2ViIFVJIgogICAgICAgIGNvZGVJbnN0cnVtZW50ZXIgLT4gY3VzdG9tZXJDb2RlICJSZWFkcyBhbmQgd3JpdGVzIHRvIiAiRmlsZVN5c3RlbSIKICAgIH0KCiAgICB2aWV3cyB7CiAgICAgICAgc3lzdGVtQ29udGV4dCB4VHJhY2UgIkRpYWdyYW0xIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvbGF5b3V0IGxyCiAgICAgICAgfQoKICAgICAgICBjb250YWluZXIgeFRyYWNlICJDb250YWluZXJzIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICAjIGF1dG9MYXlvdXQKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlRoZSBjb250YWluZXIgZGlhZ3JhbSBmb3IgdGhlIHhUcmFjZSBTeXN0ZW0uIgogICAgICAgIH0KCiAgICAgICAgY29tcG9uZW50IGFwaUFwcGxpY2F0aW9uICJDb21wb25lbnRzIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvbGF5b3V0IGxyCiAgICAgICAgfQoKICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIlBlcnNvbiIgewogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMjIKICAgICAgICAgICAgICAgIHNoYXBlIFBlcnNvbgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkN1c3RvbWVyIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMwODQyN2IKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJCYW5rIFN0YWZmIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM5OTk5OTkKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJTb2Z0d2FyZSBTeXN0ZW0iIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzExNjhiZAogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkV4aXN0aW5nIFN5c3RlbSIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjOTk5OTk5CiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiQ29udGFpbmVyIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM0MzhkZDUKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJXZWIgQnJvd3NlciIgewogICAgICAgICAgICAgICAgc2hhcGUgV2ViQnJvd3NlcgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIk1vYmlsZSBBcHAiIHsKICAgICAgICAgICAgICAgIHNoYXBlIE1vYmlsZURldmljZUxhbmRzY2FwZQogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkRhdGFiYXNlIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBDeWxpbmRlcgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkNvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjODViYmYwCiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMDAwCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiRmFpbG92ZXIiIHsKICAgICAgICAgICAgICAgIG9wYWNpdHkgMjUKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJDb2RlUmVwbyIgewogICAgICAgICAgICAgICAgc2hhcGUgRm9sZGVyCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiUmFpbHMgTW9kZWwiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzdiYzQwZSAKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiQXBwIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBSb3VuZGVkQm94CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CgogICAgY29uZmlndXJhdGlvbiB7CiAgICAgICAgc2NvcGUgc29mdHdhcmVzeXN0ZW0KICAgIH0KCgp9Cg=="
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "7",
+      "dimensions" : {
+        "height" : 2611,
+        "width" : 3120
+      },
+      "elements" : [ {
+        "id" : "6",
+        "x" : 2469,
+        "y" : 1419
+      }, {
+        "id" : "8",
+        "x" : 219,
+        "y" : 1419
+      }, {
+        "id" : "9",
+        "x" : 219,
+        "y" : 2019
+      }, {
+        "id" : "10",
+        "x" : 219,
+        "y" : 219
+      }, {
+        "id" : "11",
+        "x" : 969,
+        "y" : 1419
+      }, {
+        "id" : "12",
+        "x" : 219,
+        "y" : 819
+      }, {
+        "id" : "13",
+        "x" : 1719,
+        "y" : 1419
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "14"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "16"
+      } ]
+    } ],
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "Containers",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : {
+        "elements" : [ {
+          "color" : "#ffffff",
+          "fontSize" : 22,
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#08427b",
+          "tag" : "Customer"
+        }, {
+          "background" : "#999999",
+          "tag" : "Bank Staff"
+        }, {
+          "background" : "#1168bd",
+          "color" : "#ffffff",
+          "tag" : "Software System"
+        }, {
+          "background" : "#999999",
+          "color" : "#ffffff",
+          "tag" : "Existing System"
+        }, {
+          "background" : "#438dd5",
+          "color" : "#ffffff",
+          "tag" : "Container"
+        }, {
+          "shape" : "WebBrowser",
+          "tag" : "Web Browser"
+        }, {
+          "shape" : "MobileDeviceLandscape",
+          "tag" : "Mobile App"
+        }, {
+          "shape" : "Cylinder",
+          "tag" : "Database"
+        }, {
+          "background" : "#85bbf0",
+          "color" : "#000000",
+          "tag" : "Component"
+        }, {
+          "opacity" : 25,
+          "tag" : "Failover"
+        }, {
+          "shape" : "Folder",
+          "tag" : "CodeRepo"
+        }, {
+          "background" : "#7bc40e",
+          "tag" : "Rails Model"
+        }, {
+          "shape" : "RoundedBox",
+          "tag" : "App"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "description" : "The container diagram for the xTrace System.",
+      "dimensions" : {
+        "height" : 3096,
+        "width" : 3400
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 1445,
+        "y" : 75
+      }, {
+        "id" : "2",
+        "x" : 2460,
+        "y" : 150
+      }, {
+        "id" : "4",
+        "x" : 1079,
+        "y" : 874
+      }, {
+        "id" : "5",
+        "x" : 1909,
+        "y" : 869
+      }, {
+        "id" : "6",
+        "x" : 1915,
+        "y" : 1910
+      }, {
+        "id" : "7",
+        "x" : 1920,
+        "y" : 1345
+      }, {
+        "id" : "18",
+        "x" : 1090,
+        "y" : 1355
+      }, {
+        "id" : "19",
+        "x" : 1135,
+        "y" : 1890
+      }, {
+        "id" : "20",
+        "x" : 350,
+        "y" : 1360
+      }, {
+        "id" : "21",
+        "x" : 345,
+        "y" : 1910
+      }, {
+        "id" : "29",
+        "x" : 2780,
+        "y" : 1725
+      }, {
+        "id" : "30",
+        "x" : 350,
+        "y" : 2580
+      }, {
+        "id" : "31",
+        "x" : 2755,
+        "y" : 1295
+      }, {
+        "id" : "32",
+        "x" : 2750,
+        "y" : 850
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Containers",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "17"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "35"
+      }, {
+        "id" : "36"
+      }, {
+        "id" : "37"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "42"
+      }, {
+        "id" : "44"
+      }, {
+        "id" : "45"
+      } ],
+      "softwareSystemId" : "3"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 2100,
+        "width" : 2350
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 224,
+        "y" : 199
+      }, {
+        "id" : "2",
+        "x" : 224,
+        "y" : 899
+      }, {
+        "id" : "3",
+        "x" : 949,
+        "y" : 949
+      }, {
+        "id" : "29",
+        "x" : 199,
+        "y" : 1599
+      }, {
+        "id" : "30",
+        "x" : 1699,
+        "y" : 349
+      }, {
+        "id" : "31",
+        "x" : 1699,
+        "y" : 949
+      }, {
+        "id" : "32",
+        "x" : 1699,
+        "y" : 1549
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "Diagram1",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "46"
+      } ],
+      "softwareSystemId" : "3"
+    } ]
+  }
+}
