@@ -1,25 +1,8 @@
 
 ## High level design
 
-### C4 diagram
-[diagram](media/c4diagram.drawio)
+### C4 System context diagram
+![Context](media/C4_Context.png)
+### C4 Container diagram
+![Context](media/C4Containers.png)
 
-![High level diagram](media/flowDiagram.drawio.png)
-
-
-## CodeHooks injector
-
-### Block level diagram
-
-![Block diagram](media/hooksInjector.drawio.png)
-
-
-
-## Core components
-- E2E testing infra
-- Writing E2E tests
-- User SignIn, Registeration flow
-- Payments flow
-- Dev console app
-- Code record player app
-- CPP Hooks injector logic
