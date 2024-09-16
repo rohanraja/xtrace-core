@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node esbuild.config.js",
     "inject": "node esbuild.config.js && node dist/out.js",
-    "test": "npm run inject < tests/inp.cc"
+    "test": "npm run inject < tests/inp.cc > tests/out.cc"
   },
   "author": "",
   "license": "ISC",

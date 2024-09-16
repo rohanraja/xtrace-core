@@ -29,3 +29,20 @@ Currently supported languages are C# and TypeScript but the code is open for ext
 ## How it works
 
 This works by generating a parallel version of original source code by adding code hooks before each line in the source code. Those code hooks send code running information to a Redis server, which accumulates the hook data from all line executions and consolidates it into a single code recording. That recording is viewed in a browser based debugging UI built in React-Redux which communicates with an API built in Ruby on Rails.
+
+# Dev setup
+
+## Clone repo
+```shell
+git clone https://github.com/rohanraja/xtrace-core
+```
+
+## To install and test, run the following commands
+
+```shell
+npm install
+npm run build
+npm run test
+```
+
+After running the last command, tests/out.cc will be generated with the hooked code.
