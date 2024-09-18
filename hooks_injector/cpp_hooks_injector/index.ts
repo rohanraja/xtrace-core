@@ -12,8 +12,15 @@ parser.setLanguage(Cpp);
 
 export enum NodeType {
     FunctionDefinition = "function_definition",
+    ForRangeLoop = "for_range_loop",
+    ForStatement = "for_statement",
+    IfStatement = "if_statement",
+    ElseClause = "else_clause",
 }
 
+export interface CompoundStatementNode extends SyntaxNode {
+    statements: SyntaxNode[];
+}
 // Read sourcecode from stdin stream
 const sourceCode = fs.readFileSync(0, 'utf-8');
 
@@ -22,43 +29,50 @@ function addLogLines(sourceCode: string): string {
     let modifiedSourceCode = sourceCode.split('\n');
 
     function visit(node: SyntaxNode) {
-        if(node.type === NodeType.FunctionDefinition) {
+        if (node.type === NodeType.FunctionDefinition) {
             const bodyNode: SyntaxNode = (node as any).bodyNode
             const declaratorNode = (node as any).declaratorNode;
             // Find any node which has identifier in type
             let methodName = "";
-            function findD(decNode: SyntaxNode){
+            function findD(decNode: SyntaxNode) {
 
-                if(!methodName && decNode.type.includes("identifier")) {
+                if (!methodName && decNode.type.includes("identifier")) {
                     methodName = decNode.text;
                     return;
                 }
-                for(const child of decNode.namedChildren){
+                for (const child of decNode.namedChildren) {
                     findD(child);
                 }
             }
 
             findD(declaratorNode);
+            
+            if(!bodyNode || !bodyNode.namedChildren) {
+                return;
+            }
 
             const statements = bodyNode.namedChildren.filter(x => isValidStatementType(x.type));
             statements.forEach((childNode: SyntaxNode, index: number) => {
                 const lineNumber = childNode.startPosition.row;
                 const columnNumber = childNode.startPosition.column;
-                
+
                 let lineData = "";
 
-                if(index===0){
+                if (index === 0) {
                     lineData += `XTrace *xtrace = XTrace::getInstance(); `
                     lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" ); `;
                 }
 
                 lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
 
-                if(index===statements.length-1){
+                if (index === statements.length - 1) {
                     lineData += `xtrace->FlushAllEventsToJSONFile(); `
                 }
 
                 modifiedSourceCode[lineNumber] = modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + modifiedSourceCode[lineNumber].slice(columnNumber).trim();
+                if (childNode.namedChildCount > 0) {
+                    modifiedSourceCode = handleSyntaxNode(childNode, modifiedSourceCode);
+                }
             });
             return;
         }
@@ -69,12 +83,48 @@ function addLogLines(sourceCode: string): string {
 
     return modifiedSourceCode.join('\n');
 }
+function handleSyntaxNode(node: SyntaxNode, modifiedSourceCode: string[]): string[] {
+    let statements;
+    // let statements: SyntaxNode[] = [];
 
+    switch (node.type) {
+        case NodeType.IfStatement:
+        case NodeType.ElseClause: {
+            statements = node.consequenceNode.namedChildren;
+            if(node.alternativeNode) {
+                statements = statements.concat(node.alternativeNode.namedChildren);
+            }
+            statements
+            break;
+        }
+        case NodeType.ForStatement:
+        case NodeType.ForRangeLoop: {
+            statements = node.bodyNode.namedChildren;
+            break;
+        }
+        default: {
+            statements = node.namedChildren;
+            break;
+        }
+    }
+    statements.filter(x => isValidStatementType(x.type)).forEach((childNode: SyntaxNode, index: number) => {
+        const lineNumber = childNode.startPosition.row;
+        const columnNumber = childNode.startPosition.column;
+        let lineData = "";
+        lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `;
+        modifiedSourceCode[lineNumber] = modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + modifiedSourceCode[lineNumber].slice(columnNumber).trim();
+        if (childNode.namedChildCount > 0) {
+            modifiedSourceCode = handleSyntaxNode(childNode, modifiedSourceCode);
+        }
+    });
 
-function isValidStatementType(type: string){
-    return type.includes("statement") || type.includes("declaration") || type.includes("definition");
+    return modifiedSourceCode;
 }
 
-console.log(`Injecting.... ${sourceCode}`);
+function isValidStatementType(type: string) {
+    return !type.includes("else") && type.includes("statement") || type.includes("declaration") || type.includes("definition") || type.includes("for_range_loop");
+}
+
+// console.log(`Injecting.... ${sourceCode}`);
 const modifiedSourceCode = addLogLines(sourceCode);
 console.log(modifiedSourceCode);
