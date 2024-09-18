@@ -4,7 +4,7 @@ import Parser, { SyntaxNode, Tree } from 'tree-sitter';
 import Cpp from 'tree-sitter-cpp';
 import fs from 'fs';
 
-const fileName = process.env["FileName"] || "main.cc";
+const fileName = process.env["FileName"] || "clipboard_promise.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
 
 const parser = new Parser();
@@ -81,7 +81,7 @@ function addLogLines(sourceCode: string): string {
 
     visit(tree.rootNode);
 
-    return modifiedSourceCode.join('\n');
+    return "#include \"third_party/xtrace/xtrace.h\"\n" + modifiedSourceCode.join('\n');
 }
 function handleSyntaxNode(node: SyntaxNode, modifiedSourceCode: string[]): string[] {
     let statements;

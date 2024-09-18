@@ -5,7 +5,6 @@ obj
 .DS_Store
 experiments
 **tmprun**
-third_party
 first_party
 tests/current
 node_modules
