@@ -27,7 +27,7 @@ export interface CompoundStatementNode extends SyntaxNode {
 const sourceCode = fs.readFileSync(0, 'utf-8');
 
 function addLogLines(sourceCode: string): string {
-    
+
     let modifiedSourceCode = sourceCode.split('\n');
     const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"));
     function visit(node: SyntaxNode) {
