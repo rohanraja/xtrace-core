@@ -69,6 +69,30 @@ public:
 
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
 
+  inline void LocalVarUpdate(std::string mrid, std::string varName, std::string varValue) {
+
+    int timeStamp = timeCount;
+    timeCount++;
+    SendVarUpdate(mrid, varName, true, "", varValue, timeStamp);
+  }
+
+  inline void SendVarUpdate(std::string contId, std::string varName, bool isLocal, std::string className, std::string newVal, int timeStamp) {
+    std::string eventType = "SEND_VAR_UPDATE";
+    std::string newValStr = newVal;
+    std::string varType = "VALUE";
+
+    std::vector<std::string> payload;
+    payload.push_back(contId);
+    payload.push_back(varName);
+    payload.push_back(varType);
+    payload.push_back(className);
+    payload.push_back(newValStr);
+    payload.push_back(std::to_string(timeStamp));
+    payload.push_back(isLocal ? "true" : "false");
+
+    DispatchEvent(eventType, getVectorOfStringToJson(payload));
+}
+
   inline void LogLineRun(std::string mrid, int lineNo) {
 
     std::string type = "LINE_EXEC";
