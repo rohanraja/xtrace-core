@@ -23,8 +23,7 @@ namespace CppHooksInjector{
             {
                 return code;
             }
-            string formatted = RunCppFormat(output, baseCppPath);
-            return formatted;
+            return output;
         }
 
         static string RunCppFormat(string code, string baseCppPath)

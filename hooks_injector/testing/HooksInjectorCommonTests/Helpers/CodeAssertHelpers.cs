@@ -13,9 +13,6 @@ namespace HooksInjectorCommonTests.Helpers
             List<string> hookedLines = GetTrimmedLines(hookedCode);
             List<string> expectedLines = GetTrimmedLines(expectedCode);
 
-            // TODO: Create a common class "TmpFile.GenerateTmpFilePath" to generate tmp file paths
-			File.WriteAllText("/tmp/code.ts", hookedCode);
-
             Assert.AreEqual(expectedLines.Count, hookedLines.Count);
 
             for(int i=0; i<hookedLines.Count; i++)

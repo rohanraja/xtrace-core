@@ -8,6 +8,7 @@ git clone https://github.com/rohanraja/xtrace-core
 ```shell
 cd hooks_injector/cpp_hooks_injector
 npm install
+npm install -g clang-format
 npm run build
 npm run test
 

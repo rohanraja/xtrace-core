@@ -3,6 +3,7 @@
 import Parser, { SyntaxNode, Tree } from 'tree-sitter';
 import Cpp from 'tree-sitter-cpp';
 import fs from 'fs';
+import { spawnSync } from 'child_process';
 
 const fileName = process.env["FileName"] || "main.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
@@ -149,4 +150,24 @@ function isValidStatementType(type: string) {
 // console.log(`Injecting.... ${sourceCode}`);
 const modifiedSourceCode = addLogLines(sourceCode);
 
-console.log(modifiedSourceCode);
+const formattedSourceCode = formatSourceCode(modifiedSourceCode);
+console.log(formattedSourceCode);
+
+function formatSourceCode(sourceCode: string): string {
+    const result = spawnSync("clang-format", [], {
+        input: sourceCode,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'inherit'],
+        shell: true
+    });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    if (result.status !== 0) {
+        throw new Error(`clang-format process exited with code ${result.status}`);
+    }
+
+    return result.stdout;
+}
