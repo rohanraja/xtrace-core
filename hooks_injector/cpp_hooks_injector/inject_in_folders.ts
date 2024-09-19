@@ -4,8 +4,7 @@ import * as path from 'path';
 
 // Specify absolute paths of the folders to inject the code into
 const foldersToInject = [
-    "/Users/rohanraja/chromium/src/third_party/blink/renderer/modules/clipboard",
-    // "/Users/rohanraja/chromium/src/third_party/blink/renderer/core/clipboard",
+    "Q:\\cr\\src\\third_party\\blink\\renderer\\modules\\clipboard",
 ];
 
 const prefix = "/Users/rohanraja/chromium/src/";
@@ -19,16 +18,14 @@ function getRelativePath(absolutePath: string): string {
 const extensions = [".cc", ".h"];
 
 let CodeRunId = guidGenerator();
-let CodeVersion = guidGenerator(); // "8e76ca30-5658-f406-a09c-c068bfd4387c"
-let CodeEvents:any = [];
+let CodeVersion = guidGenerator();
+let CodeEvents: any = [];
 
-function guidGenerator()
-{
-	const S4 = function ()
-	{
-		return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-	};
-	return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+function guidGenerator() {
+    const S4 = function () {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    };
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
 
 function findFiles(dir: string, exts: string[], fileList: string[] = []): string[] {
@@ -50,7 +47,7 @@ function findFiles(dir: string, exts: string[], fileList: string[] = []): string
 function processFile(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const fileContents = fs.readFileSync(filePath, 'utf-8');
-        const env = { ...process.env, FileName: getRelativePath(filePath), CodeVersion: CodeVersion};
+        const env = { ...process.env, FileName: getRelativePath(filePath), CodeVersion: CodeVersion };
         const child = spawn('node', ['dist/out.js'], { env });
 
         let stdout = '';
@@ -84,12 +81,15 @@ async function main() {
             allFiles = findFiles(folder, extensions, allFiles);
         });
 
+        allFiles = allFiles.concat(["Q:\\cr\\src\\third_party\\blink\\renderer\\core\\clipboard\\system_clipboard.cc",
+            "Q:\\cr\\src\\third_party\\blink\\renderer\\core\\clipboard\\system_clipboard.h"]);
+
         for (const file of allFiles) {
             addSourceFile(getRelativePath(file), fs.readFileSync(file, 'utf-8'), CodeVersion);
-            try{
+            try {
 
                 await processFile(file);
-            }catch(err){
+            } catch (err) {
                 console.error('Error processing file:', err);
             }
         }
@@ -117,10 +117,9 @@ function addSourceFile(relativeFilePath: string, code: string, codeVersion: stri
     DispatchCodeRunEvent(CodeRunId, eventType, payload);
 }
 
-function DispatchCodeRunEvent(cvId:string, eventType:string, payload:any)
-{
-	const payload_json = JSON.stringify(payload);
-	const codeevent = [cvId, eventType, payload_json];
-	CodeEvents.push(JSON.stringify(codeevent));
-	
+function DispatchCodeRunEvent(cvId: string, eventType: string, payload: any) {
+    const payload_json = JSON.stringify(payload);
+    const codeevent = [cvId, eventType, payload_json];
+    CodeEvents.push(JSON.stringify(codeevent));
+
 }
