@@ -5,14 +5,21 @@ import * as path from 'path';
 // Specify absolute paths of the folders to inject the code into
 const foldersToInject = [
     "/Users/rohanraja/chromium/src/third_party/blink/renderer/modules/clipboard",
+    // "/Users/rohanraja/chromium/src/third_party/blink/renderer/core/clipboard",
 ];
+
+const prefix = "/Users/rohanraja/chromium/src/";
+
+function getRelativePath(absolutePath: string): string {
+    return absolutePath.replace(prefix, '');
+}
 
 // This generates a file with the code events to register source code on server
 
 const extensions = [".cc", ".h"];
 
 let CodeRunId = guidGenerator();
-let CodeVersion = guidGenerator();
+let CodeVersion = guidGenerator(); // "8e76ca30-5658-f406-a09c-c068bfd4387c"
 let CodeEvents:any = [];
 
 function guidGenerator()
@@ -43,7 +50,8 @@ function findFiles(dir: string, exts: string[], fileList: string[] = []): string
 function processFile(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const fileContents = fs.readFileSync(filePath, 'utf-8');
-        const child = spawn('node', ['dist/out.js']);
+        const env = { ...process.env, FileName: getRelativePath(filePath), CodeVersion: CodeVersion};
+        const child = spawn('node', ['dist/out.js'], { env });
 
         let stdout = '';
         let stderr = '';
@@ -77,8 +85,13 @@ async function main() {
         });
 
         for (const file of allFiles) {
-            await processFile(file);
-            addSourceFile(file, fs.readFileSync(file, 'utf-8'), CodeVersion);
+            addSourceFile(getRelativePath(file), fs.readFileSync(file, 'utf-8'), CodeVersion);
+            try{
+
+                await processFile(file);
+            }catch(err){
+                console.error('Error processing file:', err);
+            }
         }
 
         // Write the code events to a file
