@@ -27,6 +27,7 @@ export interface CompoundStatementNode extends SyntaxNode {
 const sourceCode = fs.readFileSync(0, 'utf-8');
 
 function addLogLines(sourceCode: string): string {
+
     let modifiedSourceCode = sourceCode.split('\n');
     const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"));
     function visit(node: SyntaxNode) {
@@ -51,7 +52,7 @@ function addLogLines(sourceCode: string): string {
             if (!bodyNode || !bodyNode.namedChildren) {
                 return;
             }
-
+            const params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
             const statements = bodyNode.namedChildren.filter(x => isValidStatementType(x.type));
             statements.forEach((childNode: SyntaxNode, index: number) => {
                 if (isValidStatementType(childNode.type)) {
@@ -61,8 +62,14 @@ function addLogLines(sourceCode: string): string {
                     let lineData = "";
 
                     if (index === 0) {
+
+
                         lineData += `XTrace *xtrace = XTrace::getInstance(); `
-                        lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" ); `;
+                        lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
+                        params.namedChildren.forEach((param) => {
+                            const identifier = param.namedChildren.filter((x) => x.type.includes("identifier"))[0].text;
+                            const primitive_type = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0].text;
+                            lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}))\n`; });
                     }
 
                     lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
