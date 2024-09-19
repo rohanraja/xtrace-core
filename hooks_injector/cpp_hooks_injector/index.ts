@@ -149,16 +149,4 @@ function isValidStatementType(type: string) {
 // console.log(`Injecting.... ${sourceCode}`);
 const modifiedSourceCode = addLogLines(sourceCode);
 
-const formattedSourceCode = formatSourceCode(modifiedSourceCode);
-console.log(formattedSourceCode);
-
-function formatSourceCode(sourceCode: string): string {
-    // Call command at "../cpp_formatter/node_modules/.bin/clang-format" with stdin as sourceCode and return the formatted source code from stdout
-
-    const child = spawnSync("../cpp_formatter/node_modules/.bin/clang-format", [], {
-        input: sourceCode,
-        encoding: 'utf-8'
-    });
-
-    return child.stdout;
-}
+console.log(modifiedSourceCode);
