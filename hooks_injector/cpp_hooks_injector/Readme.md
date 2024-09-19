@@ -68,7 +68,12 @@ Example: "/// OnMethodEnter", which is starting with "///" indicates that the pa
 
 Ensure that Step #2 is completed sucessfully
 
+Install Dot Net core SDK in your system
+
 ```shell
+# Install .net core SDK. Ensure 'winget' is available in your system
+winget install Microsoft.DotNet.SDK.8
+
 cd hooks_injector/testing/HooksInjectorCommonTests
 dotnet test
 ```

@@ -8,7 +8,7 @@
     "inject": "node esbuild.config.js && node dist/out.js",
     "format": "../cpp_formatter/node_modules/.bin/clang-format -i tests/out.cc",
     "folders": "node esbuild.config2.js && node dist/inject_folders.js",
-    "test": "npm run build && (node dist/out.js < tests/inp.cc > tests/out.cc) && npm run format"
+    "test": "npm run build && (node dist/out.js < tests/inp.cc > tests/out.cc)"
   },
   "author": "",
   "license": "ISC",
