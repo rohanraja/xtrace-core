@@ -3,6 +3,7 @@
 import Parser, { SyntaxNode, Tree } from 'tree-sitter';
 import Cpp from 'tree-sitter-cpp';
 import fs from 'fs';
+import { spawnSync } from 'child_process';
 
 const fileName = process.env["FileName"] || "main.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
@@ -51,7 +52,7 @@ function addLogLines(sourceCode: string): string {
             if (!bodyNode || !bodyNode.namedChildren) {
                 return;
             }
-            const params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
+
             const statements = bodyNode.namedChildren.filter(x => isValidStatementType(x.type));
             statements.forEach((childNode: SyntaxNode, index: number) => {
                 if (isValidStatementType(childNode.type)) {
@@ -61,9 +62,7 @@ function addLogLines(sourceCode: string): string {
                     let lineData = "";
 
                     if (index === 0) {
-
-
-                        lineData += `XTrace *xtrace = XTrace::getInstance(); `
+                        lineData += `XTrace *xtrace = XTrace::getInstance(); `;
                         lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
                         params.namedChildren.forEach((param) => {
                             const identifier = param.namedChildren.filter((x) => x.type.includes("identifier"))[0].text;
@@ -76,6 +75,7 @@ function addLogLines(sourceCode: string): string {
                             }
                             else
                             lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`; });
+
                     }
 
                     lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
@@ -161,4 +161,25 @@ function isValidStatementType(type: string) {
 
 // console.log(`Injecting.... ${sourceCode}`);
 const modifiedSourceCode = addLogLines(sourceCode);
-console.log(modifiedSourceCode);
+
+const formattedSourceCode = formatSourceCode(modifiedSourceCode);
+console.log(formattedSourceCode);
+
+function formatSourceCode(sourceCode: string): string {
+    const result = spawnSync("clang-format", [], {
+        input: sourceCode,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'inherit'],
+        shell: true
+    });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    if (result.status !== 0) {
+        throw new Error(`clang-format process exited with code ${result.status}`);
+    }
+
+    return result.stdout;
+}

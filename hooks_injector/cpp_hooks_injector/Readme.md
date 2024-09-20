@@ -8,8 +8,13 @@ git clone https://github.com/rohanraja/xtrace-core
 ```shell
 cd hooks_injector/cpp_hooks_injector
 npm install
+npm install -g clang-format
 npm run build
 npm run test
+
+# Install clang-formatter module
+cd hooks_injector/cpp_formatter
+npm install
 ```
 
 After running the last command, code with xTrace logs should be generated in tests/out.cc.
@@ -42,3 +47,36 @@ After running the last command, code with xTrace logs should be generated in tes
 4. Build chromium and ensure no compiler errors
 5. Run chromium with NO SANDBOX mode (add --no-sandbox arg), perform any scenario which hits clipboard code. Close chrome.
 6. In the out/debug_full_x64 folder, a file named "xtrace.run.json" should be created with logs populated
+
+
+## 7. Running the recordings jsons in xTrace to check how it looks E2E
+
+1. Open xTrace UI here - http://20.244.33.135:3009/
+2. Upload code_events.json file from xtrace-core folder
+3. Upload xtrace.run.json from CHromium debug out folder. (Ensure this order of upload is followed)
+
+Refresh the site and the first recording in the list will be the one uploaded.
+To upload any file, click on "+" icon at the top left of the page 
+
+## 8. Running the unit tests for cpp hooks injector
+
+Unit tests reside in folder - hooks_injector/testing/cpp
+
+Each unit test is a separate folder. E.g. hooks_injector/testing/cpp/simple main is one unit test
+
+Within a unit test, each .cc file has a corresponding .expected.cc file. The expected.cc file provides hints regarding what to expect in the generated code. 
+Example: "/// OnMethodEnter", which is starting with "///" indicates that the particular line should contain word "OnMethodEnter".
+
+Ensure that Step #2 is completed sucessfully
+
+Install Dot Net core SDK in your system
+
+```shell
+# Install .net core SDK. Ensure 'winget' is available in your system
+winget install Microsoft.DotNet.SDK.8
+
+cd hooks_injector/testing/HooksInjectorCommonTests
+dotnet test
+```
+
+When the tests run, it also runs "clang-format".
