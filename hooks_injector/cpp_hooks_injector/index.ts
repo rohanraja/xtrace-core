@@ -62,8 +62,20 @@ function addLogLines(sourceCode: string): string {
                     let lineData = "";
 
                     if (index === 0) {
-                        lineData += `XTrace *xtrace = XTrace::getInstance(); `
-                        lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" ); `;
+                        lineData += `XTrace *xtrace = XTrace::getInstance(); `;
+                        lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
+                        params.namedChildren.forEach((param) => {
+                            const identifier = param.namedChildren.filter((x) => x.type.includes("identifier"))[0].text;
+                            const primitive_type = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0].text;
+                            if (primitive_type === "string") {
+                                lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",${identifier});\n`;
+                            }
+                            else if(primitive_type === "char"){
+                                lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::string(1,${identifier}));\n`;
+                            }
+                            else
+                            lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`; });
+
                     }
 
                     lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
