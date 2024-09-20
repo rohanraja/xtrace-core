@@ -8,6 +8,7 @@
 #include "third_party/rapidjson/include/rapidjson/document.h"
 #include "third_party/rapidjson/include/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
+// #include "base/no_destructor.h"
 
 #include <fstream>
 #include <iostream>
@@ -15,7 +16,7 @@
 #include <string>
 #include <vector>
 
-// #define ALLOW_DISCOURAGED_TYPE(x)
+#define ALLOW_DISCOURAGED_TYPE(x)
 
 namespace blink {
 
@@ -43,20 +44,59 @@ public:
   int timeCount = 0;
 
   // std::vector<std::string> events ALLOW_DISCOURAGED_TYPE("Need to use");
-  std::vector<std::string> events ;
+  std::vector<std::string> events;
 
-  static XTrace *instance;
+  // static XTrace *instance;
 
-  static XTrace *getInstance();
+  // static XTrace *getInstance();
 
-  XTrace() {
+  inline static XTrace *getInstance() {
+    // static base::NoDestructor<XTrace> monitor;
+    // return monitor.get();
+
+    static XTrace instance;
+    return &instance;
+    // static XTrace instance; // Thread-safe in C++11 and later
+    // return &instance;
+    // // If the instance doesn't exist, create it
+    // if (!instance) {
+    //   instance = new XTrace();
+    // }
+    // return instance;
+  }
+
+  inline XTrace() {
     this->crid = generateRandomGuid();
     std::cout << "XTrace constructor again 2" << std::endl;
   }
 
-  ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
+  inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
 
-  void LogLineRun(std::string mrid, int lineNo) {
+  inline void LocalVarUpdate(std::string mrid, std::string varName, std::string varValue) {
+
+    int timeStamp = timeCount;
+    timeCount++;
+    SendVarUpdate(mrid, varName, true, "", varValue, timeStamp);
+  }
+
+  inline void SendVarUpdate(std::string contId, std::string varName, bool isLocal, std::string className, std::string newVal, int timeStamp) {
+    std::string eventType = "SEND_VAR_UPDATE";
+    std::string newValStr = newVal;
+    std::string varType = "VALUE";
+
+    std::vector<std::string> payload;
+    payload.push_back(contId);
+    payload.push_back(varName);
+    payload.push_back(varType);
+    payload.push_back(className);
+    payload.push_back(newValStr);
+    payload.push_back(std::to_string(timeStamp));
+    payload.push_back(isLocal ? "true" : "false");
+
+    DispatchEvent(eventType, getVectorOfStringToJson(payload));
+}
+
+  inline void LogLineRun(std::string mrid, int lineNo) {
 
     std::string type = "LINE_EXEC";
     std::vector<std::string> payload;
@@ -73,7 +113,7 @@ public:
     DispatchEvent(type, payload_str);
   }
 
-  std::string OnMethodEnter(std::string relativeFilePath,
+  inline std::string OnMethodEnter(std::string relativeFilePath,
                             std::string methodName, std::string codeVersion) {
     std::string mrid = generateRandomGuid();
     std::cout << "OnMethodEnter called" << std::endl;
@@ -93,7 +133,7 @@ public:
     return mrid;
   }
 
-  void DispatchEvent(std::string eventType, std::string payload) {
+  inline void DispatchEvent(std::string eventType, std::string payload) {
     std::vector<std::string> vec;
     vec.push_back(crid);
     vec.push_back(eventType);
@@ -103,7 +143,7 @@ public:
     events.push_back(msg);
   }
 
-  std::string getVectorOfStringToJson(std::vector<std::string> &vec) {
+  inline std::string getVectorOfStringToJson(std::vector<std::string> &vec) {
 
     rapidjson::Document d;
     d.SetArray();
@@ -122,7 +162,7 @@ public:
     return buffer.GetString();
   }
 
-  void FlushAllEventsToJSONFile() {
+  inline void FlushAllEventsToJSONFile() {
 
     std::cout << "Flushing events to json" << std::endl;
     std::string json = getVectorOfStringToJson(events);
@@ -144,22 +184,6 @@ public:
   }
 };
 
-XTrace *XTrace::instance = nullptr;
-
-XTrace *XTrace::getInstance() {
-  // If the instance doesn't exist, create it
-  if (!XTrace::instance) {
-    XTrace::instance = new XTrace();
-  }
-  return XTrace::instance;
-
-  // return new XTrace();
-  // if(XTrace::instance == NULL)
-  // {
-  //     std::cout << "XTrace constructor again" << std::endl;
-  //     XTrace::instance = new XTrace();
-  // }
-}
 
 } // namespace blink
 
