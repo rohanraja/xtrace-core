@@ -27,7 +27,6 @@ export interface CompoundStatementNode extends SyntaxNode {
 const sourceCode = fs.readFileSync(0, 'utf-8');
 
 function addLogLines(sourceCode: string): string {
-
     let modifiedSourceCode = sourceCode.split('\n');
     const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"));
     function visit(node: SyntaxNode) {
@@ -69,7 +68,14 @@ function addLogLines(sourceCode: string): string {
                         params.namedChildren.forEach((param) => {
                             const identifier = param.namedChildren.filter((x) => x.type.includes("identifier"))[0].text;
                             const primitive_type = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0].text;
-                            lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}))\n`; });
+                            if (primitive_type === "string") {
+                                lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",${identifier});\n`;
+                            }
+                            else if(primitive_type === "char"){
+                                lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::string(1,${identifier}));\n`;
+                            }
+                            else
+                            lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`; });
                     }
 
                     lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
