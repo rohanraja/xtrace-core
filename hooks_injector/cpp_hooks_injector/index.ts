@@ -74,13 +74,13 @@ function addLogLines(sourceCode: string): string {
                             const primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
                             if(primitive_type != null && identifier !=null){
                                 if (primitive_type === "string") {
-                                    lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",${identifier});\n`;
+                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",${identifier});\n`;
                                 }
                                 else if (primitive_type === "char") {
-                                    lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::string(1,${identifier}));\n`;
+                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",std::string(1,${identifier}));\n`;
                                 }
                                 else
-                                    lineData += `xtrace->SendVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`;
+                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`;
                             }
                         });
                     }
@@ -96,10 +96,10 @@ function addLogLines(sourceCode: string): string {
                         let identifier = identifiers ? identifiers.text : null;
                         if (identifier != null && valueType != null) {
                             if (valueType == "string_literal") {
-                                lineDataAfterExec += `xtrace->SendVarUpdate(xtrace_mrid, "${identifier}", ${identifier});\n`;
+                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", ${identifier});\n`;
                             }
                             else {
-                                lineDataAfterExec += `xtrace->SendVarUpdate(xtrace_mrid, "${identifier}", std::to_string(${identifier}));\n`;
+                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", std::to_string(${identifier}));\n`;
                             }
                         }
                     }

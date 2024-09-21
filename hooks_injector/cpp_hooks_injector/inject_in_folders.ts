@@ -4,13 +4,13 @@ import * as path from 'path';
 
 // Specify absolute paths of the folders to inject the code into
 const foldersToInject = [
-    "Q:\\cr\\src\\third_party\\blink\\renderer\\modules\\clipboard",
+    path.normalize("D:/cr/src/third_party/blink/renderer/modules/clipboard"),
 ];
 
-const prefix = "/Users/rohanraja/chromium/src/";
+const prefix = path.normalize("D:/cr/src/third_party/blink/");
 
 function getRelativePath(absolutePath: string): string {
-    return absolutePath.replace(prefix, '');
+    return absolutePath.replace(prefix, '').replaceAll('\\', '/');
 }
 
 // This generates a file with the code events to register source code on server
@@ -80,9 +80,6 @@ async function main() {
         foldersToInject.forEach(folder => {
             allFiles = findFiles(folder, extensions, allFiles);
         });
-
-        allFiles = allFiles.concat(["Q:\\cr\\src\\third_party\\blink\\renderer\\core\\clipboard\\system_clipboard.cc",
-            "Q:\\cr\\src\\third_party\\blink\\renderer\\core\\clipboard\\system_clipboard.h"]);
 
         for (const file of allFiles) {
             addSourceFile(getRelativePath(file), fs.readFileSync(file, 'utf-8'), CodeVersion);

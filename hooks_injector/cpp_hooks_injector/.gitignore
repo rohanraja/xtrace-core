@@ -3,3 +3,4 @@ dist
 tests/out.cc
 tests/main
 tests/*.o
+code_events.json
