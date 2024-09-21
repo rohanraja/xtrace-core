@@ -18,14 +18,15 @@ const runStep = require('./utils.js').runStep;
 async function main() {
 
   // 0.1 Setup paths
+  const isWin = process.platform === "win32";
   const cr_src_folder = path.join(test_input.cr_path, "src");
   const cr_debug_folder = path.join(cr_src_folder, "out", test_input.debug_folder_name);
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
   const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
+  const content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
 
   // 0.2 Setup environment to include cr tools like autoninja
-  const isWin = process.platform === "win32";
   let envs = process.env;
   if (isWin) {
     envs = { ...process.env, Path: `C:\\Program Files\\nodejs;${test_input.cr_path}\\depot_tools\\scripts;${test_input.cr_path}\\depot_tools;${process.env.Path}` };
@@ -54,6 +55,12 @@ async function main() {
     // 2.3 Delete xTrace.run.json if it exists
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
+    }
+
+    // 2.4 Delete content_shell.exe if it exists, so no tests run if build failed
+    const content_shell_path = path.join(cr_debug_folder, content_shell_bin);
+    if (fs.existsSync(content_shell_path)) {
+      fs.rmSync(content_shell_path);
     }
   });
 
@@ -91,7 +98,6 @@ async function main() {
   });
 
   await runStep("7", async () => {
-    const content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
     await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
   });
 

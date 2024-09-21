@@ -5,3 +5,8 @@ int sum(int a, int b) {
 void print(int a) {
   cout << a;
 }
+
+void localVars(){
+  int a = 5;
+  int b = a;
+}

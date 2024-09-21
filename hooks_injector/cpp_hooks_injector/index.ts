@@ -21,11 +21,20 @@ export enum NodeType {
     Declaration = "declaration",
 }
 
+const primitive_types = ["int", "float", "double", "char", "string", "bool"];
+
 export interface CompoundStatementNode extends SyntaxNode {
     statements: SyntaxNode[];
 }
-// Read sourcecode from stdin stream
-const sourceCode = fs.readFileSync(0, 'utf-8');
+
+let sourceCode = "";
+
+if(process.argv.length > 2){
+    sourceCode = fs.readFileSync(process.argv[2], 'utf-8');
+}else{
+    // Read sourcecode from stdin stream
+    sourceCode = fs.readFileSync(0, 'utf-8');
+}
 
 function addLogLines(sourceCode: string): string {
     let modifiedSourceCode = sourceCode.split('\n');
@@ -57,6 +66,7 @@ function addLogLines(sourceCode: string): string {
             statements.forEach((childNode: SyntaxNode, index: number) => {
                 if (isValidStatementType(childNode.type)) {
                     const lineNumber = childNode.startPosition.row;
+                    const endLineNumber = childNode.endPosition.row;
                     const columnNumber = childNode.startPosition.column;
 
                     let lineData = "";
@@ -68,19 +78,26 @@ function addLogLines(sourceCode: string): string {
                         if(params){
                         params.namedChildren.forEach((param) => {
                             const identifierNode = param.namedChildren.filter((x) => x.type.includes("identifier"))[0];
+                            let identifierStr = "";
+                            if(param.declaratorNode.type == "identifier"){
+                                identifierStr = param.declaratorNode.text;
+                            }else{
+                                identifierStr = param.declaratorNode.namedChildren.filter((x) => x.type.includes("identifier"))[0]?.text;
+                            }
                             const primitiveTypeNode = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0];
+                            let primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
 
-                            const identifier = identifierNode ? identifierNode.text : null;
-                            const primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
-                            if(primitive_type != null && identifier !=null){
-                                if (primitive_type === "string") {
-                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",${identifier});\n`;
+                            if(!primitive_type){
+                                const type_str = param.typeNode.text;
+
+                                if(primitive_types.includes(type_str.toLowerCase())){
+                                    primitive_type = type_str;
                                 }
-                                else if (primitive_type === "char") {
-                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",std::string(1,${identifier}));\n`;
-                                }
-                                else
-                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifier}",std::to_string(${identifier}));\n`;
+                            }
+
+
+                            if(identifierStr != ""){
+                                lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}", base::ToString(${identifierStr}));\n`;
                             }
                         });
                     }
@@ -90,17 +107,29 @@ function addLogLines(sourceCode: string): string {
                         let identifiers, valueTypes;
                         assignmentStatement.forEach((param) => {
                             identifiers= param.namedChildren.filter((x) => x.type.includes("identifier"))[0];
-                            valueTypes = param.namedChildren.filter((x) => x.type.includes("number_literal") || x.type.includes("string_literal"))[0];
+                            valueTypes = param.namedChildren.filter((x) => x.type.includes("number_literal") || x.type.includes("string_literal") || x.type.includes("identifier"))[0];
                         });
                         let valueType = valueTypes ? valueTypes.type : null;
                         let identifier = identifiers ? identifiers.text : null;
-                        if (identifier != null && valueType != null) {
-                            if (valueType == "string_literal") {
-                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", ${identifier});\n`;
+                        let isPrimitive = false;
+                        let primitive_type = "";
+                        if(valueType === "identifier"){
+                            const primitiveTypeNode = childNode.namedChildren.filter((x) => x.type.includes("primitive_type"))[0];
+                            if(primitiveTypeNode){
+                              isPrimitive = true;
+                            }else if((childNode as any).typeNode){
+                                const type_str = (childNode as any).typeNode.text;
+
+                                if(primitive_types.includes(type_str.toLowerCase())){
+                                    isPrimitive = true;
+                                    primitive_type = type_str;
+                                }
+
                             }
-                            else {
-                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", std::to_string(${identifier}));\n`;
-                            }
+                        }
+            
+                        if (identifier != null) {
+                            lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", base::ToString(${identifier}));\n`;
                         }
                     }
 
@@ -110,7 +139,8 @@ function addLogLines(sourceCode: string): string {
                         lineData += `xtrace->FlushAllEventsToJSONFile(); `
                     }
 
-                    modifiedSourceCode[lineNumber] = modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + modifiedSourceCode[lineNumber].slice(columnNumber).trim() + lineDataAfterExec;
+                    modifiedSourceCode[lineNumber] = modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + modifiedSourceCode[lineNumber].slice(columnNumber).trim() ;
+                    modifiedSourceCode[endLineNumber] += lineDataAfterExec;
                 }
                 if (childNode.namedChildCount > 0) {
                     modifiedSourceCode = handleSyntaxNode(childNode, modifiedSourceCode);
@@ -123,9 +153,9 @@ function addLogLines(sourceCode: string): string {
 
     visit(tree.rootNode);
 
-    return "#include \"third_party/xtrace/xtrace.h\"\n" + modifiedSourceCode.join('\n');
+    return "#include \"third_party/xtrace/xtrace.h\"\n" + "#include \"base/strings/to_string.h\"\n" + modifiedSourceCode.join('\n');
 }
-function handleSyntaxNode(node: SyntaxNode, modifiedSourceCode: string[]): string[] {
+function handleSyntaxNode(node: any, modifiedSourceCode: string[]): string[] {
     let statements = [];
     // let statements: SyntaxNode[] = [];
 

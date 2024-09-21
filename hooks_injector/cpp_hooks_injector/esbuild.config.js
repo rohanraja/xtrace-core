@@ -9,5 +9,6 @@ esbuild
     target: "ESNext", // ECMAScript target version
     outfile: "dist/out.js", // The output file for the bundled code
     external: ["*.node", "tree-sitter", "tree-sitter-cpp"], // Exclude these modules from the bundle
+    sourcemap: true,
   })
   .catch(() => process.exit(1));
