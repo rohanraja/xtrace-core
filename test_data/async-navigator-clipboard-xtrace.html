@@ -40,4 +40,15 @@ promise_test(async () => {
   assert_true(result[0] instanceof ClipboardItem);
 }, 'navigator.clipboard.read() succeeds');
 
+promise_test(async () => {
+  await getPermissions();
+  const result = await navigator.clipboard.readText();
+  assert_equals(typeof result, 'string');
+}, 'navigator.clipboard.readText() succeeds');
+
+promise_test(async () => {
+  await getPermissions();
+  await navigator.clipboard.writeText('New clipboard text');
+}, 'navigator.clipboard.writeText(DOMString) succeeds');
+
 </script>

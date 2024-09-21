@@ -83,7 +83,7 @@ async function main() {
   //   await runInEnv(`${binary_name} --no-sandbox`, cr_debug_folder);
   // });
 
-  await runStep("6.8", async () => {
+  await runStep("6", async () => {
     runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
 
     // Wait for 5 seconds
