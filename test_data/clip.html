@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard API Example</title>
+</head>
+<body>
+    <h1>Clipboard API Example</h1>
+    <button id="readClipboard">Read from Clipboard</button>
+    <button id="writeClipboard">Write to Clipboard</button>
+    <textarea id="clipboardContent" rows="10" cols="30" placeholder="Clipboard content will appear here..."></textarea>
+
+    <script>
+        document.getElementById('readClipboard').addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('clipboardContent').value = text;
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+            }
+        });
+
+        document.getElementById('writeClipboard').addEventListener('click', async () => {
+            const text = document.getElementById('clipboardContent').value;
+            try {
+                await navigator.clipboard.writeText(text);
+                alert('Text written to clipboard');
+            } catch (err) {
+                console.error('Failed to write to clipboard: ', err);
+            }
+        });
+    </script>
+
+<fencedframe
+  title="Advertisement for new Log. From Blammo!"
+  width="640"
+  height="320"></fencedframe>
+
+    <fencedframe></fencedframe>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Async Clipboard input type validation tests</title>
+<link rel="help" href="https://w3c.github.io/clipboard-apis/#async-clipboard-api">
+<body>Body needed for test_driver.click()</body>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/resources/testdriver.js"></script>
+<script src="/resources/testdriver-vendor.js"></script>
+<script src="resources/user-activation.js"></script>
+<script>
+
+// Permissions are required in order to invoke navigator.clipboard functions in
+// an automated test.
+async function getPermissions() {
+  await tryGrantReadPermission();
+  await tryGrantWritePermission();
+  await waitForUserActivation();
+}
+
+test(() => {
+  assert_not_equals(navigator.clipboard, undefined);
+  assert_true(navigator.clipboard instanceof Clipboard);
+  assert_equals(navigator.clipboard, navigator.clipboard);
+}, 'navigator.clipboard exists');
+
+promise_test(async () => {
+  await getPermissions();
+  const fetched = await fetch('/clipboard-apis/resources/greenbox.png');
+  const image = await fetched.blob();
+  const item = new ClipboardItem({'image/png': image});
+
+  await navigator.clipboard.write([item]);
+}, 'navigator.clipboard.write({string : image/png Blob}) succeeds');
+
+promise_test(async () => {
+  await getPermissions();
+  const result = await navigator.clipboard.read();
+  assert_true(result instanceof Object);
+  assert_true(result[0] instanceof ClipboardItem);
+}, 'navigator.clipboard.read() succeeds');
+
+</script>

@@ -1,0 +1,1 @@
+All the logs from E2E automation scripts reside here.
