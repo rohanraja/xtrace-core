@@ -19,7 +19,12 @@ async function main(){
         cmd = cmd + " " + arg;
     }
 
-    const outPut = await run(cmd, process.cwd());
+    let outPut = "";
+    try{
+        outPut = await run(cmd, process.cwd());
+    }catch(e){
+        outPut = e;
+    }
 
     // Write output to log file
     fs.writeFileSync(logFile + "/" + date + ".log", outPut);

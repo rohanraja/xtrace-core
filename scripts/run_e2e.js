@@ -91,7 +91,8 @@ async function main() {
   });
 
   await runStep("7", async () => {
-    await runInEnv(`content_shell.exe  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+    const content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
+    await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
   });
 
   // 8. Upload scenario recording xtrace.run file to xTrace server

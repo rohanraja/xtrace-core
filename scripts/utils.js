@@ -18,6 +18,7 @@ const test_input = {
 async function run(command, cwd_p, env) {
   const cwd = cwd_p || process.cwd();
   const [cmd, ...args] = command.split(' ');
+  console.log(`Running command: ${command} in ${cwd}`);
 
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, env, shell: true });
@@ -44,18 +45,20 @@ async function run(command, cwd_p, env) {
 
     child.stderr.on('data', (data) => {
       process.stderr.write(`Error: ${data}`);
+      fullStdout += data.toString();
     });
 
     child.on('close', (code) => {
       if (code !== 0) {
-        reject(`Execution failed with code ${code}`);
+        reject(`${fullStdout}\nExecution failed with code ${code}`);
       } else {
         resolve(fullStdout);
       }
     });
 
     child.on('error', (error) => {
-      reject(`Execution failed: ${error}`);
+      fullStdout += `Error: ${error}`;
+      reject(fullStdout);
     });
   });
 }
