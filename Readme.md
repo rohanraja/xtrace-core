@@ -111,6 +111,6 @@ dotnet test
 
 ## 9. E2E Automation pipeline to test xTrace with Chromium
 There is a way to easily test xTrace with Chromium source code using an automation script present in this repo.
-Check this [Readme](scripts\Readme.md) in the "scripts" folder.
+Check this [Readme](scripts/Readme.md) in the "scripts" folder.
 
 When the tests run, it also runs "clang-format".
