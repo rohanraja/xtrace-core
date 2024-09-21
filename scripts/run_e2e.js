@@ -84,7 +84,7 @@ async function main() {
   // });
 
   await runStep("6.8", async () => {
-    runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t debug_full_x64`, cr_src_folder);
+    runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
 
     // Wait for 5 seconds
     await new Promise(resolve => setTimeout(resolve, 10000));
