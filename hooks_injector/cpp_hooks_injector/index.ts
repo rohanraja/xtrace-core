@@ -21,6 +21,9 @@ export enum NodeType {
     Declaration = "declaration",
 }
 
+const methodsToInclude = [
+];
+
 const primitive_types = ["int", "float", "double", "char", "string", "bool"];
 
 export interface CompoundStatementNode extends SyntaxNode {
@@ -38,7 +41,7 @@ if(process.argv.length > 2){
 
 function addLogLines(sourceCode: string): string {
     let modifiedSourceCode = sourceCode.split('\n');
-    const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"));
+    const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"), undefined, {bufferSize: sourceCode.length + 10});
     function visit(node: SyntaxNode) {
         if (node.type === NodeType.FunctionDefinition) {
             const bodyNode: SyntaxNode = (node as any).bodyNode
@@ -57,6 +60,19 @@ function addLogLines(sourceCode: string): string {
             }
 
             findD(declaratorNode);
+
+            if(!methodName)
+                return;
+
+            let found = false;
+            for(const methodNameCheck of methodsToInclude){
+                if(methodName.includes(methodNameCheck)){
+                    found = true;
+                }
+            }
+            if(methodsToInclude.length > 0 && !found){
+                return;
+            }
 
             if (!bodyNode || !bodyNode.namedChildren) {
                 return;
@@ -79,10 +95,10 @@ function addLogLines(sourceCode: string): string {
                         params.namedChildren.forEach((param) => {
                             const identifierNode = param.namedChildren.filter((x) => x.type.includes("identifier"))[0];
                             let identifierStr = "";
-                            if(param.declaratorNode.type == "identifier"){
-                                identifierStr = param.declaratorNode.text;
+                            if(param.declaratorNode?.type == "identifier"){
+                                identifierStr = param.declaratorNode?.text;
                             }else{
-                                identifierStr = param.declaratorNode.namedChildren.filter((x) => x.type.includes("identifier"))[0]?.text;
+                                identifierStr = param.declaratorNode?.namedChildren?.filter((x) => x.type.includes("identifier"))[0]?.text;
                             }
                             const primitiveTypeNode = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0];
                             let primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
@@ -96,7 +112,7 @@ function addLogLines(sourceCode: string): string {
                             }
 
 
-                            if(identifierStr != ""){
+                            if(identifierStr != "" && identifierStr != "undefined" && identifierStr != null ){
                                 lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}", base::ToString(${identifierStr}));\n`;
                             }
                         });
@@ -128,7 +144,7 @@ function addLogLines(sourceCode: string): string {
                             }
                         }
             
-                        if (identifier != null) {
+                        if (identifier != null && identifier != "undefined" && identifier != null) {
                             lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", base::ToString(${identifier}));\n`;
                         }
                     }
