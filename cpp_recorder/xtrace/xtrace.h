@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,9 @@ public:
   // std::vector<std::string> events ALLOW_DISCOURAGED_TYPE("Need to use");
   std::vector<std::string> events;
 
+  // Map of name to count
+  std::map<std::string, int> run_names_count_map;
+
   // static XTrace *instance;
 
   // static XTrace *getInstance();
@@ -70,6 +74,16 @@ public:
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
 
   inline void ResetCodeRunId(std::string name){
+    // Add to run_names_count_map count
+    if (run_names_count_map.find(name) == run_names_count_map.end()) {
+      run_names_count_map[name] = 0;
+    } else {
+      run_names_count_map[name] += 1;
+    }
+
+    int count = run_names_count_map[name];
+    name = name + "/" + std::to_string(count);
+
     std::string eventType = "NEW_CODE_RUN_ID";
     crid = generateRandomGuid();
 

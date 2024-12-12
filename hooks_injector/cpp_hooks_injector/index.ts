@@ -11,6 +11,8 @@ const config = GetConfigFromEnv();
 const fileName = process.env["FileName"] || "main.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
 
+const code_run_name_prefix = process.env["XTRACE_PREFIX"] || "";
+
 const parser = new Parser();
 parser.setLanguage(Cpp);
 
@@ -99,7 +101,8 @@ function addLogLines(sourceCode: string): string {
                     if (index === 0) {
                         lineData += `XTrace *xtrace = XTrace::getInstance(); `;
                         if(shouldResetCodeRun){
-                            lineData += `xtrace->ResetCodeRunId("${methodName}"); `;
+                            const crName = `${code_run_name_prefix}/${methodName}`;
+                            lineData += `xtrace->ResetCodeRunId("${crName}"); `;
                         }
                         lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
                         if(params){
@@ -242,7 +245,6 @@ function isValidStatementType(type: string) {
     return !type.includes("else") && !type.includes("case") && (type.includes("statement") || type.includes("declaration") || type.includes("definition") || type.includes("for_range_loop"));
 }
 
-// console.log(`Injecting.... ${sourceCode}`);
 const modifiedSourceCode = addLogLines(sourceCode);
 
 const formattedSourceCode = formatSourceCode(modifiedSourceCode);

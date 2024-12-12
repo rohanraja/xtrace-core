@@ -1,8 +1,9 @@
 {
+    "name": "Test async clipboard API",
     "cr_path": "E:/cr",
     "debug_folder_name": "debug_full_x64",
     "xtrace_server_ip": "20.244.33.135",
-    "path_prefix_filter": "third_party/blink",
+    "path_prefix_filter": "third_party/blink/",
     "folders_whitelist": [
         "third_party/blink/renderer/modules/clipboard"
     ],
@@ -12,7 +13,8 @@
     "methods_which_split_run": [
         "Clipboard::write",
         "Clipboard::read",
-        "Clipboard::writeText"
+        "Clipboard::writeText",
+        "Clipboard::readText"
     ],
     "run_filter": ""
 }

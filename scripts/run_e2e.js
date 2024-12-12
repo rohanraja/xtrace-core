@@ -31,6 +31,10 @@ async function main() {
 
   const runStep = (step, fn) => runStepWithFilter(step, fn, config.run_filter);
 
+  const username = process.env["USERNAME"] || "unknown";
+  const sno = process.env["XTRACE_SNO"] || "0";
+  const code_run_name_prefix = `${username}/${config.name}/${sno}`;
+
   const test_input = config;
 
   // 0.1 Setup paths
@@ -48,6 +52,7 @@ async function main() {
     envs = { ...process.env, Path: `C:\\Program Files\\nodejs;${test_input.cr_path}\\depot_tools\\scripts;${test_input.cr_path}\\depot_tools;${process.env.Path}` };
   }
   envs = {...envs, "XTRACE_CONFIG": json_config}
+  envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
 
@@ -132,6 +137,7 @@ async function main() {
   // 8. Upload scenario recording xtrace.run file to xTrace server
   await runStep("8", async () => {
     await uploadFile(xtrace_run_json, upload_url);
+    console.log(`Visit http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)} to view the trace`);
   });
 
   // Kill process

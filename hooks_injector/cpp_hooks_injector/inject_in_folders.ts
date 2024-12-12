@@ -46,12 +46,20 @@ function findFiles(dir: string, exts: string[], fileList: string[] = []): string
             fileList.push(filePath);
         }
     });
-
-    for(const filePth of config.folders_whitelist) {
-        const fullPath = path.join(config.cr_path, "src", filePth);
-        fileList.push(path.normalize(fullPath));
-    }
     return fileList;
+}
+
+function getAllFilesToProcess(){
+    let allFiles: string[] = [];
+    foldersToInject.forEach(folder => {
+        allFiles = findFiles(folder, extensions, allFiles);
+    });
+
+    for(const filePth of config.files_whitelist) {
+        const fullPath = path.join(config.cr_path, "src", filePth);
+        allFiles.push(path.normalize(fullPath));
+    }
+    return allFiles;
 }
 
 
@@ -87,16 +95,11 @@ function processFile(filePath: string): Promise<void> {
 }
 async function main() {
     try {
-        let allFiles: string[] = [];
-        foldersToInject.forEach(folder => {
-            allFiles = findFiles(folder, extensions, allFiles);
-        });
-
+        let allFiles: string[] = getAllFilesToProcess();
         for (const file of allFiles) {
             console.log('Processing file:', getRelativePath(file));
             addSourceFile(getRelativePath(file), fs.readFileSync(file, 'utf-8'), CodeVersion);
             try {
-
                 await processFile(file);
             } catch (err) {
                 console.error('Error processing file:', err);
@@ -130,5 +133,4 @@ function DispatchCodeRunEvent(cvId: string, eventType: string, payload: any) {
     const payload_json = JSON.stringify(payload);
     const codeevent = [cvId, eventType, payload_json];
     CodeEvents.push(JSON.stringify(codeevent));
-
 }
