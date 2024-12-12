@@ -16,15 +16,14 @@ This script automates the E2E pipeline for
 
 ## To run
 
-1. Edit scripts/input.js with appropriate values
-2. Ensure list of folders to inject is updated in hooks_injector/cpp_hooks_injector/inject_in_folders.ts
+1. Create a run_config JSON in run_configs folder
 
 ``` shell
 cd <Root>/scripts/
 npm install
 
 cd <Root>
-node scripts/run.js
+node scripts/run.js ./run_configs/run1.json
 ```
 
 Sit back and relax while the autmation script performs all the testing for you!

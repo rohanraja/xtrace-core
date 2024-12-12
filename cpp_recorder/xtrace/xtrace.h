@@ -122,25 +122,6 @@ public:
   inline std::string OnMethodEnter(std::string relativeFilePath,
                             std::string methodName, std::string codeVersion) {
 
-    std::vector<std::string> methods_to_trace = {
-        "Clipboard::write", 
-        "Clipboard::read", 
-        "Clipboard::readText", 
-        "Clipboard::writeText"
-    };
-    if(methods_to_trace.size() > 0){
-      bool found = false;
-      for (auto & it : methods_to_trace) {
-        // Check if methodName exists in the vector
-        if (methodName.find(it) != std::string::npos) {
-          found = true;
-          break;
-        }
-      }
-      if(found){
-        ResetCodeRunId(methodName);
-      }
-    }
     std::string mrid = generateRandomGuid();
     std::cout << "OnMethodEnter called" << std::endl;
 

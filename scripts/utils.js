@@ -15,7 +15,7 @@ const test_input = {
 }
 
 
-async function run(command, cwd_p, env) {
+async function run(command, cwd_p, env, onOutput) {
   const cwd = cwd_p || process.cwd();
   const [cmd, ...args] = command.split(' ');
   console.log(`Running command: ${command} in ${cwd}`);
@@ -41,11 +41,17 @@ async function run(command, cwd_p, env) {
     child.stdout.on('data', (data) => {
       process.stdout.write(data);
       fullStdout += data.toString();
+      if(onOutput){
+        onOutput(data.toString());
+      }
     });
 
     child.stderr.on('data', (data) => {
       process.stderr.write(`Error: ${data}`);
       fullStdout += data.toString();
+      if(onOutput){
+        onOutput(data.toString());
+      }
     });
 
     child.on('close', (code) => {
@@ -80,10 +86,10 @@ async function uploadFile(filePath, url) {
     }
 }
 
-async function runStep(step_name, fn){
-    if(process.argv.length > 2){
+async function runStep(step_name, fn, filterStr){
+    if(filterStr){
         // Get all the steps to run
-        const steps = process.argv[2].split(',');
+        const steps = filterStr.split(',');
         if(!steps.includes(step_name)){
             console.log(`-- Skipping step: ${step_name}`);
             return;

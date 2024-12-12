@@ -12,10 +12,26 @@ const path = require('path');
 const fs = require('fs');
 const run = require('./utils.js').run;
 const uploadFile = require('./utils.js').uploadFile;
-const test_input = require('./input.js').test_input;
-const runStep = require('./utils.js').runStep;
+const runStepWithFilter = require('./utils.js').runStep;
 
 async function main() {
+
+  let json_config = "";
+
+  if(process.argv.length > 2){
+      json_config = fs.readFileSync(process.argv[2], 'utf-8');
+  }else{
+      // Read sourcecode from stdin stream
+      json_config = fs.readFileSync(0, 'utf-8');
+  }
+
+  const config = JSON.parse(json_config);
+
+  console.log("Running with config: ", JSON.stringify(config, null, 2));
+
+  const runStep = (step, fn) => runStepWithFilter(step, fn, config.run_filter);
+
+  const test_input = config;
 
   // 0.1 Setup paths
   const isWin = process.platform === "win32";
@@ -31,6 +47,7 @@ async function main() {
   if (isWin) {
     envs = { ...process.env, Path: `C:\\Program Files\\nodejs;${test_input.cr_path}\\depot_tools\\scripts;${test_input.cr_path}\\depot_tools;${process.env.Path}` };
   }
+  envs = {...envs, "XTRACE_CONFIG": json_config}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
 
@@ -78,10 +95,21 @@ async function main() {
   // 5. Build chromium code
   await runStep("5", async () => {
     console.log("Building content_shell");
-    await runInEnv(`autoninja content_shell`, cr_debug_folder);
 
-    console.log("Building blink_tests");
-    await runInEnv(`autoninja blink_tests`, cr_debug_folder);
+    // Close any running process
+    try{
+      await runInEnv(`taskkill -F /IM chrome.exe`, cr_debug_folder);
+    }catch(e){
+      console.log("No chrome running");
+    }
+    try{
+      await runInEnv(`taskkill -F /IM content_shell.exe`, cr_debug_folder);
+    }catch(e){
+      console.log("No content_shell running");
+    }
+
+    await runInEnv(`autoninja content_shell`, cr_debug_folder);
+    // await runInEnv(`autoninja blink_tests`, cr_debug_folder);
   });
 
   // 6. Run chrome

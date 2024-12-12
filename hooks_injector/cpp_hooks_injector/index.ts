@@ -4,6 +4,9 @@ import Parser, { SyntaxNode, Tree } from 'tree-sitter';
 import Cpp from 'tree-sitter-cpp';
 import fs from 'fs';
 import { spawnSync } from 'child_process';
+import { GetConfigFromEnv } from './inject_config';
+
+const config = GetConfigFromEnv();
 
 const fileName = process.env["FileName"] || "main.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
@@ -77,6 +80,11 @@ function addLogLines(sourceCode: string): string {
             if (!bodyNode || !bodyNode.namedChildren) {
                 return;
             }
+            let shouldResetCodeRun = false;
+            if(config.methods_which_split_run.includes(methodName)){
+                shouldResetCodeRun = true;
+            }
+
             const params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
             const statements = bodyNode.namedChildren.filter(x => isValidStatementType(x.type));
             statements.forEach((childNode: SyntaxNode, index: number) => {
@@ -90,6 +98,9 @@ function addLogLines(sourceCode: string): string {
 
                     if (index === 0) {
                         lineData += `XTrace *xtrace = XTrace::getInstance(); `;
+                        if(shouldResetCodeRun){
+                            lineData += `xtrace->ResetCodeRunId("${methodName}"); `;
+                        }
                         lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
                         if(params){
                         params.namedChildren.forEach((param) => {

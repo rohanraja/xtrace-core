@@ -1,13 +1,19 @@
 import * as fs from 'fs';
 import { spawn } from 'child_process';
 import * as path from 'path';
+import { GetConfigFromEnv } from './inject_config';
 
-// Specify absolute paths of the folders to inject the code into
-const foldersToInject = [
-    path.normalize("D:/cr/src/third_party/blink/renderer/modules/clipboard"),
-];
+const config = GetConfigFromEnv();
 
-const prefix = path.normalize("D:/cr/src/third_party/blink/");
+let foldersToInject = [];
+
+for(const folder of config.folders_whitelist) {
+
+    const folderPath = path.join(config.cr_path, "src", folder);
+    foldersToInject.push(path.normalize(folderPath));
+}
+
+const prefix = path.normalize(path.join(config.cr_path, 'src', config.path_prefix_filter));
 
 function getRelativePath(absolutePath: string): string {
     return absolutePath.replace(prefix, '').replaceAll('\\', '/');
@@ -40,6 +46,11 @@ function findFiles(dir: string, exts: string[], fileList: string[] = []): string
             fileList.push(filePath);
         }
     });
+
+    for(const filePth of config.folders_whitelist) {
+        const fullPath = path.join(config.cr_path, "src", filePth);
+        fileList.push(path.normalize(fullPath));
+    }
     return fileList;
 }
 
@@ -82,6 +93,7 @@ async function main() {
         });
 
         for (const file of allFiles) {
+            console.log('Processing file:', getRelativePath(file));
             addSourceFile(getRelativePath(file), fs.readFileSync(file, 'utf-8'), CodeVersion);
             try {
 

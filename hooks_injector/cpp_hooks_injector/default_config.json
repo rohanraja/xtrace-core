@@ -1,0 +1,10 @@
+{
+    "cr_path": "F:/cr",
+    "debug_folder_name": "debug_full_x64",
+    "xtrace_server_ip": "20.244.33.135",
+    "folders_whitelist": ["third_party/blink/renderer/modules/clipboard"],
+    "files_whitelist": [],
+    "methods_which_split_run": [
+    ],
+    "run_filter": ""
+}
