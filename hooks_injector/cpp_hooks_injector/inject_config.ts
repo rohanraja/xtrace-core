@@ -8,6 +8,7 @@ export interface InjectConfig {
     path_prefix_filter: string;
     folders_whitelist: string[];
     files_whitelist: string[];
+    methods_whitelist: string[];
     methods_which_split_run: string[];
     name: string;
 };

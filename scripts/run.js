@@ -1,6 +1,7 @@
 const run = require('./utils.js').run;
 const path = require('path');
 const fs = require('fs');
+const JSON5 = require('json5');
 // Wrapper around "run_e2e.js" to captures the output in a log file
 
 let json_config = "";
@@ -12,7 +13,7 @@ if(process.argv.length > 2){
     json_config = fs.readFileSync(0, 'utf-8');
 }
 
-const config = JSON.parse(json_config);
+const config = JSON5.parse(json_config);
 
 let sno = 0;
 

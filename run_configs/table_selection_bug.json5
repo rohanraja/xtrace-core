@@ -1,0 +1,23 @@
+{
+    "name": "Table selection bug",
+    "cr_path": "E:/cr",
+    "debug_folder_name": "debug_full_x64",
+    "xtrace_server_ip": "20.244.33.135",
+    "path_prefix_filter": "third_party/blink/",
+    "folders_whitelist": [
+    ],
+    "files_whitelist": [
+        "third_party/blink/renderer/core/editing/serializers/styled_markup_serializer.cc"
+        // "third_party/blink/renderer/core/editing/editing_utilities.cc"
+    ],
+    "methods_which_split_run": [
+        "CreateMarkup"
+    ],
+    "methods_whitelist":[
+        "CreateMarkup"
+    ],
+    "should_skip_wpt_serve": true,
+    // "run_filter": "",
+    "run_filter": "2,5,7,8",
+    "web_test": "../../third_party/blink/web_tests/editing/pasteboard/extended_table_selection.html"
+}

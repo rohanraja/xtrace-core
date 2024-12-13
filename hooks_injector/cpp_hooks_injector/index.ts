@@ -11,8 +11,6 @@ const config = GetConfigFromEnv();
 const fileName = process.env["FileName"] || "main.cc";
 const cvid = process.env["CodeVersion"] || "3c4e3b6b-2026-4b15-872c-07ce4463f59b";
 
-const code_run_name_prefix = process.env["XTRACE_PREFIX"] || "";
-
 const parser = new Parser();
 parser.setLanguage(Cpp);
 
@@ -26,8 +24,7 @@ export enum NodeType {
     Declaration = "declaration",
 }
 
-const methodsToInclude = [
-];
+const methodsToInclude = config.methods_whitelist || [];
 
 const primitive_types = ["int", "float", "double", "char", "string", "bool"];
 
@@ -83,8 +80,11 @@ function addLogLines(sourceCode: string): string {
                 return;
             }
             let shouldResetCodeRun = false;
-            if(config.methods_which_split_run.includes(methodName)){
-                shouldResetCodeRun = true;
+            for(const methodNameCandidate of config.methods_which_split_run){
+                if(methodName.includes(methodNameCandidate)){
+                    shouldResetCodeRun = true;
+                    break;
+                }
             }
 
             const params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
@@ -101,8 +101,7 @@ function addLogLines(sourceCode: string): string {
                     if (index === 0) {
                         lineData += `XTrace *xtrace = XTrace::getInstance(); `;
                         if(shouldResetCodeRun){
-                            const crName = `${code_run_name_prefix}/${methodName}`;
-                            lineData += `xtrace->ResetCodeRunId("${crName}"); `;
+                            lineData += `xtrace->ResetCodeRunId("${methodName}"); `;
                         }
                         lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
                         if(params){

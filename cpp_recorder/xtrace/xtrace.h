@@ -74,6 +74,10 @@ public:
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
 
   inline void ResetCodeRunId(std::string name){
+    // Get xTrace_Prefix from environment variable "XTRACE_PREFIX"
+    const char* xTrace_Prefix_cstr = std::getenv("XTRACE_PREFIX");
+    std::string xTrace_Prefix = xTrace_Prefix_cstr ? std::string(xTrace_Prefix_cstr) : "";
+
     // Add to run_names_count_map count
     if (run_names_count_map.find(name) == run_names_count_map.end()) {
       run_names_count_map[name] = 0;
@@ -82,7 +86,7 @@ public:
     }
 
     int count = run_names_count_map[name];
-    name = name + "/" + std::to_string(count);
+    name = xTrace_Prefix + "/" + name + "/" + std::to_string(count);
 
     std::string eventType = "NEW_CODE_RUN_ID";
     crid = generateRandomGuid();

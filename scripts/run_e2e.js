@@ -13,6 +13,7 @@ const fs = require('fs');
 const run = require('./utils.js').run;
 const uploadFile = require('./utils.js').uploadFile;
 const runStepWithFilter = require('./utils.js').runStep;
+const JSON5 = require('json5');
 
 async function main() {
 
@@ -25,7 +26,7 @@ async function main() {
       json_config = fs.readFileSync(0, 'utf-8');
   }
 
-  const config = JSON.parse(json_config);
+  const config = JSON5.parse(json_config);
 
   console.log("Running with config: ", JSON.stringify(config, null, 2));
 
@@ -51,7 +52,7 @@ async function main() {
   if (isWin) {
     envs = { ...process.env, Path: `C:\\Program Files\\nodejs;${test_input.cr_path}\\depot_tools\\scripts;${test_input.cr_path}\\depot_tools;${process.env.Path}` };
   }
-  envs = {...envs, "XTRACE_CONFIG": json_config}
+  envs = {...envs, "XTRACE_CONFIG": JSON.stringify(config)}
   envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
@@ -98,6 +99,7 @@ async function main() {
   });
 
   // 5. Build chromium code
+  // TODO - Check if build failed then exit
   await runStep("5", async () => {
     console.log("Building content_shell");
 
@@ -123,15 +125,23 @@ async function main() {
   //   await runInEnv(`${binary_name} --no-sandbox`, cr_debug_folder);
   // });
 
-  await runStep("6", async () => {
-    runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
+  if(!test_input.should_skip_wpt_serve){
+    await runStep("6", async () => {
+      runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
 
-    // Wait for 5 seconds
-    await new Promise(resolve => setTimeout(resolve, 10000));
-  });
+      // Wait for 5 seconds
+      await new Promise(resolve => setTimeout(resolve, 10000));
+    });
+  }
 
   await runStep("7", async () => {
-    await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+
+    // 7.1 Delete xTrace.run.json if it exists
+    if (fs.existsSync(xtrace_run_json)) {
+      fs.rmSync(xtrace_run_json);
+    }
+    // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+    await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
   });
 
   // 8. Upload scenario recording xtrace.run file to xTrace server
