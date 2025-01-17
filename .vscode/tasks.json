@@ -2,6 +2,14 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "A) Open tasks",
+			"type": "shell",
+			"command": "code",
+			"args": [
+				"docs/000 - Tasks.md",
+			],
+		},
+		{
 			"label": "B) Run E2E automation",
 			"type": "shell",
 			"command": "node",

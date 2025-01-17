@@ -1,0 +1,2 @@
+- Add more unit tests for cpp hooks injector to protect against refactor
+- Refactor cpp hooks injector index.ts
