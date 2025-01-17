@@ -2,119 +2,24 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "A) Build dev containers",
+			"label": "B) Run E2E automation",
 			"type": "shell",
 			"command": "node",
 			"args": [
-				"scripts/dev/docker.js",
-				"dev"
-			]
-		},
-		{
-			"label": "B) Run dev containers",
-			"dependsOn": [
-				"2.) Run dev containers"
+				"./scripts/run.js",
+				"./run_configs/table_selection_bug.json5"
 			],
-			"dependsOrder": "parallel",
-			"problemMatcher": []
 		},
 		{
-			"label": "C) Run all servers in dev container",
-			"dependsOn": [
-				"3.1) Start API server",
-				"3.2) Start Webclient server"
+			"label": "C) Run CPP Injector UTs",
+			"type": "shell",
+			"command": "dotnet",
+				"options": {
+					"cwd": "${workspaceFolder}/hooks_injector/testing/HooksInjectorCommonTests"
+			},
+			"args": [
+				"test",
 			],
-			"dependsOrder": "parallel",
-			"problemMatcher": []
-		},
-		{
-			"label": "0.) Sync third party dependencies",
-			"type": "shell",
-			"command": "bash",
-			"args": [
-				"scripts/syncThirdParty.sh"
-			]
-		},
-		{
-			"label": "2.) Run dev containers",
-			"type": "shell",
-			"command": "docker-compose",
-			"args": [
-				"-f",
-				"docker-compose.devcontainer.yml",
-				"up"
-			]
-		},
-		{
-			"label": "2.2) Rails DB migrate",
-			"type": "shell",
-			"command": "docker",
-			"args": [
-				"exec",
-				"-it",
-				"xtrace-dev-apiserver",
-				"rails",
-				"db:migrate"
-			]
-		},
-		{
-			"label": "3.1) Start API server",
-			"type": "shell",
-			"command": "docker",
-			"args": [
-				"exec",
-				"-it",
-				"xtrace-dev-apiserver",
-				"bash",
-				"script/force_run_server.sh"
-			]
-		},
-		{
-			"label": "3.2) Start Webclient server",
-			"type": "shell",
-			"command": "docker",
-			"args": [
-				"exec",
-				"-it",
-				"xtrace-dev-webclient",
-				"yarn",
-				"start"
-			]
-		},
-		{
-			"label": "4.) Open web client",
-			"type": "shell",
-			"command": "node",
-			"args": [
-				"scripts/common/open_webpage.js",
-				"http://localhost:3009"
-			]
-		},
-		{
-			"label": "Open Folder in Dev Container",
-			"type": "shell",
-			"command": "code",
-			"args": [
-				"apiserver",
-				"--folder-uri",
-				"--folder-uri=vscode-remote://dev-container+xtrace-dev-apiserver"
-			],
-			"problemMatcher": []
-		},
-		{
-			"label": "Start docs server",
-			"type": "shell",
-			"command": "docker",
-			"args": [
-				"run",
-				"-it",
-				"--rm",
-				"-p",
-				"8080:8080",
-				 "-v",
-				 "./docs/structurizer:/usr/local/structurizr",
-				 "structurizr/lite"
-			]
 		},
 	]
 }
