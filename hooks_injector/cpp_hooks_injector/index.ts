@@ -47,7 +47,7 @@ function addLogLines(sourceCode: string): string {
     function visit(node: SyntaxNode) {
         if (node.type === NodeType.FunctionDefinition) {
             const bodyNode: SyntaxNode = (node as any).bodyNode
-            const declaratorNode = (node as any).declaratorNode;
+            let declaratorNode = (node as any).declaratorNode;
             // Find any node which has identifier in type
             let methodName = "";
             function findD(decNode: SyntaxNode) {
@@ -87,7 +87,17 @@ function addLogLines(sourceCode: string): string {
                 }
             }
 
-            const params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
+            let params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
+
+            if(!params){
+                // Check incase the function is returning a pointer
+
+                declaratorNode = declaratorNode.namedChildren.filter((x) => x.type === "function_declarator" /* ParameterDeclaration */)[0];
+                if(declaratorNode){
+                    params = declaratorNode.namedChildren.filter((x) => x.type === "parameter_list" /* ParameterDeclaration */)[0];
+                }
+
+            }
             const statements = bodyNode.namedChildren.filter(x => isValidStatementType(x.type));
             statements.forEach((childNode: SyntaxNode, index: number) => {
                 if (isValidStatementType(childNode.type)) {
@@ -112,7 +122,13 @@ function addLogLines(sourceCode: string): string {
                                 identifierStr = param.declaratorNode?.text;
                             }else{
                                 identifierStr = param.declaratorNode?.namedChildren?.filter((x) => x.type.includes("identifier"))[0]?.text;
+                                
+                                // const pointerTypes= param.declaratorNode?.namedChildren?.filter((x) => x.type.includes("pointer_declarator"))[0];
+                                // if(pointerTypes){
+                                //     identifierStr = pointerTypes.namedChildren.filter((x) => x.type.includes("identifier"))[0]?.text;
+                                // }
                             }
+                            const isPointerType = param.declaratorNode?.type == "pointer_declarator";
                             const primitiveTypeNode = param.namedChildren.filter((x) => x.type.includes("primitive_type"))[0];
                             let primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
 
@@ -126,17 +142,25 @@ function addLogLines(sourceCode: string): string {
 
 
                             if(identifierStr != "" && identifierStr != "undefined" && identifierStr != null ){
-                                lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}", base::ToString(${identifierStr}));\n`;
+                                if(isPointerType){
+                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}",  ${identifierStr} ? base::ToString(*${identifierStr}) : "");\n`;
+                                }else{
+                                    lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}", base::ToString(${identifierStr}));\n`;
+                                }
                             }
                         });
                     }
                     }
                     const assignmentStatement = childNode.namedChildren.filter((x) => x.type.includes("init_declarator") || x.type.includes("assignment_expression"));
                     if (assignmentStatement) {
-                        let identifiers, valueTypes;
+                        let identifiers, valueTypes, pointerTypes;
                         assignmentStatement.forEach((param) => {
                             identifiers= param.namedChildren.filter((x) => x.type.includes("identifier"))[0];
                             valueTypes = param.namedChildren.filter((x) => x.type.includes("number_literal") || x.type.includes("string_literal") || x.type.includes("identifier"))[0];
+                            pointerTypes= param.namedChildren.filter((x) => x.type.includes("pointer_declarator"))[0];
+                            if(pointerTypes){
+                                identifiers = pointerTypes.namedChildren.filter((x) => x.type.includes("identifier"))[0];
+                            }
                         });
                         let valueType = valueTypes ? valueTypes.type : null;
                         let identifier = identifiers ? identifiers.text : null;
@@ -158,7 +182,12 @@ function addLogLines(sourceCode: string): string {
                         }
             
                         if (identifier != null && identifier != "undefined" && identifier != null) {
-                            lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", base::ToString(${identifier}));\n`;
+                            if(pointerTypes){
+                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", ${identifier} ? base::ToString(*${identifier}) : "");\n`;
+                            }
+                            else{
+                                lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", base::ToString(${identifier}));\n`;
+                            }
                         }
                     }
 
