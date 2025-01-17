@@ -70,7 +70,7 @@ namespace HooksInjectorCommonTests
             }
 
             // Add hooks to source code
-            sourceFileHooker.AddHooksToSourceCode(sourceCodeInfo, Guid.NewGuid());
+            sourceFileHooker.AddHooksToSourceCode(sourceCodeInfo, Guid.Empty);
 
             // Compare the hooked code with expected code
             foreach (var testFile in testFiles)
