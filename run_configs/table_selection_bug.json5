@@ -7,17 +7,20 @@
     "folders_whitelist": [
     ],
     "files_whitelist": [
-        "third_party/blink/renderer/core/editing/serializers/styled_markup_serializer.cc"
-        // "third_party/blink/renderer/core/editing/editing_utilities.cc"
+        "third_party/blink/renderer/core/editing/serializers/styled_markup_serializer.cc",
+        "third_party/blink/renderer/core/editing/editing_utilities.cc"
     ],
     "methods_which_split_run": [
         "CreateMarkup"
     ],
+    "methods_blacklist": [
+        "LocalToAbsoluteQuadOf" // Causing to_string issue
+    ],
     "methods_whitelist":[
-        "CreateMarkup"
     ],
     "should_skip_wpt_serve": true,
-    // "run_filter": "",
-    "run_filter": "2,5,7,8",
+    // "run_filter": "5", // BUILD only
+    // "run_filter": "1,2,3",
+    // "run_filter": "2,5,7,8",
     "web_test": "../../third_party/blink/web_tests/editing/pasteboard/extended_table_selection.html"
 }

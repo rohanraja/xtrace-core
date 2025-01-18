@@ -26,6 +26,7 @@ export enum NodeType {
 }
 
 const methodsToInclude = config.methods_whitelist || [];
+const methodsToExclude = config.methods_blacklist || [];
 
 const primitive_types = ["int", "float", "double", "char", "string", "bool"];
 
@@ -78,6 +79,13 @@ function addLogLines(sourceCode: string): string {
             }
             if(methodsToInclude.length > 0 && !found){
                 return;
+            }
+
+            // Check for methods to exclude
+            for(const methodNameCheck of methodsToExclude){
+                if(methodName.includes(methodNameCheck)){
+                    return;
+                }
             }
 
             if (!bodyNode || !bodyNode.namedChildren) {

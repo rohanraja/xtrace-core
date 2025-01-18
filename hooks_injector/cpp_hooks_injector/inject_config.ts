@@ -9,6 +9,7 @@ export interface InjectConfig {
     folders_whitelist: string[];
     files_whitelist: string[];
     methods_whitelist: string[];
+    methods_blacklist: string[];
     methods_which_split_run: string[];
     name: string;
 };
