@@ -438,8 +438,6 @@ Element *RootEditableElement(const Node &node) {
     if (node.GetDocument().body() == n)
       break;
   }
-  xtrace->LocalVarUpdate(xtrace_mrid, "n", base::ToString(n));
-
   xtrace->LogLineRun(xtrace_mrid, 282);
   xtrace->FlushAllEventsToJSONFile();
   return const_cast<Element *>(result);
@@ -1620,7 +1618,6 @@ TextDirection PrimaryDirectionOf(const Node &node) {
       break;
     }
   }
-  xtrace->LocalVarUpdate(xtrace_mrid, "r", base::ToString(r));
 
   xtrace->LogLineRun(xtrace_mrid, 896);
   xtrace->FlushAllEventsToJSONFile();
@@ -2033,7 +2030,6 @@ static Node *EnclosingNodeOfTypeAlgorithm(const PositionTemplate<Strategy> &p,
     if (n == root)
       return nullptr;
   }
-  xtrace->LocalVarUpdate(xtrace_mrid, "n", base::ToString(n));
 
   xtrace->LogLineRun(xtrace_mrid, 1092);
   xtrace->FlushAllEventsToJSONFile();
@@ -2106,7 +2102,6 @@ Node *HighestEnclosingNodeOfType(const Position &p,
     if (n == root)
       break;
   }
-  xtrace->LocalVarUpdate(xtrace_mrid, "n", base::ToString(n));
 
   xtrace->LogLineRun(xtrace_mrid, 1126);
   xtrace->FlushAllEventsToJSONFile();
@@ -2131,8 +2126,6 @@ Element *EnclosingAnchorElement(const Position &p) {
     if (ancestor->IsLink())
       return ancestor;
   }
-  xtrace->LocalVarUpdate(xtrace_mrid, "ancestor", base::ToString(ancestor));
-
   xtrace->LogLineRun(xtrace_mrid, 1139);
   xtrace->FlushAllEventsToJSONFile();
   return nullptr;

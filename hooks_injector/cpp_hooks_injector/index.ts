@@ -156,7 +156,7 @@ function addLogLines(sourceCode: string): string {
                     }
                     }
                     const assignmentStatement = childNode.namedChildren.filter((x) => x.type.includes("init_declarator") || x.type.includes("assignment_expression"));
-                    if (assignmentStatement) {
+                    if (assignmentStatement && childNode.type != NodeType.ForStatement) {
                         let identifiers, valueTypes, pointerTypes;
                         assignmentStatement.forEach((param) => {
                             identifiers= param.namedChildren.filter((x) => x.type.includes("identifier"))[0];
