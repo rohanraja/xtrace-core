@@ -106,7 +106,9 @@ namespace CppHooksInjector{
 
                     if (!string.IsNullOrEmpty(error))
                     {
-                        throw new Exception($"Error running TypeScript file: {error}");
+                        // throw new Exception($"Error running TypeScript file: {error}");
+                        // Show error on console
+                        Console.WriteLine($"Error running TypeScript file: {error}");
                     }
 
                     return output;

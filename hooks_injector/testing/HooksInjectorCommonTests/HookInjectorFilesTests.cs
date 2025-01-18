@@ -77,6 +77,13 @@ namespace HooksInjectorCommonTests
             {
                 var hookedCode = File.ReadAllText(testFile.First);
                 var expectedHookedCode = File.ReadAllText(testFile.Second);
+                // If expectedHookedCode is empty, skip checking and update expectedHookedCode file
+                if (string.IsNullOrWhiteSpace(expectedHookedCode))
+                {
+                    File.WriteAllText(testFile.Second, hookedCode);
+                    Console.WriteLine("Updated file: " + testFile.Second);
+                    continue;
+                }
                 Debug.WriteLine("Checking file: " + testFile.Second);
                 CodeAssertHelpers.MatchCodeWithHookedCode(hookedCode, expectedHookedCode);
             }

@@ -10,6 +10,18 @@
 			],
 		},
 		{
+			"label": "1) Parse inp.cc",
+			"type": "shell",
+			"command": "npm",
+			"options": {
+				"cwd": "${workspaceFolder}/hooks_injector/cpp_hooks_injector"
+			},
+			"args": [
+				"run",
+				"test"
+			],
+		},
+		{
 			"label": "A) Open tasks",
 			"type": "shell",
 			"command": "code",
@@ -30,12 +42,42 @@
 			"label": "C) Run CPP Injector UTs",
 			"type": "shell",
 			"command": "dotnet",
-				"options": {
-					"cwd": "${workspaceFolder}/hooks_injector/testing/HooksInjectorCommonTests"
+			"options": {
+				"cwd": "${workspaceFolder}/hooks_injector/testing/HooksInjectorCommonTests"
 			},
 			"args": [
 				"test",
 			],
+			"dependsOn": [
+				"1) Parse inp.cc"
+			]
 		},
+		{
+			"label": "Add test cpp file",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"${workspaceFolder}/scripts/add_test_cpp_file.js",
+				"${input:cppFileName}"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Parse current file",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"${workspaceFolder}/scripts/parse_current_file.js",
+				"${file}",
+			],
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "cppFileName",
+			"type": "promptString",
+			"description": "Enter the name of the C++ file (without extension)"
+		}
 	]
 }

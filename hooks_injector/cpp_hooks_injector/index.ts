@@ -44,6 +44,9 @@ if(process.argv.length > 2){
 function addLogLines(sourceCode: string): string {
     let modifiedSourceCode = sourceCode.split('\n');
     const tree: Tree = parser.parse(sourceCode.replaceAll("class CORE_EXPORT", "class"), undefined, {bufferSize: sourceCode.length + 10});
+    if(tree.rootNode.hasError){
+        console.error("Input code has syntax errors. Skipping injection");
+    }
     function visit(node: SyntaxNode) {
         if (node.type === NodeType.FunctionDefinition) {
             const bodyNode: SyntaxNode = (node as any).bodyNode
@@ -277,6 +280,27 @@ const modifiedSourceCode = addLogLines(sourceCode);
 
 const formattedSourceCode = formatSourceCode(modifiedSourceCode);
 console.log(formattedSourceCode);
+
+
+const tree: Tree = parser.parse(formattedSourceCode, undefined, {bufferSize: formattedSourceCode.length + 10});
+// Set environment variable to pass the tree-sitter tree to the next process
+process.env["XT_OUTPUT_HAS_CLANG_ERROR"] = tree.rootNode.hasError ? "true" : "false";
+if(tree.rootNode.hasError){
+    console.error(`XT_OUTPUT_HAS_CLANG_ERROR: ${process.env["XT_OUTPUT_HAS_CLANG_ERROR"]}`);
+    // Traverse the tree and find the error node
+    let errorNode = null;
+    function visit(node: SyntaxNode) {
+        if(node.isError){
+            errorNode = node;
+            console.error(`XT_OUTPUT_ERROR_NODE: ${node.type} at line ${node.startPosition.row+1}`);
+        }
+        node.namedChildren.forEach(visit);
+    }
+    visit(tree.rootNode);
+    if(errorNode){
+        console.error(`XT_OUTPUT_ERROR_NODE: ${errorNode.type} at line ${errorNode.startPosition.row}`);
+    }
+}
 
 function formatSourceCode(sourceCode: string): string {
     const result = spawnSync("clang-format", [], {
