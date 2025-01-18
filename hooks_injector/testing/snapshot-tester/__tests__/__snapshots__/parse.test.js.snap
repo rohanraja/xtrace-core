@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parse file 1`] = `
+"#include "base/strings/to_string.h"
+#include "third_party/xtrace/xtrace.h"
+template <typename Strategy> void StyledMarkupTraverser<Strategy>::Traverse() {
+  XTrace *xtrace = XTrace::getInstance();
+  std::string xtrace_mrid = xtrace->OnMethodEnter(
+      "inp.cc", "StyledMarkupTraverser<Strategy>::Traverse", "GUID_FROM_TEST");
+  xtrace->LogLineRun(xtrace_mrid, 2);
+  xtrace->FlushAllEventsToJSONFile();
+  for (Node n = start_node;; n = n + 1) {
+  }
+}
+"
+`;

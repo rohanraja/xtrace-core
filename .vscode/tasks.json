@@ -71,7 +71,31 @@
 				"${file}",
 			],
 			"problemMatcher": []
-		}
+		},
+		{
+			"label": "D) Run JS Snapshot tests",
+			"type": "shell",
+			"command": "npm",
+			"options": {
+				"cwd": "${workspaceFolder}/hooks_injector/testing/snapshot-tester"
+			},
+			"args": [
+				"test"
+			],
+		},
+		{
+			"label": "D.A) Update JS Snapshot tests",
+			"type": "shell",
+			"command": "npm",
+			"options": {
+				"cwd": "${workspaceFolder}/hooks_injector/testing/snapshot-tester"
+			},
+			"args": [
+				"test",
+				"--",
+				"-u"
+			],
+		},
 	],
 	"inputs": [
 		{
