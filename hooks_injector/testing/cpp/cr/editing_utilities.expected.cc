@@ -473,8 +473,7 @@ ContainerNode *HighestEditableRoot(const Position &position) {
   xtrace->LocalVarUpdate(xtrace_mrid, "node",
                          node ? base::ToString(*node) : "");
 
-  xtrace->LogLixtrace->LogLineRun(xtrace_mrid, 297);
-  neRun(xtrace_mrid, 297);
+  xtrace->LogLineRun(xtrace_mrid, 297);
   while (node) {
     xtrace->LogLineRun(xtrace_mrid, 298);
     if (IsEditable(*node))
@@ -626,7 +625,7 @@ NextCandidateAlgorithm(const PositionTemplate<Strategy> &position) {
 
   xtrace->LogLineRun(xtrace_mrid, 370);
   p.Increment();
-  xtrace->LogLineRun(xtrace->LogLineRun(xtrace_mrid, 371); xtrace_mrid, 371);
+  xtrace->LogLineRun(xtrace_mrid, 371);
   while (!p.AtEnd()) {
     xtrace->LogLineRun(xtrace_mrid, 372);
     PositionTemplate<Strategy> candidate = p.ComputePosition();
@@ -699,7 +698,7 @@ static PositionTemplate<Strategy> NextVisuallyDistinctCandidateAlgorithm(
 
   xtrace->LogLineRun(xtrace_mrid, 407);
   p.Increment();
-  xtrace->LogLineRun(xtrace->LogLineRun(xtrace_mrid, 408); xtrace_mrid, 408);
+  xtrace->LogLineRun(xtrace_mrid, 408);
   while (!p.AtEnd()) {
     xtrace->LogLineRun(xtrace_mrid, 409);
     PositionTemplate<Strategy> candidate = p.ComputePosition();
@@ -757,7 +756,7 @@ PreviousCandidateAlgorithm(const PositionTemplate<Strategy> &position) {
 
   xtrace->LogLineRun(xtrace_mrid, 437);
   p.Decrement();
-  xtrace->LogLineRun(xtxtrace->LogLineRun(xtrace_mrid, 438); race_mrid, 438);
+  xtrace->LogLineRun(xtrace_mrid, 438);
   while (!p.AtStart()) {
     xtrace->LogLineRun(xtrace_mrid, 439);
     PositionTemplate<Strategy> candidate = p.ComputePosition();
@@ -830,7 +829,7 @@ PositionTemplate<Strategy> PreviousVisuallyDistinctCandidateAlgorithm(
 
   xtrace->LogLineRun(xtrace_mrid, 474);
   p.Decrement();
-  xtrace->LogLineRun(xtxtrace->LogLineRun(xtrace_mrid, 475); race_mrid, 475);
+  xtrace->LogLineRun(xtrace_mrid, 475);
   while (!p.AtStart()) {
     xtrace->LogLineRun(xtrace_mrid, 476);
     PositionTemplate<Strategy> candidate = p.ComputePosition();
@@ -921,9 +920,7 @@ PositionTemplate<Strategy> FirstEditablePositionAfterPositionInRootAlgorithm(
   xtrace->LogLineRun(xtrace_mrid, 522);
   while (editable_position.AnchorNode() &&
          !IsEditablePosition(editable_position) &&
-         editable_position.AnchorNode()->IsDescendantOf(&highest_root))
-    xtrace->LogLineRun(xtrace_mrid, 524);
-  {
+         editable_position.AnchorNode()->IsDescendantOf(&highest_root)) {
     xtrace->LogLineRun(xtrace_mrid, 525);
     non_editable_node = editable_position.AnchorNode();
     xtrace->LogLineRun(xtrace_mrid, 526);
@@ -1051,12 +1048,11 @@ PositionTemplate<Strategy> LastEditablePositionBeforePositionInRootAlgorithm(
   while (editable_position.AnchorNode() &&
          !IsEditablePosition(editable_position) &&
          editable_position.AnchorNode()->IsDescendantOf(&highest_root))
-    xtrace->LogLineRun(xtrace_mrid, 604);
-  editable_position =
-      IsAtomicNode(editable_position.AnchorNode())
-          ? PositionTemplate<Strategy>::InParentBeforeNode(
-                *editable_position.AnchorNode())
-          : PreviousVisuallyDistinctCandidate(editable_position);
+    editable_position =
+        IsAtomicNode(editable_position.AnchorNode())
+            ? PositionTemplate<Strategy>::InParentBeforeNode(
+                  *editable_position.AnchorNode())
+            : PreviousVisuallyDistinctCandidate(editable_position);
 
   xtrace->LogLineRun(xtrace_mrid, 610);
   if (editable_position.AnchorNode() &&

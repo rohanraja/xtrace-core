@@ -18,6 +18,7 @@ export enum NodeType {
     FunctionDefinition = "function_definition",
     ForRangeLoop = "for_range_loop",
     ForStatement = "for_statement",
+    WhileStatement = "while_statement",
     SwitchStatement = "switch_statement",
     IfStatement = "if_statement",
     ElseClause = "else_clause",
@@ -230,6 +231,7 @@ function handleSyntaxNode(node: any, modifiedSourceCode: string[]): string[] {
         }
         case NodeType.SwitchStatement:
         case NodeType.ForStatement:
+        case NodeType.WhileStatement:
         case NodeType.ForRangeLoop: {
             statements = node.bodyNode.namedChildren;
             break;
