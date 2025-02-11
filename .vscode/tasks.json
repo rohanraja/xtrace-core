@@ -10,6 +10,14 @@
 			],
 		},
 		{
+			"label": "Install: use",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/install.user.js",
+			],
+		},
+		{
 			"label": "1) Parse inp.cc",
 			"type": "shell",
 			"command": "npm",
@@ -30,7 +38,7 @@
 			],
 		},
 		{
-			"label": "B) Run E2E automation",
+			"label": "Run E2E automation",
 			"type": "shell",
 			"command": "node",
 			"args": [

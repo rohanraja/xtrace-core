@@ -12,7 +12,7 @@ This script automates the E2E pipeline for
     1. Starts WPT server required for running WPT
     2. Copies xTrace's WPT HTML file to chromium's folder
     3. Running xTrace's WPT HTML
-4. Uploads generated xtrace.run file so that the recording is available on the server.
+4. Uploads generated xtrace.run file so that the recording is available on the server. The url of the recording is available in the output once the command execution completes.
 
 ## To run
 
