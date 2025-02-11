@@ -53,6 +53,9 @@ async function main(){
 
     const logFile = logFolder + fileSafeName + `_${sno}`  + ".log";
 
+    // Copy log filename to tmp/last_log_file
+    fs.writeFileSync(path.join('tmp/last_log_file'), logFile);
+
     const onOutput = (data) => {
         // Append data to logfile
         fs.appendFileSync(logFile, data);

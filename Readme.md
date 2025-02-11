@@ -3,6 +3,7 @@
 ## Pre-reqs
 - Have a chromium enlistment with build working correctly, ensure git worktree is clean
 - Install NodeJS 18.16.0
+- VSCode
 
 ## 1. Clone repo
 ```shell
@@ -17,6 +18,7 @@ git clone https://github.com/rohanraja/xtrace-core
 ## 4. Run task - "Install: use"
 - Hit "Ctrl+Shift+P" and search for "Run task" command, execute it.
 - A list of tasks available are shown, search for the task to run "Install: use" and hit Enter
+- If prompted, click "Continue without scanning"
 
 ## 5. Run task - "Add new run config"
 - Name the config according to your scenario
