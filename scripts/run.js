@@ -9,8 +9,11 @@ let json_config = "";
 if(process.argv.length > 2){
     json_config = fs.readFileSync(process.argv[2], 'utf-8');
 }else{
-    // Read sourcecode from stdin stream
-    json_config = fs.readFileSync(0, 'utf-8');
+        // Read filename from "tmp/active_run_file" and use it as cmd arg
+        if(fs.existsSync('tmp/active_run_file')){
+            const arg = fs.readFileSync('tmp/active_run_file', 'utf-8');
+            json_config = fs.readFileSync(arg, 'utf-8');
+        }
 }
 
 const config = JSON5.parse(json_config);
@@ -29,9 +32,15 @@ async function main(){
     let cmd = "node scripts/run_e2e.js";
 
     if(process.argv.length > 2){
-        // Get all the steps to run
+        // Provide filename
         const arg = process.argv[2];
         cmd = cmd + " " + arg;
+    }else{
+        // Read filename from "tmp/active_run_file" and use it as cmd arg
+        if(fs.existsSync('tmp/active_run_file')){
+            const arg = fs.readFileSync('tmp/active_run_file', 'utf-8');
+            cmd = cmd + " " + arg;
+        }
     }
 
     const fileSafeName = config.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -49,6 +58,9 @@ async function main(){
         fs.appendFileSync(logFile, data);
     };
 
+    // Write starting date, time to log file
+    fs.appendFileSync(logFile, "Starting new run at :" + date + "\n");
+
     let outPut = "";
     try{
         outPut = await run(cmd, process.cwd(), {...process.env, "XTRACE_SNO": sno}, onOutput);
@@ -62,6 +74,9 @@ async function main(){
     const timeTakenInMinutes = timeTaken / 60000;
     console.log(`Time taken: ${timeTakenInMinutes} minutes`);
     fs.appendFileSync(logFile, `Time taken: ${timeTakenInMinutes} minutes`);
+
+    // Copy logFile to tmp/lastRun.log
+    fs.copyFileSync(logFile, path.join(__dirname, '..', 'tmp/lastRun.log'));
 
     // Write output to log file
     // fs.writeFileSync(logFile + "/" + date + ".log", outPut);

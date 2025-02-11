@@ -35,7 +35,7 @@
 			"command": "node",
 			"args": [
 				"./scripts/run.js",
-				"./run_configs/table_selection_bug.json5"
+				// "./run_configs/table_selection_bug.json5"
 			],
 		},
 		{
@@ -51,6 +51,16 @@
 			"dependsOn": [
 				"1) Parse inp.cc"
 			]
+		},
+		{
+			"label": "Add new run config",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"${workspaceFolder}/scripts/new_config_from_base.js",
+				"${input:jsonFileName}"
+			],
+			"problemMatcher": []
 		},
 		{
 			"label": "Add test cpp file",
@@ -96,12 +106,25 @@
 				"-u"
 			],
 		},
+		{
+			"label": "Open last run logs",
+			"type": "shell",
+			"command": "code",
+			"args": [
+				"tmp/lastRun.log",
+			],
+		},
 	],
 	"inputs": [
 		{
 			"id": "cppFileName",
 			"type": "promptString",
 			"description": "Enter the name of the C++ file (without extension)"
+		},
+		{
+			"id": "jsonFileName",
+			"type": "promptString",
+			"description": "Enter the name of JSON run config file"
 		}
 	]
 }
