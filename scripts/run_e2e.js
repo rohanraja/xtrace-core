@@ -30,7 +30,15 @@ async function main() {
 
   console.log("Running with config: ", JSON.stringify(config, null, 2));
 
-  const runStep = (step, fn) => runStepWithFilter(step, fn, config.run_filter);
+  let run_filter = config.run_filter;
+
+  // If env has XT_RUN_FILTER, override the run_filter
+  if(process.env["XT_RUN_FILTER"]){
+    run_filter = process.env["XT_RUN_FILTER"];
+    console.log("Overriding run_filter with: " + run_filter);
+  }
+
+  const runStep = (step, fn) => runStepWithFilter(step, fn, run_filter);
 
   const username = process.env["USERNAME"] || "unknown";
   const sno = process.env["XTRACE_SNO"] || "0";
@@ -46,6 +54,18 @@ async function main() {
   const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
   const content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
+  const chromium_bin = isWin ? 'chrome.exe' : './Chrome.app/Contents/MacOS/Chrome';
+
+  const run_chrome = test_input.web_page != null;
+
+  let web_page = test_input.web_page;
+  if(run_chrome){
+    // If web_page doesn't start with http, construct file:// url from relative path in pwd
+    if(!web_page.startsWith("http")){
+      web_page = `file://${path.join(process.cwd(), "run_configs/html", web_page)}`;
+    }
+
+  }
 
   // 0.2 Setup environment to include cr tools like autoninja
   let envs = process.env;
@@ -56,6 +76,7 @@ async function main() {
   envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
+  const runInEnvWaited = (command, cwd) => run(command, cwd, {...envs, "WAIT_FOR_EXIT": "true"});
 
   // 1. Reset hard to HEAD for complete chromium repo
   await runStep("1", async () => {
@@ -115,7 +136,12 @@ async function main() {
       console.log("No content_shell running");
     }
 
-    await runInEnv(`autoninja content_shell`, cr_debug_folder);
+    if(run_chrome){
+      console.log("Building chrome");
+      await runInEnv(`autoninja chrome`, cr_debug_folder);
+    }else{
+      await runInEnv(`autoninja content_shell`, cr_debug_folder);
+    }
     // await runInEnv(`autoninja blink_tests`, cr_debug_folder);
   });
 
@@ -125,7 +151,7 @@ async function main() {
   //   await runInEnv(`${binary_name} --no-sandbox`, cr_debug_folder);
   // });
 
-  if(!test_input.should_skip_wpt_serve){
+  if(!run_chrome && !test_input.should_skip_wpt_serve){
     await runStep("6", async () => {
       runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
 
@@ -141,11 +167,17 @@ async function main() {
       fs.rmSync(xtrace_run_json);
     }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
-    await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+    if(run_chrome){
+      await runInEnvWaited(`${chromium_bin}  --no-sandbox ${web_page}`, cr_debug_folder);
+    }
+    else{
+      await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+    }
   });
 
   // 8. Upload scenario recording xtrace.run file to xTrace server
   await runStep("8", async () => {
+    console.log("Uploading xtrace.run.json");
     await uploadFile(xtrace_run_json, upload_url);
     console.log(`Visit http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)} to view the trace`);
   });

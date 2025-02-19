@@ -121,7 +121,7 @@ function addLogLines(sourceCode: string): string {
                     let lineDataAfterExec = "";
 
                     if (index === 0) {
-                        lineData += `XTrace *xtrace = XTrace::getInstance(); `;
+                        lineData += `blink::XTrace *xtrace = blink::XTrace::getInstance(); `;
                         if(shouldResetCodeRun){
                             lineData += `xtrace->ResetCodeRunId("${methodName}"); `;
                         }

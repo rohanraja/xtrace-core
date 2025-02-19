@@ -6,6 +6,11 @@ global.open_last_log = (params) => {
     codeOpen(logFile);
 }
 
+global.open_active_runconfig = (params) => {
+    const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
+    codeOpen(file);
+}
+
 
 // Utilities
 function codeOpen(fileName){

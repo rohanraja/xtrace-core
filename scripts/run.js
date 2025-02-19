@@ -68,6 +68,7 @@ async function main(){
     try{
         outPut = await run(cmd, process.cwd(), {...process.env, "XTRACE_SNO": sno}, onOutput);
     }catch(e){
+        console.log(`Error while running main e2e command ${e}`);
         outPut = e;
         fs.appendFileSync(logFile, e);
     }

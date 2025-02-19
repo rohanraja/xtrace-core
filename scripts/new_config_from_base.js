@@ -4,8 +4,8 @@ const { exec } = require('child_process');
 
 const createJsonFile = (name) => {
   const dir = path.join(__dirname, '../run_configs');
-  const baseFilePath = path.join(dir, 'base.json');
-  const newFilePath = path.join(dir, `${name}.json`);
+  const baseFilePath = path.join(dir, 'base.json5');
+  const newFilePath = path.join(dir, `${name}.json5`);
 
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });

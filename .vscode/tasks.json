@@ -38,13 +38,55 @@
 			],
 		},
 		{
-			"label": "Run E2E automation",
+			"label": "Run.E2E",
 			"type": "shell",
 			"command": "node",
 			"args": [
 				"./scripts/run.js",
 				// "./run_configs/table_selection_bug.json5"
 			],
+		},
+		{
+			"label": "Run.ALL",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "1,2,3,4,5,6,7,8"
+				}
+			}
+		},
+		{
+			"label": "Run.BrowserAndUpload",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "7,8"
+				}
+			}
+		},
+		{
+			"label": "Run.OnlyBuild",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "5"
+				}
+			}
 		},
 		{
 			"label": "C) Run CPP Injector UTs",
@@ -61,7 +103,7 @@
 			]
 		},
 		{
-			"label": "Add new run config",
+			"label": "Config.Add new",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -115,7 +157,7 @@
 			],
 		},
 		{
-			"label": "Open last run logs",
+			"label": "Logs.Open last run",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -124,11 +166,12 @@
 			],
 		},
 		{
-			"label": "Open active run config",
+			"label": "Open active run config file",
 			"type": "shell",
-			"command": "code",
+			"command": "node",
 			"args": [
-				"tmp/lastRun.log",
+				"./scripts/ui.js",
+				"open_active_runconfig",
 			],
 		},
 	],
