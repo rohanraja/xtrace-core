@@ -122,7 +122,7 @@ async function main() {
   });
 
   // 2. Copy xTrace recorder folder from xtrace-core to
-  await runStep("2", async () => {
+  await runStep("copy-xtrace-lib", async () => {
     const srcFolder = path.join(__dirname, '..', "cpp_recorder", "xtrace");
     const destFolder = path.join(cr_src_folder, 'third_party', 'xtrace');
     await fs.promises.cp(srcFolder, destFolder, { recursive: true });
@@ -141,19 +141,19 @@ async function main() {
   });
 
   // 3. Run hook injection on selected folders as per input
-  await runStep("3", async () => {
+  await runStep("inject-hooks", async () => {
     await runInEnv(`npm run folders`, cr_hooks_injector_folder);
   });
 
   // 4. Upload source code run events to xTrace server
-  await runStep("4", async () => {
+  await runStep("upload-source-code", async () => {
     const xtrace_sourcecode_events_path = path.join(cr_hooks_injector_folder, 'code_events.json');
     await uploadFile(xtrace_sourcecode_events_path, upload_url);
   });
 
   // 5. Build chromium code
   // TODO - Check if build failed then exit
-  await runStep("5", async () => {
+  await runStep("autoninja", async () => {
     console.log("Building content_shell");
 
     // Close any running process
@@ -178,7 +178,7 @@ async function main() {
   });
 
   if(!run_chrome && !test_input.should_skip_wpt_serve){
-    await runStep("6", async () => {
+    await runStep("wpt-serve", async () => {
       runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
 
       // Wait for 5 seconds
@@ -186,9 +186,19 @@ async function main() {
     });
   }
 
-  await runStep("7", async () => {
+  await runStep("run-web-test", async () => {
 
-    // 7.1 Delete xTrace.run.json if it exists
+    if (fs.existsSync(xtrace_run_json)) {
+      fs.rmSync(xtrace_run_json);
+    }
+    // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+    if(!run_chrome){
+      await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+    }
+  });
+
+  await runStep("run-chrome", async () => {
+
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
     }
@@ -196,13 +206,10 @@ async function main() {
     if(run_chrome){
       await runInEnvWaited(`${chromium_bin}  --no-sandbox ${web_page}`, cr_debug_folder);
     }
-    else{
-      await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
-    }
   });
 
   // 8. Upload scenario recording xtrace.run file to xTrace server
-  await runStep("8", async () => {
+  await runStep("upload-recording", async () => {
     console.log("Uploading xtrace.run.json");
     await uploadFile(xtrace_run_json, upload_url);
     const recording_url = `http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)}`;

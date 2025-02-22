@@ -183,6 +183,20 @@
 				"open_last_recording",
 			],
 		},
+		{
+			"label": "Run.Select..",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "${input:run_stage}"
+				}
+			}
+		},
 	],
 	"inputs": [
 		{
@@ -194,6 +208,23 @@
 			"id": "jsonFileName",
 			"type": "promptString",
 			"description": "Enter the name of JSON run config file"
-		}
+		},
+        {
+            "id": "run_stage",
+            "type": "pickString",
+            "description": "Select a stage to run",
+            "options": [
+                "gclient",
+                "copy-xtrace-lib",
+                "cl-fetch",
+                "git-reset",
+                "inject-hooks",
+                "upload-source-code",
+                "autoninja",
+                "run-web-test",
+                "run-chrome",
+                "upload-recording",
+            ]
+        }
 	]
 }
