@@ -53,8 +53,17 @@ async function main() {
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
   const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
-  const content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
-  const chromium_bin = isWin ? 'chrome.exe' : './Chrome.app/Contents/MacOS/Chrome';
+  let content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
+  let chromium_bin = isWin ? 'chrome.exe' : './Chrome.app/Contents/MacOS/Chrome';
+
+  // If linux, use "./chrome"
+  const isLinux = process.platform == "linux";
+  if(isLinux)
+  {
+    chromium_bin = "./chrome";
+    content_shell_bin = "./content_shell";
+  }
+
 
   const run_chrome = test_input.web_page != null;
 
@@ -67,6 +76,7 @@ async function main() {
 
   }
 
+
   // 0.2 Setup environment to include cr tools like autoninja
   let envs = process.env;
   if (isWin) {
@@ -78,9 +88,37 @@ async function main() {
   const runInEnv = (command, cwd) => run(command, cwd, envs);
   const runInEnvWaited = (command, cwd) => run(command, cwd, {...envs, "WAIT_FOR_EXIT": "true"});
 
+
   // 1. Reset hard to HEAD for complete chromium repo
-  await runStep("1", async () => {
+  await runStep("git-reset", async () => {
     await runInEnv(`git reset --hard`, cr_src_folder);
+  });
+
+  // Check if CL needs to be pulled
+  await runStep("cl-fetch", async () => {
+    const cl = test_input.cl;
+    const patchSet = test_input.patch_set;
+    if(cl && patchSet){ 
+
+      const targetBranch = `change-${cl}-${patchSet}`;
+      const currentBranch = await runInEnv(`git rev-parse --abbrev-ref HEAD`, cr_src_folder);
+      console.log("Current branch: ", currentBranch);
+      if(currentBranch.includes(targetBranch)){
+        console.log("Already on branch: ", targetBranch);
+      }
+      else{
+        console.log("Fetching and checking out branch: ", targetBranch);
+        const patchSetLastTwoDigits = cl.slice(-2);
+        const fetchUrl = `refs/changes/${patchSetLastTwoDigits}/${cl}/${patchSet}`;
+        await runInEnv(`git fetch https://chromium.googlesource.com/chromium/src ${fetchUrl}`, cr_src_folder);
+        await runInEnv(`git checkout -b ${targetBranch} FETCH_HEAD`, cr_src_folder);
+      }
+
+    }
+  });
+
+  await runStep("gclient", async () => {
+    await runInEnv(`gclient sync -fD`, cr_src_folder);
   });
 
   // 2. Copy xTrace recorder folder from xtrace-core to
@@ -89,12 +127,6 @@ async function main() {
     const destFolder = path.join(cr_src_folder, 'third_party', 'xtrace');
     await fs.promises.cp(srcFolder, destFolder, { recursive: true });
     console.log(`Copied ${srcFolder} to ${destFolder}`);
-
-    // 2.2 Copy xTrace WPT folder from xtrace-core to chromium WPTs
-    const xt_test_path = path.join(__dirname, '..', "test_data", "async-navigator-clipboard-xtrace.html");
-    const wpt_xt_test_path = path.join(cr_src_folder, 'third_party', 'blink', 'web_tests', 'external', 'wpt', 'clipboard-apis', "async-navigator-clipboard-xtrace.html");
-    await fs.copyFileSync(xt_test_path, wpt_xt_test_path);
-    console.log(`Copied ${xt_test_path} to ${wpt_xt_test_path}`);
 
     // 2.3 Delete xTrace.run.json if it exists
     if (fs.existsSync(xtrace_run_json)) {
@@ -145,12 +177,6 @@ async function main() {
     // await runInEnv(`autoninja blink_tests`, cr_debug_folder);
   });
 
-  // 6. Run chrome
-  // await runStep("6", async () => {
-  //   const binary_name = isWin ? 'chrome.exe' : 'chrome';
-  //   await runInEnv(`${binary_name} --no-sandbox`, cr_debug_folder);
-  // });
-
   if(!run_chrome && !test_input.should_skip_wpt_serve){
     await runStep("6", async () => {
       runInEnv(`vpython3 third_party/blink/tools/run_blink_wptserve.py -t ${test_input.debug_folder_name}`, cr_src_folder);
@@ -179,7 +205,10 @@ async function main() {
   await runStep("8", async () => {
     console.log("Uploading xtrace.run.json");
     await uploadFile(xtrace_run_json, upload_url);
-    console.log(`Visit http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)} to view the trace`);
+    const recording_url = `http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)}`;
+    console.log(`Visit ${recording_url} to view the trace`);
+    // Write url to tmp/last_recording_url
+    fs.writeFileSync('tmp/last_recording_url', recording_url);
   });
 
   // Kill process

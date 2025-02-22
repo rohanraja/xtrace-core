@@ -1,0 +1,23 @@
+{
+    "name": "Selection listify CL",
+    "cr_path": "E:/cr", // Path to chromium source code, mostly "Q:/cr"
+    "debug_folder_name": "debug_full_x64", // Build ouput folder name in "out", mostly "debug_full_x64"
+    "xtrace_server_ip": "20.244.33.135",
+    "path_prefix_filter": "third_party/blink/", // If all files have common prefix, that can be removed from UI.
+    "cl": "6225479",
+    "patch_set": "7",
+    "folders_whitelist": [ // List of folders which should be recorded
+    ],
+    "files_whitelist": [ // List of files which should be recorded
+        "third_party/blink/renderer/core/editing/commands/insert_list_command.cc",
+    ],
+    "methods_which_split_run": [ // Methods from which we want to study code execution
+        "InsertListCommand::DoApplyForSingleParagraph",
+    ],
+    "methods_blacklist": [ // Methods which should not be parsed
+        "InDifferentLinesOfSameInlineFormattingContext", 
+    ],
+    "should_skip_wpt_serve": true, // In case we don't want to run WPT server for web tests
+    "run_filter": "", // If empty, run all steps otherwise comma separated list of steps to run
+    "web_test": "../../third_party/blink/web_tests/editing/execCommand/insert_list/insert_list_selection_update.html"
+}

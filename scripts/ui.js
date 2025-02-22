@@ -1,6 +1,13 @@
 const { exec } = require('child_process');
 const fs = require('fs');
 
+var start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
+
+const open = (url) => {
+    exec(`${start} ${url}`);
+};
+
+
 global.open_last_log = (params) => {
     const logFile = fs.readFileSync('tmp/last_log_file', 'utf-8');
     codeOpen(logFile);
@@ -9,6 +16,13 @@ global.open_last_log = (params) => {
 global.open_active_runconfig = (params) => {
     const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
     codeOpen(file);
+}
+
+global.open_last_recording = (params) => {
+    const url = fs.readFileSync('tmp/last_recording_url', 'utf-8');
+    console.log(`Opening last recording: ${url}`);
+    // Open url in browser
+    open(url);
 }
 
 
