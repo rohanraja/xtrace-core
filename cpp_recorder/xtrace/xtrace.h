@@ -68,7 +68,8 @@ public:
 
   inline XTrace() {
     this->crid = generateRandomGuid();
-    std::cout << "XTrace constructor again 2" << std::endl;
+    std::cout << "XTrace constructor" << std::endl;
+    ResetCodeRunId("Start");
   }
 
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
@@ -166,6 +167,28 @@ public:
 
     std::string msg = getVectorOfStringToJson(vec);
     events.push_back(msg);
+    WriteStringToJsonLOGFile(msg);
+  }
+
+  inline void WriteStringToJsonLOGFile(std::string msg) {
+    std::cout << "WriteStringToJsonLOGFile called" << std::endl;
+    std::ofstream ofs;
+    ofs.open("xtrace.run.log", std::ofstream::out | std::ofstream::app);
+
+    if (!ofs.is_open()) {
+        std::cout << "Failed to open file for writing: xtrace.run.log" << std::endl;
+        return;
+    }
+
+    ofs << msg << std::endl;
+
+    if (ofs.fail()) {
+        std::cout << "Failed to write to file: xtrace.run.log" << std::endl;
+    }
+
+    ofs.close();
+    std::cout << "Data written" << std::endl;
+
   }
 
   inline std::string getVectorOfStringToJson(std::vector<std::string> &vec) {

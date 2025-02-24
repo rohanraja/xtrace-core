@@ -31,19 +31,29 @@ async function main(){
 
     let cmd = "node scripts/run_e2e.js";
 
+    let filePath = "";
+
     if(process.argv.length > 2){
         // Provide filename
         const arg = process.argv[2];
+        filePath = arg;
         cmd = cmd + " " + arg;
     }else{
         // Read filename from "tmp/active_run_file" and use it as cmd arg
         if(fs.existsSync('tmp/active_run_file')){
             const arg = fs.readFileSync('tmp/active_run_file', 'utf-8');
+            filePath = arg;
             cmd = cmd + " " + arg;
         }
     }
 
-    const fileSafeName = config.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    // get filename from path
+    const fileNameOnly = filePath.split("/")[filePath.split("/").length-1];
+
+
+    // const fileSafeName = config.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+    const fileSafeName = fileNameOnly
 
     // Find the next serial number for the log file
     while(fs.existsSync(logFolder +

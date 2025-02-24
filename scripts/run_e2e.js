@@ -14,6 +14,7 @@ const run = require('./utils.js').run;
 const uploadFile = require('./utils.js').uploadFile;
 const runStepWithFilter = require('./utils.js').runStep;
 const JSON5 = require('json5');
+const { convertFileToJsonArray } = require('./json_utils.js');
 
 async function main() {
 
@@ -53,6 +54,7 @@ async function main() {
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
   const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
+  const xtrace_run_log = path.join(cr_debug_folder, 'xtrace.run.log');
   let content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
   let chromium_bin = isWin ? 'chrome.exe' : './Chrome.app/Contents/MacOS/Chrome';
 
@@ -65,7 +67,7 @@ async function main() {
   }
 
 
-  const run_chrome = test_input.web_page != null;
+  let run_chrome = test_input.web_page != null && test_input.web_page != "" && test_input.web_page != undefined;
 
   let web_page = test_input.web_page;
   if(run_chrome){
@@ -74,6 +76,11 @@ async function main() {
       web_page = `file://${path.join(process.cwd(), "run_configs/html", web_page)}`;
     }
 
+  }else{
+    if(run_filter.includes("-chrome")){
+      web_page = "http://google.com";
+      run_chrome = true;
+    }
   }
 
 
@@ -153,26 +160,33 @@ async function main() {
 
   // 5. Build chromium code
   // TODO - Check if build failed then exit
-  await runStep("autoninja", async () => {
-    console.log("Building content_shell");
+  await runStep("build-webtest", async () => {
+    if(!run_chrome){
+      try{
+        // TODO: make cross platform
+        await runInEnv(`taskkill -F /IM content_shell.exe`, cr_debug_folder);
+      }catch(e){
+        console.log("No content_shell running");
+      }
 
-    // Close any running process
-    try{
-      await runInEnv(`taskkill -F /IM chrome.exe`, cr_debug_folder);
-    }catch(e){
-      console.log("No chrome running");
+      console.log("Building content_shell");
+      await runInEnv(`autoninja content_shell -o`, cr_debug_folder);
     }
-    try{
-      await runInEnv(`taskkill -F /IM content_shell.exe`, cr_debug_folder);
-    }catch(e){
-      console.log("No content_shell running");
-    }
+  });
 
+  await runStep("build-chrome", async () => {
     if(run_chrome){
+
+      console.log("Building chrome");
+
+      // Close any running process
+      try{
+        await runInEnv(`taskkill -F /IM chrome.exe`, cr_debug_folder);
+      }catch(e){
+        console.log("No chrome running");
+      }
       console.log("Building chrome");
       await runInEnv(`autoninja chrome`, cr_debug_folder);
-    }else{
-      await runInEnv(`autoninja content_shell`, cr_debug_folder);
     }
     // await runInEnv(`autoninja blink_tests`, cr_debug_folder);
   });
@@ -191,9 +205,15 @@ async function main() {
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
     }
+    if (fs.existsSync(xtrace_run_log)) {
+      fs.rmSync(xtrace_run_log);
+    }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     if(!run_chrome){
       await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+
+      // Delay for 5 seconds for xtrace.run.json to be generated
+      await setTimeout(() => {}, 5000);
     }
   });
 
@@ -201,6 +221,9 @@ async function main() {
 
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
+    }
+    if (fs.existsSync(xtrace_run_log)) {
+      fs.rmSync(xtrace_run_log);
     }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     if(run_chrome){
@@ -210,6 +233,8 @@ async function main() {
 
   // 8. Upload scenario recording xtrace.run file to xTrace server
   await runStep("upload-recording", async () => {
+    console.log("Converting logs to json");
+    await convertFileToJsonArray(xtrace_run_log, xtrace_run_json);
     console.log("Uploading xtrace.run.json");
     await uploadFile(xtrace_run_json, upload_url);
     const recording_url = `http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)}`;

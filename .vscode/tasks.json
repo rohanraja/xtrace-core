@@ -57,6 +57,35 @@
 			"options": {
 				"env": {
 					"XT_RUN_FILTER": ""
+					// "XT_RUN_FILTER": "gclient, copy-xtrace-lib, cl-fetch, git-reset, inject-hooks, upload-source-code, build-webtest, build-chrome, run-web-test, run-chrome, upload-recording"
+				}
+			}
+		},
+		{
+			"label": "Run.Hook-Build-Run-Upload_WebTest",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "copy-xtrace-lib,git-reset,inject-hooks,upload-source-code,build-webtest,run-web-test,upload-recording"
+				}
+			}
+		},
+		{
+			"label": "Run.Hook-Run-Upload_Webtest",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "run-web-test,upload-recording"
 				}
 			}
 		},
@@ -184,6 +213,15 @@
 			],
 		},
 		{
+			"label": "Config.Create from CL",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"create_config_from_cl",
+			],
+		},
+		{
 			"label": "Run.Select..",
 			"type": "shell",
 			"command": "node",
@@ -220,7 +258,8 @@
                 "git-reset",
                 "inject-hooks",
                 "upload-source-code",
-                "autoninja",
+                "build-webtest",
+                "build-chrome",
                 "run-web-test",
                 "run-chrome",
                 "upload-recording",

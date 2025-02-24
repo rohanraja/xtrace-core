@@ -1,5 +1,19 @@
 ### User experience
 
+### Console UI
+- Add logs selector
+- Add user based login
+- Restructure configs data with following schema
+    - users
+        - <UserID>
+            - configs
+                - <ConfigID>
+                    - runs
+                        - <RunID>
+                            - logs.log
+                            - finalUrl.txt
+                            - runConfig.json5 
+
 ### Distribution and adoption
 - Create infra for xtrace-core where people can redistribute / use xtrace, recieve updates, etc
 - Try user guide / infra on a new devbox machine
