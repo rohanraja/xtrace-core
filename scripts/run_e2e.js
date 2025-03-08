@@ -170,7 +170,7 @@ async function main() {
       }
 
       console.log("Building content_shell");
-      await runInEnv(`autoninja content_shell -o`, cr_debug_folder);
+      await runInEnv(`autoninja content_shell`, cr_debug_folder);
     }
   });
 

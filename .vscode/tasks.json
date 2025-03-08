@@ -62,6 +62,20 @@
 			}
 		},
 		{
+			"label": "Run.ReHook",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "copy-xtrace-lib,git-reset,inject-hooks"
+				}
+			}
+		},
+		{
 			"label": "Run.Hook-Build-Run-Upload_WebTest",
 			"type": "shell",
 			"command": "node",
@@ -76,7 +90,7 @@
 			}
 		},
 		{
-			"label": "Run.Hook-Run-Upload_Webtest",
+			"label": "Run.Run-Upload_Webtest",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -183,6 +197,18 @@
 				"test",
 				"--",
 				"-u"
+			],
+		},
+		{
+			"label": "Serve console web",
+			"type": "shell",
+			"command": "npm",
+			"options": {
+				"cwd": "${workspaceFolder}/console-ui"
+			},
+			"args": [
+				"run",
+				"dev",
 			],
 		},
 		{

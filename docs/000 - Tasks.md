@@ -1,3 +1,7 @@
+### P0
+- Fix code run upload for 6175802
+    - Check seq diag generator causing error 
+
 ### User experience
 
 ### Console UI
@@ -13,6 +17,11 @@
                             - logs.log
                             - finalUrl.txt
                             - runConfig.json5 
+- Fix NextJS depedencies, create package.json on Node 20.0.0 or latest
+- SHow logs as markdown to highlight important stages with ###
+- While building from CL, simply checkout local main (updated daily) then merge changes of the CL on top of it to
+  speed up the build
+  - Give an option of clean checkout vs merge on local latest
 
 ### Distribution and adoption
 - Create infra for xtrace-core where people can redistribute / use xtrace, recieve updates, etc
@@ -23,6 +32,15 @@
 ### Code parsing and injection logic
 - Fix error where a To_string method can cause infinite recursion. #P0
     - e.g. in bool IsEditable(const Node &node) {
+- After hooking, check for errors by parsing again.
+    - If error found, try to find the method name, and ignore it automatically
+    - Log the error and report to me.
+- Fix error in third_party/blink/renderer/core/editing/text_offset_mapping.cc
+- For methods which are blacklisted and not important, keep a global map of this info
+    - which can be reused by anyone
+- Fix var state capture in for loops
+- Capture state in const declaration
+    -  const InlineContents inline_contents = ComputeInlineContentsFromNode(*node);
 
 #### CPP vars capturing scenarios
 - Capture vars declared with "&"

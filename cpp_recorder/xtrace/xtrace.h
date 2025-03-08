@@ -43,6 +43,7 @@ class XTrace {
 public:
   std::string crid;
   int timeCount = 0;
+  bool enableJsonFlush = false;
 
   // std::vector<std::string> events ALLOW_DISCOURAGED_TYPE("Need to use");
   std::vector<std::string> events;
@@ -181,6 +182,7 @@ public:
     }
 
     ofs << msg << std::endl;
+    ofs.flush(); // Ensure the log is written immediately
 
     if (ofs.fail()) {
         std::cout << "Failed to write to file: xtrace.run.log" << std::endl;
@@ -212,6 +214,9 @@ public:
 
   inline void FlushAllEventsToJSONFile() {
 
+    if(!enableJsonFlush) {
+      return;
+    }
     std::cout << "Flushing events to json" << std::endl;
     std::string json = getVectorOfStringToJson(events);
 
