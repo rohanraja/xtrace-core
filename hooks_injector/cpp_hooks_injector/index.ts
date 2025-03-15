@@ -59,6 +59,10 @@ function addLogLines(sourceCode: string): string {
 
                 if (!methodName && decNode.type.includes("identifier")) {
                     methodName = decNode.text;
+                    // If method name has newLine, remove it
+                    if (methodName.includes("\n")) {
+                        methodName = methodName.replaceAll("\n", "");
+                    }
                     return;
                 }
                 for (const child of decNode.namedChildren) {

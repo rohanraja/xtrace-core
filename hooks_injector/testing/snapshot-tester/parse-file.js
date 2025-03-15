@@ -20,4 +20,19 @@ function parseFile(filePath) {
     );
     return output.toString();
 }
-module.exports = parseFile;
+
+async function buildParser() {
+
+    const output = execSync(
+        `npm run build`, {
+            cwd: "../../cpp_hooks_injector",
+        }
+    );
+    console.log(output.toString());
+    return output.toString();
+}
+
+module.exports = {
+    parseFile,
+    buildParser
+}

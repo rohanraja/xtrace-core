@@ -101,6 +101,7 @@ async function main() {
     await runInEnv(`git reset --hard`, cr_src_folder);
   });
 
+  let branchChanged = false;
   // Check if CL needs to be pulled
   await runStep("cl-fetch", async () => {
     const cl = test_input.cl;
@@ -119,13 +120,19 @@ async function main() {
         const fetchUrl = `refs/changes/${patchSetLastTwoDigits}/${cl}/${patchSet}`;
         await runInEnv(`git fetch https://chromium.googlesource.com/chromium/src ${fetchUrl}`, cr_src_folder);
         await runInEnv(`git checkout -b ${targetBranch} FETCH_HEAD`, cr_src_folder);
+        branchChanged = true;
       }
 
     }
   });
 
   await runStep("gclient", async () => {
-    await runInEnv(`gclient sync -fD`, cr_src_folder);
+    if(branchChanged){
+      console.log("Running gclient sync -fD");
+      await runInEnv(`gclient sync -fD`, cr_src_folder);
+    }else{
+      console.log("Branch not changed, skipping gclient sync");
+    }
   });
 
   // 2. Copy xTrace recorder folder from xtrace-core to
