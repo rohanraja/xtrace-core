@@ -10,6 +10,22 @@ const open = (url) => {
 };
 
 
+
+
+global.open_whitelist_files = (params) => {
+    const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
+    const baseContent = JSON5.parse(fs.readFileSync(file, 'utf8'));
+    const srcDir = path.join(baseContent.cr_path, 'src');
+    const whiteListFiles = baseContent.files_whitelist.map(f => path.join(srcDir, f));
+    codeOpen(srcDir);
+
+    // Open all files in the whitelist
+    whiteListFiles.forEach(file => {
+        codeOpen(file);
+    });
+}
+
+
 global.open_src_dir = (params) => {
     const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
     const baseContent = JSON5.parse(fs.readFileSync(file, 'utf8'));
