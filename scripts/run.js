@@ -4,19 +4,26 @@ const fs = require('fs');
 const JSON5 = require('json5');
 // Wrapper around "run_e2e.js" to captures the output in a log file
 
-let json_config = "";
+const config_path = path.join(__dirname, '..', 'runs', 'config.json');
 
-if(process.argv.length > 2){
-    json_config = fs.readFileSync(process.argv[2], 'utf-8');
-}else{
-        // Read filename from "tmp/active_run_file" and use it as cmd arg
-        if(fs.existsSync('tmp/active_run_file')){
-            const arg = fs.readFileSync('tmp/active_run_file', 'utf-8');
-            json_config = fs.readFileSync(arg, 'utf-8');
-        }
+// Load config_path json and apply to process.env
+let config = {};
+if(fs.existsSync(config_path)){
+    try{
+        config = JSON5.parse(fs.readFileSync(config_path, 'utf-8'));
+    }catch(e){
+        console.log(`Error while reading config file ${config_path} ${e}`);
+    }
 }
-
-const config = JSON5.parse(json_config);
+if(config){
+    for (const [key, value] of Object.entries(config)) {
+        if(key in process.env){
+            console.log(`Overriding env variable ${key} with value ${value}`);
+        }
+        process.env[key] = value;
+    }
+    console.log(`Loaded config from ${config_path}`);
+}
 
 let sno = 0;
 
@@ -49,9 +56,6 @@ async function main(){
 
     // get filename from path
     const fileNameOnly = filePath.split("/")[filePath.split("/").length-1];
-
-
-    // const fileSafeName = config.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
     const fileSafeName = fileNameOnly
 

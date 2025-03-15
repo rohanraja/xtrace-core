@@ -239,6 +239,15 @@
 			],
 		},
 		{
+			"label": "Code.Open src dir",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"open_src_dir",
+			],
+		},
+		{
 			"label": "Config.Create from CL",
 			"type": "shell",
 			"command": "node",

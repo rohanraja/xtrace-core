@@ -22,7 +22,8 @@ const execCommand = (command) => {
 const runCommands = async () => {
   try {
     await execCommand('mkdir tmp');
-    await execCommand('cd hooks_injector/cpp_hooks_injector && npm install && npm install -g clang-format && npm run build && npm run test');
+    await execCommand('mkdir runs');
+    await execCommand('cd hooks_injector/cpp_hooks_injector && npm install && npm install -g clang-format');
     await execCommand('cd scripts && npm install');
   } catch (error) {
     console.error('An error occurred:', error);

@@ -10,6 +10,13 @@ const open = (url) => {
 };
 
 
+global.open_src_dir = (params) => {
+    const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
+    const baseContent = JSON5.parse(fs.readFileSync(file, 'utf8'));
+    const srcDir = path.join(baseContent.cr_path, 'src');
+    codeOpen(srcDir);
+}
+
 global.open_last_log = (params) => {
     const logFile = fs.readFileSync('tmp/last_log_file', 'utf-8');
     codeOpen(logFile);

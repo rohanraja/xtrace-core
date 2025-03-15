@@ -1,6 +1,10 @@
 ### P0
 - Fix code run upload for 6175802
     - Check seq diag generator causing error 
+- Support running unit tests
+- While building from CL, simply checkout local main (updated daily) then merge changes of the CL on top of it to
+  speed up the build
+  - Give an option of clean checkout vs merge on local latest
 
 ### User experience
 
@@ -19,9 +23,6 @@
                             - runConfig.json5 
 - Fix NextJS depedencies, create package.json on Node 20.0.0 or latest
 - SHow logs as markdown to highlight important stages with ###
-- While building from CL, simply checkout local main (updated daily) then merge changes of the CL on top of it to
-  speed up the build
-  - Give an option of clean checkout vs merge on local latest
 
 ### Distribution and adoption
 - Create infra for xtrace-core where people can redistribute / use xtrace, recieve updates, etc

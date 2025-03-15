@@ -313,7 +313,8 @@ if(tree.rootNode.hasError){
 }
 
 function formatSourceCode(sourceCode: string): string {
-    const result = spawnSync("clang-format", [], {
+    const clang_format_path = process.env["CLANG_FORMAT_PATH"] || "clang-format";
+    const result = spawnSync(clang_format_path, [], {
         input: sourceCode,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'inherit'],

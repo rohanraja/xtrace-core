@@ -56,7 +56,7 @@ async function main() {
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
   const xtrace_run_log = path.join(cr_debug_folder, 'xtrace.run.log');
   let content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
-  let chromium_bin = isWin ? 'chrome.exe' : './Chrome.app/Contents/MacOS/Chrome';
+  let chromium_bin = isWin ? 'chrome.exe' : './Chromium.app/Contents/MacOS/Chromium';
 
   // If linux, use "./chrome"
   const isLinux = process.platform == "linux";
