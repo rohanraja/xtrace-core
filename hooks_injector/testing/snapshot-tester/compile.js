@@ -39,7 +39,7 @@ function compileFile(file, outputBinaryPath) {
             console.log(`Deleted existing binary: ${outputBinaryPath}`);
         }
         // Compile the .cc file
-        execSync(`g++ -Wall -Wextra -std=c++11 -DXTRACE_LOCAL_RUN -o ${outputBinaryPath} ${file}`, { stdio: 'inherit' });
+        execSync(`g++ -Wall -Wextra -std=c++20 -DXTRACE_LOCAL_RUN -o ${outputBinaryPath} ${file}`, { stdio: 'inherit' });
         console.log(`Compiled ${file} to ${outputBinaryPath}`);
         return outputBinaryPath;
     } catch (error) {
@@ -66,9 +66,7 @@ function runBinary(binaryPath) {
         fs.renameSync(xtraceRunLogPath, newLogPath);
         console.log(`Renamed ${xtraceRunLogPath} to ${newLogPath}`);
 
-        // Print content of the new log file
-        const logContent = fs.readFileSync(newLogPath, 'utf8');
-        return logContent;
+        return newLogPath;
     } catch (error) {
         console.error(`Failed to run ${binaryPath}: ${error.message}`);
     }
