@@ -1,4 +1,7 @@
 const { execSync } = require("child_process");
+const { cppHookInjectorPath } = require("./paths");
+const path = require("path");
+const fs = require("fs");
 
 /*
 Given a cpp file path, triggers hooks_injector/cpp_hooks_injector/index.ts
@@ -10,7 +13,7 @@ function parseFile(filePath) {
 
     const output = execSync(
         `node dist/out.js ${filePath}`, {
-            cwd: "../../cpp_hooks_injector",
+            cwd: cppHookInjectorPath,
             env: {
                 ...process.env,
                 FileName: fileNameOnly,
@@ -21,11 +24,24 @@ function parseFile(filePath) {
     return output.toString();
 }
 
+function parseFileToHookedFolder(filePath) {
+    const fileDir = filePath.split(path.sep).slice(0, -1).join(path.sep);
+    const outPutDir = `${fileDir}_hooked`;
+    const fileNameOnly = path.basename(filePath);
+    const outFileName = path.join(outPutDir, fileNameOnly);
+    const outPut = parseFile(filePath);
+    if (!fs.existsSync(outPutDir)) {
+        fs.mkdirSync(outPutDir);
+    }
+    fs.writeFileSync(outFileName, outPut);
+    return outFileName;
+}
+
 async function buildParser() {
 
     const output = execSync(
         `npm run build`, {
-            cwd: "../../cpp_hooks_injector",
+            cwd: cppHookInjectorPath,
         }
     );
     console.log(output.toString());
@@ -34,5 +50,6 @@ async function buildParser() {
 
 module.exports = {
     parseFile,
-    buildParser
+    buildParser,
+    parseFileToHookedFolder
 }

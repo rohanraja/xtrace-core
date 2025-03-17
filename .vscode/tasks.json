@@ -280,6 +280,36 @@
 			],
 		},
 		{
+			"label": "Hook.ActiveFile",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"hook_active_file",
+				"${file}"
+			],
+		},
+		{
+			"label": "Compile.ActiveFile",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"compile_run_active_file",
+				"${file}"
+			],
+		},
+		{
+			"label": "Testing.HookAndRunFile.ActiveFile",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"hook_and_run_file",
+				"${file}"
+			],
+		},
+		{
 			"label": "Run.Select..",
 			"type": "shell",
 			"command": "node",

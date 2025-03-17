@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const { e2eHookedPath, binFolderPath, xTracePath } = require('./paths');
+const { e2eHookedPath, binFolderPath, xTracePath, baseFolderForXTrace } = require('./paths');
 
 // Ensure the bin folder exists
 if (!fs.existsSync(binFolderPath)) {
@@ -18,10 +18,20 @@ function copyXTraceFolder() {
             console.log('xTrace folder copied successfully.');
         }
     });
+    fs.cpSync(baseFolderForXTrace, path.join(e2eHookedPath, 'base'), { recursive: true }, (err) => {
+        if (err) {
+            console.error(`Error copying base folder: ${err}`);
+        } else {
+            console.log('base folder copied successfully.');
+        }
+    });
 }
 
 // Compile a single .cc file
 function compileFile(file, outputBinaryPath) {
+    if(!outputBinaryPath) {
+        outputBinaryPath = path.join(binFolderPath, path.basename(file, '.cc'));
+    }
     try {
         // Delete the existing binary if it exists
         if (fs.existsSync(outputBinaryPath)) {
@@ -31,6 +41,7 @@ function compileFile(file, outputBinaryPath) {
         // Compile the .cc file
         execSync(`g++ -Wall -Wextra -std=c++11 -DXTRACE_LOCAL_RUN -o ${outputBinaryPath} ${file}`, { stdio: 'inherit' });
         console.log(`Compiled ${file} to ${outputBinaryPath}`);
+        return outputBinaryPath;
     } catch (error) {
         console.error(`Failed to compile ${file}: ${error.message}`);
     }

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { parseFile, buildParser } = require('../parse-file');
+const { parseFile, buildParser, parseFileToHookedFolder } = require('../parse-file');
 
 const { cppFolderPath, snapshotFolderPath } = require('../paths');
 
@@ -19,11 +19,8 @@ describe('Parse File Tests', () => {
     const filePath = path.join(cppFolderPath, file);
     const snapshotFilePath = path.join(snapshotFolderPath, `${file}`);
     test(`parse file: ${file}`, () => {
-      const result = parseFile(filePath);
-
-      // Save the snapshot result to a .cc file
-      fs.writeFileSync(snapshotFilePath, result);
-
+      const outFile = parseFileToHookedFolder(filePath);
+      const result = fs.readFileSync(outFile, 'utf-8');
       expect(result).toMatchSnapshot();
     });
   });

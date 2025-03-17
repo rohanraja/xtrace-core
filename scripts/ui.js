@@ -1,7 +1,9 @@
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const JSON5 = require('json5');
+const { compileFile, runBinary } = require("../hooks_injector/testing/snapshot-tester/compile");
+const { parseFileToHookedFolder } = require('../hooks_injector/testing/snapshot-tester/parse-file');
 
 var start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
 
@@ -10,6 +12,30 @@ const open = (url) => {
 };
 
 
+global.hook_and_run_file = (params) => {
+    const fileFromParams = params[0];
+    console.log(`Hooking file: ${fileFromParams}`);
+    const hookedCodeFile = parseFileToHookedFolder(fileFromParams);
+    const outputBinaryPath = compileFile(hookedCodeFile);
+    const logs = runBinary(outputBinaryPath);
+    console.log(logs.toString());
+}
+
+global.hook_active_file = (params) => {
+    const fileFromParams = params[0];
+    console.log(`Hooking file: ${fileFromParams}`);
+    const hookedCodeFile = parseFileToHookedFolder(fileFromParams);
+    console.log(hookedCodeFile);
+}
+
+global.compile_run_active_file = (params) => {
+    const fileFromParams = params[0];
+    console.log(`Running file: ${fileFromParams}`);
+    const outputBinaryPath = compileFile(fileFromParams);
+    // execute the binary
+    const logs = execSync(outputBinaryPath);
+    console.log(logs.toString());
+}
 
 
 global.open_whitelist_files = (params) => {
