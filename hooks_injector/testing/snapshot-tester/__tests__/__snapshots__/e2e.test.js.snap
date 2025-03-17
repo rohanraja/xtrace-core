@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Parse File Tests parse file: helloWorld.cc 1`] = `
+"#include "base/strings/to_string.h"
+#include "third_party/xtrace/xtrace.h"
+#include <iostream>
+
+int main() {
+
+  blink::XTrace *xtrace = blink::XTrace::getInstance();
+  std::string xtrace_mrid =
+      xtrace->OnMethodEnter("helloWorld.cc", "main", "GUID_FROM_TEST");
+  xtrace->LogLineRun(xtrace_mrid, 4);
+  int x = 34;
+  xtrace->LocalVarUpdate(xtrace_mrid, "x", base::ToString(x));
+
+  xtrace->LogLineRun(xtrace_mrid, 5);
+  std::cout << "Hello, World!" << std::endl;
+  xtrace->LogLineRun(xtrace_mrid, 6);
+  x = x + 1;
+  xtrace->LocalVarUpdate(xtrace_mrid, "x", base::ToString(x));
+
+  xtrace->LogLineRun(xtrace_mrid, 7);
+  std::cout << "x is " << x << std::endl;
+  xtrace->LogLineRun(xtrace_mrid, 8);
+  xtrace->FlushAllEventsToJSONFile();
+  return 0;
+}
+"
+`;
+
+exports[`Parse File Tests parse file: helloWorld.cc 2`] = `
+"["3035eff0-2381-3d33-e701-99f0fa473eb2","NEW_CODE_RUN_ID","[\\"/Start/0\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","METHOD_ENTER","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"helloWorld.cc\\",\\"main\\",\\"dummy_threadId\\",\\"dummy_clrid\\",\\"GUID_FROM_TEST\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","LINE_EXEC","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"4\\",\\"0\\",\\"\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","SEND_VAR_UPDATE","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"x\\",\\"VALUE\\",\\"\\",\\"34\\",\\"1\\",\\"true\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","LINE_EXEC","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"5\\",\\"2\\",\\"\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","LINE_EXEC","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"6\\",\\"3\\",\\"\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","SEND_VAR_UPDATE","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"x\\",\\"VALUE\\",\\"\\",\\"35\\",\\"4\\",\\"true\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","LINE_EXEC","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"7\\",\\"5\\",\\"\\"]"]
+["3035eff0-2381-3d33-e701-99f0fa473eb2","LINE_EXEC","[\\"7c200455-6841-f49a-af81-1799367be2b0\\",\\"8\\",\\"6\\",\\"\\"]"]
+"
+`;

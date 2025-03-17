@@ -1,10 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 const { parseFile, buildParser } = require('../parse-file');
 
-const cppFolderPath = path.join(__dirname, 'cpp');
-const snapshotFolderPath = path.join(__dirname, '__snapshots__');
+const { cppFolderPath, snapshotFolderPath } = require('../paths');
 
 describe('Parse File Tests', () => {
   beforeAll(async () => {

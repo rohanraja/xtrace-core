@@ -37,9 +37,7 @@ export class CodeLogger {
 
         const statements = bodyNode.namedChildren.filter(x => this.isValidStatementType(x.type));
         statements.forEach((childNode: SyntaxNode, index: number) => {
-            if (this.isValidStatementType(childNode.type)) {
-                this.addLogLine(childNode, index, statements.length, methodName, shouldResetCodeRun, params);
-            }
+            this.addLogLine(childNode, index, statements.length, methodName, shouldResetCodeRun, params);
             if (childNode.namedChildCount > 0) {
                 this.handleSyntaxNode(childNode);
             }

@@ -8,7 +8,10 @@
 #include "third_party/rapidjson/include/rapidjson/document.h"
 #include "third_party/rapidjson/include/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
+
+#ifndef XTRACE_LOCAL_RUN
 #include "base/no_destructor.h"
+#endif
 
 #include <fstream>
 #include <iostream>
@@ -23,7 +26,15 @@ namespace blink {
 
 inline std::string generateRandomGuid() {
   std::random_device rd;
-  std::mt19937 mt(rd());
+  // std::mt19937 mt(rd());
+  // If env has "XTRACE_SEED" set, use that as seed else use random
+  static char* seed_env = std::getenv("XTRACE_SEED_0");
+  static std::mt19937 mt(seed_env ? 0 : rd());
+  if(seed_env) {
+    std::cout << "Using Xtrace seed 0" << std::endl;
+  }else{
+    std::cout << "Using random seed" << std::endl;
+  }
   std::uniform_int_distribution<int> dist(0, 15);
 
   const char *v = "0123456789abcdef";
@@ -56,8 +67,13 @@ public:
   // static XTrace *getInstance();
 
   inline static XTrace *getInstance() {
+#ifndef XTRACE_LOCAL_RUN
     static base::NoDestructor<XTrace> monitor;
     return monitor.get();
+#else
+    static XTrace monitor;
+    return &monitor;
+#endif
     // static XTrace instance; // Thread-safe in C++11 and later
     // return &instance;
     // // If the instance doesn't exist, create it
