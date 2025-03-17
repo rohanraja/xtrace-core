@@ -24,17 +24,26 @@
 
 namespace blink {
 
+int id_cnt = 0;
+
 inline std::string generateRandomGuid() {
   std::random_device rd;
   // std::mt19937 mt(rd());
   // If env has "XTRACE_SEED" set, use that as seed else use random
   static char* seed_env = std::getenv("XTRACE_SEED_0");
-  static std::mt19937 mt(seed_env ? 0 : rd());
+
+  // If seed_env is set, return a counted string
+  // else return a random string
   if(seed_env) {
-    std::cout << "Using Xtrace seed 0" << std::endl;
+    id_cnt++;
+    // Convert id_cnt to string
+    std::string id_cnt_str = std::to_string(id_cnt);
+    return "ID_" + id_cnt_str;
   }else{
     std::cout << "Using random seed" << std::endl;
   }
+
+  static std::mt19937 mt(rd());
   std::uniform_int_distribution<int> dist(0, 15);
 
   const char *v = "0123456789abcdef";
