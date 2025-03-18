@@ -4,7 +4,7 @@ const fs = require('fs');
 const JSON5 = require('json5');
 const { compileFile, runBinary, copyXTraceFolder } = require("../hooks_injector/testing/snapshot-tester/compile");
 const { parseFileToHookedFolder, buildParser } = require('../hooks_injector/testing/snapshot-tester/parse-file');
-const { getBinaryLogFilePath, getOutputBinaryPath } = require('../hooks_injector/testing/snapshot-tester/paths');
+const { getBinaryLogFilePath, getOutputBinaryPath } = require('../utils/paths');
 
 var start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
 

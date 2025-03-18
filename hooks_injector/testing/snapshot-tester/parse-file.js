@@ -1,5 +1,5 @@
 const { execSync } = require("child_process");
-const { cppHookInjectorPath } = require("./paths");
+const { cppHookInjectorPath } = require("../../../utils/paths");
 const path = require("path");
 const fs = require("fs");
 

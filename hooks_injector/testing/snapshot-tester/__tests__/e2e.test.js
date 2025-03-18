@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { parseFile, buildParser } = require('../parse-file');
-const { e2eCppPath, e2eHookedPath, binFolderPath } = require('../paths');
+const { e2eCppPath, e2eHookedPath, binFolderPath } = require('../../../../utils/paths');
 const { compileFile, runBinary, copyXTraceFolder } = require('../compile');
+const { cleanTextForSnapshot } = require('../utils/snapshot_utils');
 
 
 describe('Parse File Tests', () => {
@@ -47,7 +48,7 @@ describe('Parse File Tests', () => {
 
       const logs = runBinary(outputBinaryPath);
       const logsData = fs.readFileSync(logs, 'utf-8');
-      expect(logsData).toMatchSnapshot();
+      expect(cleanTextForSnapshot(logsData)).toMatchSnapshot();
 
     });
   });

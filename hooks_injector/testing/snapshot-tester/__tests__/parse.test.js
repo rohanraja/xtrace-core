@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { parseFile, buildParser, parseFileToHookedFolder } = require('../parse-file');
 
-const { cppFolderPath, snapshotFolderPath } = require('../paths');
+const { cppFolderPath, snapshotFolderPath } = require('../../../../utils/paths');
 
 describe('Parse File Tests', () => {
   beforeAll(async () => {

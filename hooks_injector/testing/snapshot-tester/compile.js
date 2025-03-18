@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const { e2eHookedPath, binFolderPath, xTracePath, baseFolderForXTrace, getOutputBinaryPath, getBinaryLogFilePath } = require('./paths');
+const { e2eHookedPath, binFolderPath, xTracePath, baseFolderForXTrace, getOutputBinaryPath, getBinaryLogFilePath } = require('../../../utils/paths');
 
 // Ensure the bin folder exists
 if (!fs.existsSync(binFolderPath)) {

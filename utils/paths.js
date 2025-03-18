@@ -1,6 +1,6 @@
 const path = require('path');
 
-const repoRoot = path.join(__dirname, '..', '..', "..");
+const repoRoot = path.join(__dirname, '..');
 
 
 // Tests paths
