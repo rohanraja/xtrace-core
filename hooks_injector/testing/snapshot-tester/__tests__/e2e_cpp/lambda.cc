@@ -2,6 +2,11 @@
 #include <vector>
 #include <algorithm>
 
+// Function which takes in a lamda function
+void executeLambda(const std::function<void()>& lambda) {
+    lambda();
+}
+
 int main() {
     // Define a lambda function that prints a message
     auto printMessage = []() {
@@ -14,10 +19,9 @@ int main() {
     // Define a vector of integers
     std::vector<int> numbers = {1, 2, 3, 4, 5};
 
-    // Use a lambda function to print each number in the vector
-    // std::for_each(numbers.begin(), numbers.end(), [](int number) {
-    //     std::cout << "Number: " << number << std::endl;
-    // });
+    executeLambda([](){
+        std::cout << "Hello from the lambda function! INLINE" << std::endl;
+    });
 
     return 0;
 }

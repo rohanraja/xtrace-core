@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const { e2eHookedPath, binFolderPath, xTracePath, baseFolderForXTrace } = require('./paths');
+const { e2eHookedPath, binFolderPath, xTracePath, baseFolderForXTrace, getOutputBinaryPath, getBinaryLogFilePath } = require('./paths');
 
 // Ensure the bin folder exists
 if (!fs.existsSync(binFolderPath)) {
@@ -30,8 +30,9 @@ function copyXTraceFolder() {
 // Compile a single .cc file
 function compileFile(file, outputBinaryPath) {
     if(!outputBinaryPath) {
-        outputBinaryPath = path.join(binFolderPath, path.basename(file, '.cc'));
+        outputBinaryPath = getOutputBinaryPath(file);
     }
+    const logFile = getBinaryLogFilePath(outputBinaryPath);
     try {
         // Delete the existing binary if it exists
         if (fs.existsSync(outputBinaryPath)) {
@@ -39,7 +40,14 @@ function compileFile(file, outputBinaryPath) {
             console.log(`Deleted existing binary: ${outputBinaryPath}`);
         }
         // Compile the .cc file
-        execSync(`g++ -Wall -Wextra -std=c++20 -DXTRACE_LOCAL_RUN -o ${outputBinaryPath} ${file}`, { stdio: 'inherit' });
+        try{
+            const output = execSync(`g++ -Wall -Wextra -std=c++20 -DXTRACE_LOCAL_RUN -o ${outputBinaryPath} ${file}`, { encoding: 'utf-8' });
+            fs.writeFileSync(logFile, output);
+        }catch (error) {
+            console.error(`Compilation error: ${error.message}`);
+            fs.writeFileSync(logFile, error.message);
+            throw error;
+        }
         console.log(`Compiled ${file} to ${outputBinaryPath}`);
         return outputBinaryPath;
     } catch (error) {

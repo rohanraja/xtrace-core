@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const JSON5 = require('json5');
 const { compileFile, runBinary, copyXTraceFolder } = require("../hooks_injector/testing/snapshot-tester/compile");
-const { parseFileToHookedFolder } = require('../hooks_injector/testing/snapshot-tester/parse-file');
+const { parseFileToHookedFolder, buildParser } = require('../hooks_injector/testing/snapshot-tester/parse-file');
+const { getBinaryLogFilePath, getOutputBinaryPath } = require('../hooks_injector/testing/snapshot-tester/paths');
 
 var start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
 
@@ -13,24 +14,34 @@ const open = (url) => {
 
 
 global.hook_and_run_file = (params) => {
+    buildParser();
     copyXTraceFolder();
     const fileFromParams = params[0];
     console.log(`Hooking file: ${fileFromParams}`);
     const hookedCodeFile = parseFileToHookedFolder(fileFromParams);
     codeOpen(hookedCodeFile);
-    const outputBinaryPath = compileFile(hookedCodeFile);
-    const logsFile = runBinary(outputBinaryPath);
-    codeOpen(logsFile);
-    const logs = fs.readFileSync(logsFile, 'utf-8');
-    console.log(logs.toString());
+    let outputBinaryPath;
+    try{
+        outputBinaryPath = compileFile(hookedCodeFile);
+        const logsFile = runBinary(outputBinaryPath);
+        codeOpen(logsFile);
+        const logs = fs.readFileSync(logsFile, 'utf-8');
+        console.log(logs.toString());
+    }catch(e){
+        const outputBinaryPath = getOutputBinaryPath(hookedCodeFile);
+        const compileLogsFile = getBinaryLogFilePath(outputBinaryPath);
+        codeOpen(compileLogsFile);
+    }
 
 }
 
 global.hook_active_file = (params) => {
+    buildParser();
     const fileFromParams = params[0];
     console.log(`Hooking file: ${fileFromParams}`);
     const hookedCodeFile = parseFileToHookedFolder(fileFromParams);
     console.log(hookedCodeFile);
+    codeOpen(hookedCodeFile);
 }
 
 global.compile_run_active_file = (params) => {

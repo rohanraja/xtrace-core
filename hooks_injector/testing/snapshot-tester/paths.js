@@ -17,9 +17,19 @@ const cppHookInjectorPath = path.join(repoRoot, 'hooks_injector', 'cpp_hooks_inj
 const xTracePath = path.join(repoRoot, 'cpp_recorder', 'xtrace');
 const baseFolderForXTrace = path.join(repoRoot, 'cpp_recorder', 'base');
 
+function getOutputBinaryPath(file) {
+    return path.join(binFolderPath, path.basename(file, '.cc'));
+}
+
+function getBinaryLogFilePath(binaryPath) {
+    return `${binaryPath}.log`;
+}
+
 module.exports = {
     cppFolderPath,
     e2eHookedPath,
+    getOutputBinaryPath,
+    getBinaryLogFilePath,
     e2eCppPath,
     binFolderPath,
     snapshotFolderPath,
