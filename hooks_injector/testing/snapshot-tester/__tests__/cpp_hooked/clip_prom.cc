@@ -75,7 +75,6 @@ public:
     ThenCallable<IDLSequence<V8UnionBlobOrString>,
                  ClipboardItemDataPromiseFulfill>::Trace(visitor);
     xtrace->LogLineRun(xtrace_mrid, 68);
-    xtrace->FlushAllEventsToJSONFile();
     visitor->Trace(clipboard_promise_);
   }
 
@@ -96,7 +95,6 @@ public:
                            list_copy ? base::ToString(*list_copy) : "");
 
     xtrace->LogLineRun(xtrace_mrid, 76);
-    xtrace->FlushAllEventsToJSONFile();
     clipboard_promise_->HandlePromiseWrite(list_copy);
   }
 
@@ -119,7 +117,6 @@ public:
     xtrace->LogLineRun(xtrace_mrid, 90);
     ThenCallable<IDLAny, ClipboardItemDataPromiseReject>::Trace(visitor);
     xtrace->LogLineRun(xtrace_mrid, 91);
-    xtrace->FlushAllEventsToJSONFile();
     visitor->Trace(clipboard_promise_);
   }
 
@@ -131,7 +128,6 @@ public:
                            script_state ? base::ToString(*script_state) : "");
     xtrace->LocalVarUpdate(xtrace_mrid, "exception", base::ToString(exception));
     xtrace->LogLineRun(xtrace_mrid, 95);
-    xtrace->FlushAllEventsToJSONFile();
     clipboard_promise_->RejectClipboardItemPromise(exception);
   }
 
@@ -180,7 +176,6 @@ ScriptPromise<IDLSequence<ClipboardItem>> ClipboardPromise::CreateForRead(
   xtrace->LogLineRun(xtrace_mrid, 117);
   clipboard_promise->HandleRead(formats);
   xtrace->LogLineRun(xtrace_mrid, 118);
-  xtrace->FlushAllEventsToJSONFile();
   return promise;
 }
 
@@ -223,7 +218,6 @@ ClipboardPromise::CreateForReadText(ExecutionContext *context,
   xtrace->LogLineRun(xtrace_mrid, 134);
   clipboard_promise->HandleReadText();
   xtrace->LogLineRun(xtrace_mrid, 135);
-  xtrace->FlushAllEventsToJSONFile();
   return promise;
 }
 
@@ -268,7 +262,6 @@ ClipboardPromise::CreateForWrite(ExecutionContext *context,
   xtrace->LogLineRun(xtrace_mrid, 152);
   clipboard_promise->HandleWrite(items);
   xtrace->LogLineRun(xtrace_mrid, 153);
-  xtrace->FlushAllEventsToJSONFile();
   return promise;
 }
 
@@ -311,7 +304,6 @@ ScriptPromise<IDLUndefined> ClipboardPromise::CreateForWriteText(
   xtrace->LogLineRun(xtrace_mrid, 170);
   clipboard_promise->HandleWriteText(data);
   xtrace->LogLineRun(xtrace_mrid, 171);
-  xtrace->FlushAllEventsToJSONFile();
   return promise;
 }
 
@@ -335,7 +327,6 @@ void ClipboardPromise::CompleteWriteRepresentation() {
   xtrace->LogLineRun(xtrace_mrid, 186);
   ++clipboard_representation_index_;
   xtrace->LogLineRun(xtrace_mrid, 187);
-  xtrace->FlushAllEventsToJSONFile();
   WriteNextRepresentation();
 }
 
@@ -397,7 +388,6 @@ void ClipboardPromise::WriteNextRepresentation() {
     return;
   }
   xtrace->LogLineRun(xtrace_mrid, 221);
-  xtrace->FlushAllEventsToJSONFile();
   clipboard_writer_->WriteToSystem(clipboard_item_data);
 }
 
@@ -424,7 +414,6 @@ void ClipboardPromise::RejectFromReadOrDecodeFailure() {
                          base::ToString(exception_text));
 
   xtrace->LogLineRun(xtrace_mrid, 234);
-  xtrace->FlushAllEventsToJSONFile();
   script_promise_resolver_->RejectWithDOMException(
       DOMExceptionCode::kDataError,
       exception_text +
@@ -470,7 +459,6 @@ void ClipboardPromise::HandleRead(ClipboardUnsanitizedFormats *formats) {
   }
 
   xtrace->LogLineRun(xtrace_mrid, 263);
-  xtrace->FlushAllEventsToJSONFile();
   ValidatePreconditions(
       mojom::blink::PermissionName::CLIPBOARD_READ,
       /*will_be_sanitized=*/false,
@@ -485,7 +473,6 @@ void ClipboardPromise::HandleReadText() {
   xtrace->LogLineRun(xtrace_mrid, 271);
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   xtrace->LogLineRun(xtrace_mrid, 272);
-  xtrace->FlushAllEventsToJSONFile();
   ValidatePreconditions(
       mojom::blink::PermissionName::CLIPBOARD_READ,
       /*will_be_sanitized=*/true,
@@ -553,7 +540,6 @@ void ClipboardPromise::HandleWrite(
   // Input in standard formats is sanitized, so the write will be sanitized
   // unless there are custom formats.
   xtrace->LogLineRun(xtrace_mrid, 311);
-  xtrace->FlushAllEventsToJSONFile();
   ValidatePreconditions(
       mojom::blink::PermissionName::CLIPBOARD_WRITE,
       /*will_be_sanitized=*/write_custom_format_types_.empty(),
@@ -574,7 +560,6 @@ void ClipboardPromise::HandleWriteText(const String &data) {
                          base::ToString(plain_text_));
 
   xtrace->LogLineRun(xtrace_mrid, 321);
-  xtrace->FlushAllEventsToJSONFile();
   ValidatePreconditions(
       mojom::blink::PermissionName::CLIPBOARD_WRITE,
       /*will_be_sanitized=*/true,
@@ -612,7 +597,6 @@ void ClipboardPromise::HandleReadWithPermission(
                                           : "");
 
   xtrace->LogLineRun(xtrace_mrid, 341);
-  xtrace->FlushAllEventsToJSONFile();
   system_clipboard->ReadAvailableCustomAndStandardFormats(WTF::BindOnce(
       &ClipboardPromise::OnReadAvailableFormatNames, WrapPersistent(this)));
 }
@@ -666,7 +650,6 @@ void ClipboardPromise::ResolveRead() {
                          base::ToString(clipboard_items));
 
   xtrace->LogLineRun(xtrace_mrid, 369);
-  xtrace->FlushAllEventsToJSONFile();
   script_promise_resolver_->DowncastTo<IDLSequence<ClipboardItem>>()->Resolve(
       clipboard_items);
 }
@@ -699,7 +682,6 @@ void ClipboardPromise::OnReadAvailableFormatNames(
     }
   }
   xtrace->LogLineRun(xtrace_mrid, 387);
-  xtrace->FlushAllEventsToJSONFile();
   ReadNextRepresentation();
 }
 
@@ -738,7 +720,6 @@ void ClipboardPromise::ReadNextRepresentation() {
     return;
   }
   xtrace->LogLineRun(xtrace_mrid, 407);
-  xtrace->FlushAllEventsToJSONFile();
   clipboard_reader->Read();
 }
 
@@ -759,7 +740,6 @@ void ClipboardPromise::OnRead(Blob *blob) {
   xtrace->LogLineRun(xtrace_mrid, 416);
   ++clipboard_representation_index_;
   xtrace->LogLineRun(xtrace_mrid, 417);
-  xtrace->FlushAllEventsToJSONFile();
   ReadNextRepresentation();
 }
 
@@ -792,7 +772,6 @@ void ClipboardPromise::HandleReadTextWithPermission(
   xtrace->LocalVarUpdate(xtrace_mrid, "text", base::ToString(text));
 
   xtrace->LogLineRun(xtrace_mrid, 434);
-  xtrace->FlushAllEventsToJSONFile();
   script_promise_resolver_->DowncastTo<IDLString>()->Resolve(text);
 }
 
@@ -808,7 +787,6 @@ void ClipboardPromise::HandlePromiseWrite(
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
   xtrace->LogLineRun(xtrace_mrid, 441);
-  xtrace->FlushAllEventsToJSONFile();
   GetClipboardTaskRunner()->PostTask(
       FROM_HERE,
       WTF::BindOnce(&ClipboardPromise::WriteClipboardItemData,
@@ -882,7 +860,6 @@ void ClipboardPromise::WriteClipboardItemData(
   xtrace->LogLineRun(xtrace_mrid, 485);
   DCHECK(!clipboard_representation_index_);
   xtrace->LogLineRun(xtrace_mrid, 486);
-  xtrace->FlushAllEventsToJSONFile();
   WriteNextRepresentation();
 }
 
@@ -944,7 +921,6 @@ void ClipboardPromise::HandleWriteWithPermission(
   xtrace->LogLineRun(xtrace_mrid, 519);
   ScriptState::Scope scope(script_state);
   xtrace->LogLineRun(xtrace_mrid, 520);
-  xtrace->FlushAllEventsToJSONFile();
   PromiseAll<V8UnionBlobOrString>::Create(script_state, promise_list)
       .Then(script_state,
             MakeGarbageCollected<ClipboardItemDataPromiseFulfill>(this),
@@ -985,7 +961,6 @@ void ClipboardPromise::HandleWriteTextWithPermission(
   xtrace->LogLineRun(xtrace_mrid, 540);
   system_clipboard->CommitWrite();
   xtrace->LogLineRun(xtrace_mrid, 541);
-  xtrace->FlushAllEventsToJSONFile();
   script_promise_resolver_->DowncastTo<IDLUndefined>()->Resolve();
 }
 
@@ -996,7 +971,6 @@ void ClipboardPromise::RejectClipboardItemPromise(ScriptValue exception) {
       "GUID_FROM_TEST");
   xtrace->LocalVarUpdate(xtrace_mrid, "exception", base::ToString(exception));
   xtrace->LogLineRun(xtrace_mrid, 545);
-  xtrace->FlushAllEventsToJSONFile();
   script_promise_resolver_->Reject(exception);
 }
 
@@ -1022,7 +996,6 @@ PermissionService *ClipboardPromise::GetPermissionService() {
                                    GetClipboardTaskRunner()));
   }
   xtrace->LogLineRun(xtrace_mrid, 557);
-  xtrace->FlushAllEventsToJSONFile();
   return permission_service_.get();
 }
 
@@ -1146,7 +1119,6 @@ void ClipboardPromise::ValidatePreconditions(
   // Note that extra checks are performed browser-side in
   // `ContentBrowserClient::IsClipboardPasteAllowed()`.
   xtrace->LogLineRun(xtrace_mrid, 639);
-  xtrace->FlushAllEventsToJSONFile();
   permission_service_->RequestPermission(
       std::move(permission_descriptor),
       /*user_gesture=*/has_transient_user_activation, std::move(callback));
@@ -1176,7 +1148,6 @@ LocalFrame *ClipboardPromise::GetLocalFrame() const {
                          local_frame ? base::ToString(*local_frame) : "");
 
   xtrace->LogLineRun(xtrace_mrid, 653);
-  xtrace->FlushAllEventsToJSONFile();
   return local_frame;
 }
 
@@ -1187,7 +1158,6 @@ ScriptState *ClipboardPromise::GetScriptState() const {
   xtrace->LogLineRun(xtrace_mrid, 657);
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   xtrace->LogLineRun(xtrace_mrid, 658);
-  xtrace->FlushAllEventsToJSONFile();
   return script_promise_resolver_->GetScriptState();
 }
 
@@ -1200,7 +1170,6 @@ ClipboardPromise::GetClipboardTaskRunner() {
   xtrace->LogLineRun(xtrace_mrid, 663);
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   xtrace->LogLineRun(xtrace_mrid, 664);
-  xtrace->FlushAllEventsToJSONFile();
   return GetExecutionContext()->GetTaskRunner(TaskType::kClipboard);
 }
 
@@ -1215,7 +1184,6 @@ void ClipboardPromise::ContextDestroyed() {
   script_promise_resolver_->Reject(MakeGarbageCollected<DOMException>(
       DOMExceptionCode::kNotAllowedError, "Document detached."));
   xtrace->LogLineRun(xtrace_mrid, 673);
-  xtrace->FlushAllEventsToJSONFile();
   clipboard_writer_.Clear();
 }
 
@@ -1236,7 +1204,6 @@ void ClipboardPromise::Trace(Visitor *visitor) const {
   xtrace->LogLineRun(xtrace_mrid, 681);
   visitor->Trace(clipboard_item_data_with_promises_);
   xtrace->LogLineRun(xtrace_mrid, 682);
-  xtrace->FlushAllEventsToJSONFile();
   ExecutionContextLifecycleObserver::Trace(visitor);
 }
 

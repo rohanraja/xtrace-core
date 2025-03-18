@@ -25,10 +25,14 @@ export class CodeLogger {
         node.namedChildren.forEach(child => this.visit(child));
     }
 
-    private handleFunctionDefinition(node: SyntaxNode) {
+    private handleFunctionDefinition(node: SyntaxNode, isLambda = false) {
         const bodyNode: SyntaxNode = (node as any).bodyNode;
         let declaratorNode = (node as any).declaratorNode;
         let methodName = this.findMethodName(declaratorNode);
+
+        if(isLambda){
+            methodName = "lambda";
+        }
 
         if (!methodName || !this.shouldIncludeMethod(methodName) || this.shouldExcludeMethod(methodName) || !bodyNode || !bodyNode.namedChildren) return;
 
@@ -167,9 +171,9 @@ export class CodeLogger {
 
         lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
 
-        if (index === totalStatements - 1) {
-            lineData += `xtrace->FlushAllEventsToJSONFile(); `
-        }
+        // if (index === totalStatements - 1) {
+        //     lineData += `xtrace->FlushAllEventsToJSONFile(); `
+        // }
 
         this.modifiedSourceCode[lineNumber] = this.modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + this.modifiedSourceCode[lineNumber].slice(columnNumber).trim();
         this.modifiedSourceCode[endLineNumber] += lineDataAfterExec;
@@ -192,6 +196,10 @@ export class CodeLogger {
             case "for_range_loop": {
                 statements = node.bodyNode.namedChildren;
                 break;
+            }
+            case "lambda_expression": {
+                this.handleFunctionDefinition(node, true);
+                return;
             }
             case "else_clause": {
                 if (node.namedChildren[0].type.includes("compound")) {

@@ -20,6 +20,5 @@ int main() {
   xtrace->LogLineRun(xtrace_mrid, 7);
   std::cout << "x is " << x << std::endl;
   xtrace->LogLineRun(xtrace_mrid, 8);
-  xtrace->FlushAllEventsToJSONFile();
   return 0;
 }

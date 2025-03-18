@@ -15,6 +15,8 @@ const uploadFile = require('./utils.js').uploadFile;
 const runStepWithFilter = require('./utils.js').runStep;
 const JSON5 = require('json5');
 const { convertFileToJsonArray } = require('./json_utils.js');
+const { killAllProcessWithName } = require('../common/utils/process_utils.js');
+const { chromeProcessImageName, contentShellProcessImageName } = require('../clients/chromium/utils/path_utils.js');
 
 async function main() {
 
@@ -170,8 +172,7 @@ async function main() {
   await runStep("build-webtest", async () => {
     if(!run_chrome){
       try{
-        // TODO: make cross platform
-        await runInEnv(`taskkill -F /IM content_shell.exe`, cr_debug_folder);
+        killAllProcessWithName(contentShellProcessImageName());
       }catch(e){
         console.log("No content_shell running");
       }
@@ -188,7 +189,7 @@ async function main() {
 
       // Close any running process
       try{
-        await runInEnv(`taskkill -F /IM chrome.exe`, cr_debug_folder);
+        killAllProcessWithName(chromeProcessImageName());
       }catch(e){
         console.log("No chrome running");
       }

@@ -1,0 +1,1 @@
+Commons common functions and utility methods that could be used even outside this project

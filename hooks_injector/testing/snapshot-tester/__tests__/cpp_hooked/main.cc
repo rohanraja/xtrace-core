@@ -5,6 +5,5 @@ int hello() {
   std::string xtrace_mrid =
       xtrace->OnMethodEnter("main.cc", "hello", "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 1);
-  xtrace->FlushAllEventsToJSONFile();
   printf("Hello, World!");
 }

@@ -7,7 +7,6 @@ int sum(int a, int b) {
   xtrace->LocalVarUpdate(xtrace_mrid, "a", base::ToString(a));
   xtrace->LocalVarUpdate(xtrace_mrid, "b", base::ToString(b));
   xtrace->LogLineRun(xtrace_mrid, 1);
-  xtrace->FlushAllEventsToJSONFile();
   return a + b;
 }
 
@@ -17,7 +16,6 @@ void print(int a) {
       xtrace->OnMethodEnter("method_args.cc", "print", "GUID_FROM_TEST");
   xtrace->LocalVarUpdate(xtrace_mrid, "a", base::ToString(a));
   xtrace->LogLineRun(xtrace_mrid, 5);
-  xtrace->FlushAllEventsToJSONFile();
   cout << a;
 }
 
@@ -30,7 +28,6 @@ void localVars() {
   xtrace->LocalVarUpdate(xtrace_mrid, "a", base::ToString(a));
 
   xtrace->LogLineRun(xtrace_mrid, 10);
-  xtrace->FlushAllEventsToJSONFile();
   int b = a;
   xtrace->LocalVarUpdate(xtrace_mrid, "b", base::ToString(b));
 }

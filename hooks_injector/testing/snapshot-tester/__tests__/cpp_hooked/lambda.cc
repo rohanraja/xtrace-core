@@ -27,14 +27,15 @@ int main() {
 
   // Use a lambda function to print each number in the vector
   xtrace->LogLineRun(xtrace_mrid, 17);
-  std::for_eacxtrace->LogLxtrace->LogLineRun(xtrace_mrid, 17);
-  ineRun(xtrace_mrid, 17);
-  h(numbers.begin(), numbers.end(), [](int number) {
+  std::for_each(numbers.begin(), numbers.end(), [](int number) {
+    blink::XTrace *xtrace = blink::XTrace::getInstance();
+    std::string xtrace_mrid =
+        xtrace->OnMethodEnter("lambda.cc", "lambda", "GUID_FROM_TEST");
+    xtrace->LocalVarUpdate(xtrace_mrid, "number", base::ToString(number));
     xtrace->LogLineRun(xtrace_mrid, 18);
     std::cout << "Number: " << number << std::endl;
   });
 
   xtrace->LogLineRun(xtrace_mrid, 21);
-  xtrace->FlushAllEventsToJSONFile();
   return 0;
 }

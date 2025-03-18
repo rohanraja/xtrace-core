@@ -11,7 +11,6 @@ void executeLambda(const std::function<void()> &lambda) {
       xtrace->OnMethodEnter("lambda.cc", "executeLambda", "GUID_FROM_TEST");
   xtrace->LocalVarUpdate(xtrace_mrid, "lambda", base::ToString(lambda));
   xtrace->LogLineRun(xtrace_mrid, 6);
-  xtrace->FlushAllEventsToJSONFile();
   lambda();
 }
 
@@ -36,14 +35,15 @@ int main() {
   std::vector<int> numbers = {1, 2, 3, 4, 5};
   xtrace->LocalVarUpdate(xtrace_mrid, "numbers", base::ToString(numbers));
 
-  xtrace->LogLineRunxtrace->LogLineRun(xtrace_mrid, 21);
-  (xtrace_mrid, 21);
+  xtrace->LogLineRun(xtrace_mrid, 21);
   executeLambda([]() {
+    blink::XTrace *xtrace = blink::XTrace::getInstance();
+    std::string xtrace_mrid =
+        xtrace->OnMethodEnter("lambda.cc", "lambda", "GUID_FROM_TEST");
     xtrace->LogLineRun(xtrace_mrid, 22);
     std::cout << "Hello from the lambda function! INLINE" << std::endl;
   });
 
   xtrace->LogLineRun(xtrace_mrid, 25);
-  xtrace->FlushAllEventsToJSONFile();
   return 0;
 }

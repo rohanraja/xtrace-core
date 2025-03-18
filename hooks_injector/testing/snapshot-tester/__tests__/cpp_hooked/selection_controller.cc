@@ -86,7 +86,6 @@ void SelectionController::Trace(Visitor *visitor) const {
   xtrace->LogLineRun(xtrace_mrid, 77);
   visitor->Trace(original_anchor_in_flat_tree_);
   xtrace->LogLineRun(xtrace_mrid, 78);
-  xtrace->FlushAllEventsToJSONFile();
   ExecutionContextLifecycleObserver::Trace(visitor);
 }
 
@@ -103,7 +102,6 @@ DispatchEventResult DispatchSelectStart(Node *node) {
     return DispatchEventResult::kNotCanceled;
 
   xtrace->LogLineRun(xtrace_mrid, 87);
-  xtrace->FlushAllEventsToJSONFile();
   return node->DispatchEvent(
       *Event::CreateCancelableBubble(event_type_names::kSelectstart));
 }
@@ -132,7 +130,6 @@ ExpandSelectionToRespectUserSelectAll(Node *target_node,
   if (!root_user_select_all)
     return selection;
   xtrace->LogLineRun(xtrace_mrid, 100);
-  xtrace->FlushAllEventsToJSONFile();
   return SelectionInFlatTree::Builder(selection)
       .Collapse(MostBackwardCaretPosition(
           PositionInFlatTree::BeforeNode(*root_user_select_all),
@@ -151,7 +148,6 @@ static int TextDistance(const PositionInFlatTree &start,
   xtrace->LocalVarUpdate(xtrace_mrid, "start", base::ToString(start));
   xtrace->LocalVarUpdate(xtrace_mrid, "end", base::ToString(end));
   xtrace->LogLineRun(xtrace_mrid, 112);
-  xtrace->FlushAllEventsToJSONFile();
   return TextIteratorInFlatTree::RangeLength(
       start, end,
       TextIteratorBehavior::AllVisiblePositionsRangeLengthBehavior());
@@ -172,7 +168,6 @@ bool CanMouseDownStartSelect(Node *node) {
     return false;
 
   xtrace->LogLineRun(xtrace_mrid, 124);
-  xtrace->FlushAllEventsToJSONFile();
   return true;
 }
 
@@ -185,7 +180,6 @@ PositionWithAffinityOfHitTestResult(const HitTestResult &hit_test_result) {
   xtrace->LocalVarUpdate(xtrace_mrid, "hit_test_result",
                          base::ToString(hit_test_result));
   xtrace->LogLineRun(xtrace_mrid, 129);
-  xtrace->FlushAllEventsToJSONFile();
   return FromPositionInDOMTree<EditingInFlatTreeStrategy>(
       hit_test_result.GetPosition());
 }
@@ -201,7 +195,6 @@ DocumentMarkerGroup *SpellCheckMarkerGroupAtPosition(
                          base::ToString(document_marker_controller));
   xtrace->LocalVarUpdate(xtrace_mrid, "position", base::ToString(position));
   xtrace->LogLineRun(xtrace_mrid, 136);
-  xtrace->FlushAllEventsToJSONFile();
   return document_marker_controller.FirstMarkerGroupAroundPosition(
       position, DocumentMarker::MarkerTypes::Misspelling());
 }
@@ -234,7 +227,6 @@ void MarkSelectionEndpointsForRepaint(const SelectionInFlatTree &selection) {
       focus_layout_object ? base::ToString(*focus_layout_object) : "");
 
   xtrace->LogLineRun(xtrace_mrid, 150);
-  xtrace->FlushAllEventsToJSONFile();
   if (focus_layout_object) {
     xtrace->LogLineRun(xtrace_mrid, 151);
     if (auto *layer = focus_layout_object->PaintingLayer()) {
@@ -256,7 +248,6 @@ bool IsNonSelectable(const Node *node) {
                          layout_object ? base::ToString(*layout_object) : "");
 
   xtrace->LogLineRun(xtrace_mrid, 159);
-  xtrace->FlushAllEventsToJSONFile();
   return layout_object && !layout_object->IsSelectable();
 }
 
@@ -272,7 +263,6 @@ inline bool ShouldIgnoreNodeForCheckSelectable(const Node *enclosing_block,
   xtrace->LocalVarUpdate(xtrace_mrid, "node",
                          node ? base::ToString(*node) : "");
   xtrace->LogLineRun(xtrace_mrid, 164);
-  xtrace->FlushAllEventsToJSONFile();
   return node == enclosing_block || (node && node->IsTextNode());
 }
 
@@ -306,7 +296,6 @@ AdjustSelectionWithTrailingWhitespace(const SelectionInFlatTree &selection) {
         .Build();
   }
   xtrace->LogLineRun(xtrace_mrid, 184);
-  xtrace->FlushAllEventsToJSONFile();
   return SelectionInFlatTree::Builder(selection)
       .SetBaseAndExtent(new_end, selection.Focus())
       .Build();
@@ -410,7 +399,6 @@ AdjustSelectionByUserSelect(Node *anchor_node,
   }
 
   xtrace->LogLineRun(xtrace_mrid, 239);
-  xtrace->FlushAllEventsToJSONFile();
   return SelectionInFlatTree::Builder()
       .SetBaseAndExtent(new_start_pos, new_end_pos)
       .Build();
@@ -426,7 +414,6 @@ Document &SelectionController::GetDocument() const {
   xtrace->LogLineRun(xtrace_mrid, 247);
   DCHECK(frame_->GetDocument());
   xtrace->LogLineRun(xtrace_mrid, 248);
-  xtrace->FlushAllEventsToJSONFile();
   return *frame_->GetDocument();
 }
 
@@ -436,7 +423,6 @@ void SelectionController::ContextDestroyed() {
       "selection_controller.cc", "SelectionController::ContextDestroyed",
       "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 252);
-  xtrace->FlushAllEventsToJSONFile();
   original_anchor_in_flat_tree_ = PositionInFlatTreeWithAffinity();
   xtrace->LocalVarUpdate(xtrace_mrid, "original_anchor_in_flat_tree_",
                          base::ToString(original_anchor_in_flat_tree_));
@@ -488,7 +474,6 @@ static PositionInFlatTreeWithAffinity AdjustPositionRespectUserSelectAll(
         selection_in_user_select_all.ComputeEndPosition());
   }
   xtrace->LogLineRun(xtrace_mrid, 281);
-  xtrace->FlushAllEventsToJSONFile();
   return position;
 }
 
@@ -509,7 +494,6 @@ ComputeStartFromEndForExtendForward(const PositionInFlatTree &end,
   // end of word/paragraph position. To get start of word/paragraph at |end|,
   // we pass previous position of |end|.
   xtrace->LogLineRun(xtrace_mrid, 292);
-  xtrace->FlushAllEventsToJSONFile();
   return ComputeStartRespectingGranularity(
       PositionInFlatTreeWithAffinity(
           PreviousPositionOf(CreateVisiblePosition(end),
@@ -595,7 +579,6 @@ ExtendSelectionAsDirectional(const PositionInFlatTreeWithAffinity &position,
   if (new_start == new_end)
     builder.SetAffinity(position.Affinity());
   xtrace->LogLineRun(xtrace_mrid, 349);
-  xtrace->FlushAllEventsToJSONFile();
   return builder.Build();
 }
 
@@ -662,7 +645,6 @@ ExtendSelectionAsNonDirectional(const PositionInFlatTree &position,
         .Build();
   }
   xtrace->LogLineRun(xtrace_mrid, 387);
-  xtrace->FlushAllEventsToJSONFile();
   return SelectionInFlatTree::Builder()
       .SetBaseAndExtent(
           start,
@@ -863,7 +845,6 @@ bool SelectionController::HandleSingleClick(
   }
 
   xtrace->LogLineRun(xtrace_mrid, 522);
-  xtrace->FlushAllEventsToJSONFile();
   return false;
 }
 
@@ -908,7 +889,6 @@ void SelectionController::HandleTapOnCaret(
   xtrace->LocalVarUpdate(xtrace_mrid, "did_select", base::ToString(did_select));
 
   xtrace->LogLineRun(xtrace_mrid, 545);
-  xtrace->FlushAllEventsToJSONFile();
   if (did_select) {
     xtrace->LogLineRun(xtrace_mrid, 546);
     frame_->GetEventHandler().ShowNonLocatedContextMenu(nullptr,
@@ -966,7 +946,6 @@ bool SelectionController::HandleTapInsideSelection(
                                                         kMenuSourceTouch);
   }
   xtrace->LogLineRun(xtrace_mrid, 582);
-  xtrace->FlushAllEventsToJSONFile();
   return true;
 }
 
@@ -1109,7 +1088,6 @@ WebInputEventResult SelectionController::UpdateSelectionForMouseDrag(
       kAdjustEndpointsAtBidiBoundary);
 
   xtrace->LogLineRun(xtrace_mrid, 674);
-  xtrace->FlushAllEventsToJSONFile();
   return WebInputEventResult::kHandledSystem;
 }
 
@@ -1175,7 +1153,6 @@ bool SelectionController::UpdateSelectionForMouseDownDispatchingSelectStart(
   SetNonDirectionalSelectionIfNeeded(visible_selection, set_selection_options,
                                      kDoNotAdjustEndpoints);
   xtrace->LogLineRun(xtrace_mrid, 711);
-  xtrace->FlushAllEventsToJSONFile();
   return true;
 }
 
@@ -1285,7 +1262,6 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
           : new_selection;
 
   xtrace->LogLineRun(xtrace_mrid, 783);
-  xtrace->FlushAllEventsToJSONFile();
   return UpdateSelectionForMouseDownDispatchingSelectStart(
       inner_node,
       ExpandSelectionToRespectUserSelectAll(inner_node, adjusted_selection),
@@ -1373,7 +1349,6 @@ void SelectionController::SelectClosestMisspellingFromHitTestResult(
           ? AdjustSelectionWithTrailingWhitespace(new_selection)
           : new_selection;
   xtrace->LogLineRun(xtrace_mrid, 838);
-  xtrace->FlushAllEventsToJSONFile();
   UpdateSelectionForMouseDownDispatchingSelectStart(
       inner_node,
       ExpandSelectionToRespectUserSelectAll(inner_node, adjusted_selection),
@@ -1409,7 +1384,6 @@ bool SelectionController::SelectClosestWordFromMouseEvent(
   DCHECK(!frame_->GetDocument()->NeedsLayoutTreeUpdate());
 
   xtrace->LogLineRun(xtrace_mrid, 861);
-  xtrace->FlushAllEventsToJSONFile();
   return SelectClosestWordFromHitTestResult(result, append_trailing_whitespace,
                                             mouse_event->FromTouch()
                                                 ? SelectInputEventType::kTouch
@@ -1433,7 +1407,6 @@ void SelectionController::SelectClosestMisspellingFromMouseEvent(
     return;
 
   xtrace->LogLineRun(xtrace_mrid, 874);
-  xtrace->FlushAllEventsToJSONFile();
   SelectClosestMisspellingFromHitTestResult(
       hit_test_result, (mouse_event->ClickCount() == 2 &&
                         frame_->GetEditor().IsSelectTrailingWhitespaceEnabled())
@@ -1492,7 +1465,6 @@ void SelectionController::SelectClosestWordOrLinkFromMouseEvent(
           : SelectionInFlatTree();
 
   xtrace->LogLineRun(xtrace_mrid, 908);
-  xtrace->FlushAllEventsToJSONFile();
   UpdateSelectionForMouseDownDispatchingSelectStart(
       inner_node,
       ExpandSelectionToRespectUserSelectAll(inner_node, new_selection),
@@ -1608,7 +1580,6 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
   if (selection_remains_the_same)
     return;
   xtrace->LogLineRun(xtrace_mrid, 981);
-  xtrace->FlushAllEventsToJSONFile();
   Selection().SetSelection(
       ConvertToSelectionInDOMTree(selection_in_flat_tree),
       SetSelectionOptions::Builder(set_selection_options)
@@ -1662,7 +1633,6 @@ void SelectionController::SetCaretAtHitTestResult(
     return;
   }
   xtrace->LogLineRun(xtrace_mrid, 1012);
-  xtrace->FlushAllEventsToJSONFile();
   UpdateSelectionForMouseDownDispatchingSelectStart(
       inner_node,
       ExpandSelectionToRespectUserSelectAll(
@@ -1717,7 +1687,6 @@ bool SelectionController::HandleDoubleClick(
   frame_->GetEventHandler().ShowNonLocatedContextMenu(nullptr,
                                                       kMenuSourceTouch);
   xtrace->LogLineRun(xtrace_mrid, 1050);
-  xtrace->FlushAllEventsToJSONFile();
   return true;
 }
 
@@ -1811,7 +1780,6 @@ bool SelectionController::HandleTripleClick(
   frame_->GetEventHandler().ShowNonLocatedContextMenu(nullptr,
                                                       kMenuSourceTouch);
   xtrace->LogLineRun(xtrace_mrid, 1104);
-  xtrace->FlushAllEventsToJSONFile();
   return true;
 }
 
@@ -1867,7 +1835,6 @@ bool SelectionController::HandleMousePressEvent(
   if (event.Event().click_count == 2)
     return HandleDoubleClick(event);
   xtrace->LogLineRun(xtrace_mrid, 1134);
-  xtrace->FlushAllEventsToJSONFile();
   return HandleSingleClick(event);
 }
 
@@ -1904,7 +1871,6 @@ WebInputEventResult SelectionController::HandleMouseDraggedEvent(
     UpdateSelectionForMouseDrag(result, last_known_mouse_position);
   }
   xtrace->LogLineRun(xtrace_mrid, 1153);
-  xtrace->FlushAllEventsToJSONFile();
   return UpdateSelectionForMouseDrag(event.GetHitTestResult(),
                                      last_known_mouse_position);
 }
@@ -1953,7 +1919,6 @@ void SelectionController::UpdateSelectionForMouseDrag(
   xtrace->LogLineRun(xtrace_mrid, 1172);
   layout_view->HitTest(location, result);
   xtrace->LogLineRun(xtrace_mrid, 1173);
-  xtrace->FlushAllEventsToJSONFile();
   UpdateSelectionForMouseDrag(result, last_known_mouse_position_in_root_frame);
 }
 
@@ -2046,7 +2011,6 @@ bool SelectionController::HandleMouseReleaseEvent(
   }
 
   xtrace->LogLineRun(xtrace_mrid, 1233);
-  xtrace->FlushAllEventsToJSONFile();
   return handled;
 }
 
@@ -2093,7 +2057,6 @@ bool SelectionController::HandlePasteGlobalSelection(
     return frame_->GetEditor().ExecuteCommand("PasteGlobalSelection");
 
   xtrace->LogLineRun(xtrace_mrid, 1265);
-  xtrace->FlushAllEventsToJSONFile();
   return false;
 }
 
@@ -2148,7 +2111,6 @@ bool SelectionController::HandleGestureLongPress(
   xtrace->LogLineRun(xtrace_mrid, 1294);
   SetCaretAtHitTestResult(hit_test_result);
   xtrace->LogLineRun(xtrace_mrid, 1295);
-  xtrace->FlushAllEventsToJSONFile();
   return false;
 }
 
@@ -2164,7 +2126,6 @@ void SelectionController::HandleGestureTwoFingerTap(
   TRACE_EVENT0("blink", "SelectionController::handleGestureTwoFingerTap");
 
   xtrace->LogLineRun(xtrace_mrid, 1302);
-  xtrace->FlushAllEventsToJSONFile();
   SetCaretAtHitTestResult(targeted_event.GetHitTestResult());
 }
 
@@ -2192,7 +2153,6 @@ static bool HitTestResultIsMisspelled(const HitTestResult &result) {
   if (!SpellChecker::IsSpellCheckingEnabledAt(marker_position))
     return false;
   xtrace->LogLineRun(xtrace_mrid, 1314);
-  xtrace->FlushAllEventsToJSONFile();
   return SpellCheckMarkerGroupAtPosition(
       result.InnerPossiblyPseudoNode()->GetDocument().Markers(),
       ToPositionInFlatTree(marker_position));
@@ -2266,7 +2226,6 @@ void SelectionController::UpdateSelectionForContextMenuEvent(
   }
 
   xtrace->LogLineRun(xtrace_mrid, 1365);
-  xtrace->FlushAllEventsToJSONFile();
   SelectClosestWordOrLinkFromMouseEvent(mouse_event, hit_test_result);
 }
 
@@ -2311,7 +2270,6 @@ void SelectionController::PassMousePressEventToSubframe(
     return;
   }
   xtrace->LogLineRun(xtrace_mrid, 1391);
-  xtrace->FlushAllEventsToJSONFile();
   Selection().SetSelectionAndEndTyping(ConvertToSelectionInDOMTree(
       SelectionInFlatTree::Builder().Collapse(visible_pos).Build()));
 }
@@ -2322,7 +2280,6 @@ void SelectionController::InitializeSelectionState() {
       "selection_controller.cc",
       "SelectionController::InitializeSelectionState", "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 1396);
-  xtrace->FlushAllEventsToJSONFile();
   selection_state_ = SelectionState::kHaveNotStartedSelection;
   xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
                          base::ToString(selection_state_));
@@ -2336,7 +2293,6 @@ void SelectionController::SetMouseDownMayStartSelect(bool may_start_select) {
   xtrace->LocalVarUpdate(xtrace_mrid, "may_start_select",
                          base::ToString(may_start_select));
   xtrace->LogLineRun(xtrace_mrid, 1400);
-  xtrace->FlushAllEventsToJSONFile();
   mouse_down_may_start_select_ = may_start_select;
   xtrace->LocalVarUpdate(xtrace_mrid, "mouse_down_may_start_select_",
                          base::ToString(mouse_down_may_start_select_));
@@ -2348,7 +2304,6 @@ bool SelectionController::MouseDownMayStartSelect() const {
       "selection_controller.cc", "SelectionController::MouseDownMayStartSelect",
       "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 1404);
-  xtrace->FlushAllEventsToJSONFile();
   return mouse_down_may_start_select_;
 }
 
@@ -2359,7 +2314,6 @@ bool SelectionController::MouseDownWasSingleClickInSelection() const {
       "SelectionController::MouseDownWasSingleClickInSelection",
       "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 1408);
-  xtrace->FlushAllEventsToJSONFile();
   return mouse_down_was_single_click_in_selection_;
 }
 
@@ -2396,7 +2350,6 @@ void SelectionController::NotifySelectionChanged() {
   xtrace->LogLineRun(xtrace_mrid, 1427);
   DCHECK(selection.IsRange()) << selection;
   xtrace->LogLineRun(xtrace_mrid, 1428);
-  xtrace->FlushAllEventsToJSONFile();
   selection_state_ = SelectionState::kExtendedSelection;
   xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
                          base::ToString(selection_state_));
@@ -2408,7 +2361,6 @@ FrameSelection &SelectionController::Selection() const {
       xtrace->OnMethodEnter("selection_controller.cc",
                             "SelectionController::Selection", "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 1432);
-  xtrace->FlushAllEventsToJSONFile();
   return frame_->Selection();
 }
 
@@ -2418,7 +2370,6 @@ bool IsSelectionOverLink(const MouseEventWithHitTestResults &event) {
       "selection_controller.cc", "IsSelectionOverLink", "GUID_FROM_TEST");
   xtrace->LocalVarUpdate(xtrace_mrid, "event", base::ToString(event));
   xtrace->LogLineRun(xtrace_mrid, 1436);
-  xtrace->FlushAllEventsToJSONFile();
   return (event.Event().GetModifiers() & WebInputEvent::Modifiers::kAltKey) !=
              0 &&
          event.IsOverLink();
@@ -2451,7 +2402,6 @@ bool IsUserNodeDraggable(const MouseEventWithHitTestResults &event) {
                          style ? base::ToString(*style) : "");
 
   xtrace->LogLineRun(xtrace_mrid, 1454);
-  xtrace->FlushAllEventsToJSONFile();
   return style && style->UserDrag() == EUserDrag::kElement;
 }
 
@@ -2467,7 +2417,6 @@ bool IsExtendingSelection(const MouseEventWithHitTestResults &event) {
                          base::ToString(is_mouse_down_on_link_or_image));
 
   xtrace->LogLineRun(xtrace_mrid, 1461);
-  xtrace->FlushAllEventsToJSONFile();
   return (event.Event().GetModifiers() & WebInputEvent::Modifiers::kShiftKey) !=
              0 &&
          !is_mouse_down_on_link_or_image && !IsUserNodeDraggable(event);

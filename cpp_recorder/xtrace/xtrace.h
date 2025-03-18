@@ -24,7 +24,7 @@
 
 namespace blink {
 
-int id_cnt = 0;
+static int xt_id_cnt = 0;
 
 inline std::string generateRandomGuid() {
   std::random_device rd;
@@ -35,9 +35,9 @@ inline std::string generateRandomGuid() {
   // If seed_env is set, return a counted string
   // else return a random string
   if(seed_env) {
-    id_cnt++;
+    xt_id_cnt++;
     // Convert id_cnt to string
-    std::string id_cnt_str = std::to_string(id_cnt);
+    std::string id_cnt_str = std::to_string(xt_id_cnt);
     return "ID_" + id_cnt_str;
   }else{
     std::cout << "Using random seed" << std::endl;

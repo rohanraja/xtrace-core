@@ -23,7 +23,6 @@ int main() {
   xtrace->LogLineRun(xtrace_mrid, 7);
   std::cout << "x is " << x << std::endl;
   xtrace->LogLineRun(xtrace_mrid, 8);
-  xtrace->FlushAllEventsToJSONFile();
   return 0;
 }
 "
@@ -49,12 +48,22 @@ exports[`Parse File Tests parse file: lambda.cc 1`] = `
 #include <iostream>
 #include <vector>
 
+// Function which takes in a lamda function
+void executeLambda(const std::function<void()> &lambda) {
+  blink::XTrace *xtrace = blink::XTrace::getInstance();
+  std::string xtrace_mrid =
+      xtrace->OnMethodEnter("lambda.cc", "executeLambda", "GUID_FROM_TEST");
+  xtrace->LocalVarUpdate(xtrace_mrid, "lambda", base::ToString(lambda));
+  xtrace->LogLineRun(xtrace_mrid, 6);
+  lambda();
+}
+
 int main() {
   // Define a lambda function that prints a message
   blink::XTrace *xtrace = blink::XTrace::getInstance();
   std::string xtrace_mrid =
       xtrace->OnMethodEnter("lambda.cc", "main", "GUID_FROM_TEST");
-  xtrace->LogLineRun(xtrace_mrid, 6);
+  xtrace->LogLineRun(xtrace_mrid, 11);
   auto printMessage = []() {
     std::cout << "Hello from the lambda function!" << std::endl;
   };
@@ -62,28 +71,43 @@ int main() {
                          base::ToString(printMessage));
 
   // Call the lambda function
-  xtrace->LogLineRun(xtrace_mrid, 11);
+  xtrace->LogLineRun(xtrace_mrid, 16);
   printMessage();
 
   // Define a vector of integers
-  xtrace->LogLineRun(xtrace_mrid, 14);
+  xtrace->LogLineRun(xtrace_mrid, 19);
   std::vector<int> numbers = {1, 2, 3, 4, 5};
   xtrace->LocalVarUpdate(xtrace_mrid, "numbers", base::ToString(numbers));
 
-  // Use a lambda function to print each number in the vector
-  xtrace->LogLineRun(xtrace_mrid, 17);
-  std::for_eacxtrace->LogLxtrace->LogLineRun(xtrace_mrid, 17);
-  ineRun(xtrace_mrid, 17);
-  h(numbers.begin(), numbers.end(), [](int number) {
-    xtrace->LogLineRun(xtrace_mrid, 18);
-    std::cout << "Number: " << number << std::endl;
+  xtrace->LogLineRun(xtrace_mrid, 21);
+  executeLambda([]() {
+    blink::XTrace *xtrace = blink::XTrace::getInstance();
+    std::string xtrace_mrid =
+        xtrace->OnMethodEnter("lambda.cc", "lambda", "GUID_FROM_TEST");
+    xtrace->LogLineRun(xtrace_mrid, 22);
+    std::cout << "Hello from the lambda function! INLINE" << std::endl;
   });
 
-  xtrace->LogLineRun(xtrace_mrid, 21);
-  xtrace->FlushAllEventsToJSONFile();
+  xtrace->LogLineRun(xtrace_mrid, 25);
   return 0;
 }
 "
 `;
 
-exports[`Parse File Tests parse file: lambda.cc 2`] = `undefined`;
+exports[`Parse File Tests parse file: lambda.cc 2`] = `
+"["ID_2","NEW_CODE_RUN_ID","[\\"/Start/0\\"]"]
+["ID_2","METHOD_ENTER","[\\"ID_3\\",\\"lambda.cc\\",\\"main\\",\\"dummy_threadId\\",\\"dummy_clrid\\",\\"GUID_FROM_TEST\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_3\\",\\"11\\",\\"0\\",\\"\\"]"]
+["ID_2","SEND_VAR_UPDATE","[\\"ID_3\\",\\"printMessage\\",\\"VALUE\\",\\"\\",\\"1\\",\\"1\\",\\"true\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_3\\",\\"16\\",\\"2\\",\\"\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_3\\",\\"19\\",\\"3\\",\\"\\"]"]
+["ID_2","SEND_VAR_UPDATE","[\\"ID_3\\",\\"numbers\\",\\"VALUE\\",\\"\\",\\"[24-byte object at 0x0x16db0de10]\\",\\"4\\",\\"true\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_3\\",\\"21\\",\\"5\\",\\"\\"]"]
+["ID_2","METHOD_ENTER","[\\"ID_4\\",\\"lambda.cc\\",\\"executeLambda\\",\\"dummy_threadId\\",\\"dummy_clrid\\",\\"GUID_FROM_TEST\\"]"]
+["ID_2","SEND_VAR_UPDATE","[\\"ID_4\\",\\"lambda\\",\\"VALUE\\",\\"\\",\\"[32-byte object at 0x0x16db0df40]\\",\\"6\\",\\"true\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_4\\",\\"6\\",\\"7\\",\\"\\"]"]
+["ID_2","METHOD_ENTER","[\\"ID_5\\",\\"lambda.cc\\",\\"lambda\\",\\"dummy_threadId\\",\\"dummy_clrid\\",\\"GUID_FROM_TEST\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_5\\",\\"22\\",\\"8\\",\\"\\"]"]
+["ID_2","LINE_EXEC","[\\"ID_3\\",\\"25\\",\\"9\\",\\"\\"]"]
+"
+`;

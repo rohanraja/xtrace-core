@@ -9,7 +9,6 @@ PaintLayerScrollableArea::FreezeScrollbarsRootScope::
       "~FreezeScrollbarsRootScope",
       "GUID_FROM_TEST");
   xtrace->LogLineRun(xtrace_mrid, 2);
-  xtrace->FlushAllEventsToJSONFile();
   if (scrollable_area_)
     scrollable_area_->ClearScrollbarRoot();
 }

@@ -46,8 +46,8 @@ describe('Parse File Tests', () => {
       // Run the binary
 
       const logs = runBinary(outputBinaryPath);
-
-      expect(logs).toMatchSnapshot();
+      const logsData = fs.readFileSync(logs, 'utf-8');
+      expect(logsData).toMatchSnapshot();
 
     });
   });
