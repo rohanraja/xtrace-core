@@ -1,6 +1,26 @@
-import { SyntaxNode } from 'tree-sitter';
+import { SyntaxNode, Tree } from 'tree-sitter';
 import { config, fileName, cvid, methodsToInclude, methodsToExclude, primitiveTypes } from './config';
 
+/**
+ * Interfaces and Types
+ */
+interface MethodInfo {
+    name: string;
+    params?: SyntaxNode;
+    shouldResetCodeRun: boolean;
+}
+
+interface AssignmentInfo {
+    identifier: string | null;
+    valueType: string | null;
+    isPointer: boolean;
+    isPrimitive: boolean;
+    primitiveType: string;
+}
+
+/**
+ * CodeLogger class for adding logging statements to C++ code
+ */
 export class CodeLogger {
     private modifiedSourceCode: string[];
 
@@ -8,6 +28,9 @@ export class CodeLogger {
         this.modifiedSourceCode = sourceCode.split('\n');
     }
 
+    /**
+     * Main method to add log lines to the source code
+     */
     addLogLines(tree: Tree): string {
         if (tree.rootNode.hasError) {
             console.error("Input code has syntax errors. Skipping injection");
@@ -15,75 +38,220 @@ export class CodeLogger {
 
         this.visit(tree.rootNode);
 
-        return "#include \"third_party/xtrace/xtrace.h\"\n" + "#include \"base/strings/to_string.h\"\n" + this.modifiedSourceCode.join('\n');
+        return this.getModifiedSourceWithIncludes();
     }
 
-    private visit(node: SyntaxNode) {
+    private getModifiedSourceWithIncludes(): string {
+        const includes = [
+            "#include \"third_party/xtrace/xtrace.h\"",
+            "#include \"base/strings/to_string.h\""
+        ];
+        return includes.join('\n') + '\n' + this.modifiedSourceCode.join('\n');
+    }
+
+    /**
+     * Tree traversal methods
+     */
+    private visit(node: SyntaxNode): void {
         if (node.type === "function_definition") {
             this.handleFunctionDefinition(node);
         }
         node.namedChildren.forEach(child => this.visit(child));
     }
 
-    private handleFunctionDefinition(node: SyntaxNode, isLambda = false) {
+    /**
+     * Function/Method processing
+     */
+    private handleFunctionDefinition(node: SyntaxNode, isLambda = false): void {
         const bodyNode: SyntaxNode = (node as any).bodyNode;
         let declaratorNode = (node as any).declaratorNode;
-        let methodName = this.findMethodName(declaratorNode);
+        
+        // Get method information
+        const methodInfo = this.extractMethodInfo(declaratorNode, isLambda);
+        
+        // Skip if method should not be processed
+        if (!this.shouldProcessMethod(methodInfo, bodyNode)) return;
 
-        if(isLambda){
-            methodName = "lambda";
-        }
+        // Process statements in the function body
+        const statements = this.getValidStatements(bodyNode);
+        this.processStatements(statements, methodInfo);
+    }
 
-        if (!methodName || !this.shouldIncludeMethod(methodName) || this.shouldExcludeMethod(methodName) || !bodyNode || !bodyNode.namedChildren) return;
+    private extractMethodInfo(declaratorNode: SyntaxNode, isLambda: boolean): MethodInfo {
+        const methodName = isLambda ? "lambda" : this.findMethodName(declaratorNode);
+        const shouldResetCodeRun = config.methods_which_split_run.some(
+            candidate => methodName.includes(candidate)
+        );
+        const params = this.findParameters(declaratorNode);
+        
+        return { name: methodName, params, shouldResetCodeRun };
+    }
 
-        let shouldResetCodeRun = config.methods_which_split_run.some(methodNameCandidate => methodName.includes(methodNameCandidate));
-        let params = this.findParameters(declaratorNode);
+    private shouldProcessMethod(methodInfo: MethodInfo, bodyNode?: SyntaxNode): boolean {
+        return !!(
+            methodInfo.name && 
+            this.shouldIncludeMethod(methodInfo.name) && 
+            !this.shouldExcludeMethod(methodInfo.name) && 
+            bodyNode && 
+            bodyNode.namedChildren
+        );
+    }
 
-        const statements = bodyNode.namedChildren.filter(x => this.isValidStatementType(x.type));
+    private getValidStatements(bodyNode: SyntaxNode): SyntaxNode[] {
+        return bodyNode.namedChildren.filter(x => this.isValidStatementType(x.type));
+    }
+
+    private processStatements(statements: SyntaxNode[], methodInfo: MethodInfo): void {
         statements.forEach((childNode: SyntaxNode, index: number) => {
-            this.addLogLine(childNode, index, statements.length, methodName, shouldResetCodeRun, params);
+            this.addLogLine(childNode, index, statements.length, methodInfo);
+            
             if (childNode.namedChildCount > 0) {
                 this.handleSyntaxNode(childNode);
             }
         });
     }
 
+    /**
+     * Node analysis methods
+     */
     private findMethodName(declaratorNode: SyntaxNode): string {
         let methodName = "";
-        const findD = (decNode: SyntaxNode) => {
+        
+        const findIdentifier = (decNode: SyntaxNode) => {
             if (!methodName && decNode.type.includes("identifier")) {
                 methodName = decNode.text.replaceAll("\n", "");
                 return;
             }
             for (const child of decNode.namedChildren) {
-                findD(child);
+                findIdentifier(child);
             }
         };
-        findD(declaratorNode);
+        
+        findIdentifier(declaratorNode);
         return methodName;
+    }
+
+    private findParameters(declaratorNode: SyntaxNode): SyntaxNode | undefined {
+        // Try to find direct parameter list
+        let params = declaratorNode.namedChildren.find(x => x.type === "parameter_list");
+        
+        // If not found, look inside function_declarator
+        if (!params) {
+            const functionDeclarator = declaratorNode.namedChildren.find(x => 
+                x.type === "function_declarator"
+            );
+            
+            if (functionDeclarator) {
+                params = functionDeclarator.namedChildren.find(x => 
+                    x.type === "parameter_list"
+                );
+            }
+        }
+        
+        return params;
     }
 
     private shouldIncludeMethod(methodName: string): boolean {
         if (methodsToInclude.length === 0) return true;
-        return methodsToInclude.some(methodNameCheck => methodName.includes(methodNameCheck));
+        return methodsToInclude.some(methodNameCheck => 
+            methodName.includes(methodNameCheck)
+        );
     }
 
     private shouldExcludeMethod(methodName: string): boolean {
-        return methodsToExclude.some(methodNameCheck => methodName.includes(methodNameCheck));
+        return methodsToExclude.some(methodNameCheck => 
+            methodName.includes(methodNameCheck)
+        );
     }
 
-    private findParameters(declaratorNode: SyntaxNode): SyntaxNode | undefined {
-        let params = declaratorNode.namedChildren.find(x => x.type === "parameter_list");
-        if (!params) {
-            declaratorNode = declaratorNode.namedChildren.find(x => x.type === "function_declarator");
-            if (declaratorNode) {
-                params = declaratorNode.namedChildren.find(x => x.type === "parameter_list");
+    private isValidStatementType(type: string): boolean {
+        return !type.includes("else") && 
+               !type.includes("case") && 
+               (type.includes("statement") || 
+                type.includes("declaration") || 
+                type.includes("definition") || 
+                type.includes("for_range_loop"));
+    }
+
+    /**
+     * Assignment handling
+     */
+    private extractAssignmentInfo(childNode: SyntaxNode): AssignmentInfo {
+        const assignmentStatement = childNode.namedChildren.filter((x) => 
+            x.type.includes("init_declarator") || 
+            x.type.includes("assignment_expression")
+        );
+        
+        let identifier = null;
+        let valueType = null;
+        let isPointer = false;
+        let isPrimitive = false;
+        let primitiveType = "";
+        
+        if (assignmentStatement.length > 0) {
+            assignmentStatement.forEach((param) => {
+                let identifierNode = param.namedChildren.find((x) => 
+                    x.type.includes("identifier")
+                );
+                
+                const valueTypeNode = param.namedChildren.find((x) => 
+                    x.type.includes("number_literal") || 
+                    x.type.includes("string_literal") || 
+                    x.type.includes("identifier")
+                );
+                
+                const pointerTypeNode = param.namedChildren.find((x) => 
+                    x.type.includes("pointer_declarator")
+                );
+                
+                if (pointerTypeNode) {
+                    identifierNode = pointerTypeNode.namedChildren.find((x) => 
+                        x.type.includes("identifier")
+                    );
+                    isPointer = true;
+                }
+                
+                identifier = identifierNode ? identifierNode.text : null;
+                valueType = valueTypeNode ? valueTypeNode.type : null;
+            });
+            
+            // Check if primitive type
+            if (valueType === "identifier") {
+                const primitiveTypeNode = childNode.namedChildren.find((x) => 
+                    x.type.includes("primitive_type")
+                );
+                
+                if (primitiveTypeNode) {
+                    isPrimitive = true;
+                } else if ((childNode as any).typeNode) {
+                    const typeStr = (childNode as any).typeNode.text;
+                    if (primitiveTypes.includes(typeStr.toLowerCase())) {
+                        isPrimitive = true;
+                        primitiveType = typeStr;
+                    }
+                }
             }
         }
-        return params;
+        
+        return { 
+            identifier, 
+            valueType, 
+            isPointer, 
+            isPrimitive, 
+            primitiveType 
+        };
     }
 
-    private addLogLine(childNode: SyntaxNode, index: number, totalStatements: number, methodName: string, shouldResetCodeRun: boolean, params: SyntaxNode | undefined) {
+    /**
+     * Code generation methods
+     */
+    private addLogLine(
+        childNode: SyntaxNode, 
+        index: number, 
+        totalStatements: number, 
+        methodInfo: MethodInfo
+    ): void {
+        const { name: methodName, shouldResetCodeRun, params } = methodInfo;
         const lineNumber = childNode.startPosition.row;
         const endLineNumber = childNode.endPosition.row;
         const columnNumber = childNode.startPosition.column;
@@ -91,153 +259,180 @@ export class CodeLogger {
         let lineData = "";
         let lineDataAfterExec = "";
 
+        // Generate method entry code for the first statement
         if (index === 0) {
-            lineData += `blink::XTrace *xtrace = blink::XTrace::getInstance(); `;
-            if (shouldResetCodeRun) {
-                lineData += `xtrace->ResetCodeRunId("${methodName}"); `;
-            }
-            lineData += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
+            lineData += this.generateMethodEntryCode(methodName, shouldResetCodeRun);
+            
+            // Add parameter logging if params exist
             if (params) {
-                params.namedChildren.forEach((param) => {
-                    let identifierStr = "";
-                    if(param.declaratorNode?.type == "identifier"){
-                        identifierStr = param.declaratorNode?.text;
-                    }else{
-                        identifierStr = param.declaratorNode?.namedChildren?.filter((x) => x.type.includes("identifier"))[0]?.text;
-                        
-                        // const pointerTypes= param.declaratorNode?.namedChildren?.filter((x) => x.type.includes("pointer_declarator"))[0];
-                        // if(pointerTypes){
-                        //     identifierStr = pointerTypes.namedChildren.filter((x) => x.type.includes("identifier"))[0]?.text;
-                        // }
-                    }
-                    const isPointerType = param.declaratorNode?.type == "pointer_declarator";
-                    const primitiveTypeNode = param.namedChildren.find((x) => x.type.includes("primitive_type"));
-                    let primitive_type = primitiveTypeNode ? primitiveTypeNode.text : null;
-
-                    if (!primitive_type) {
-                        const type_str = param.typeNode.text;
-                        if (primitiveTypes.includes(type_str.toLowerCase())) {
-                            primitive_type = type_str;
-                        }
-                    }
-
-                    if (identifierStr) {
-                        if (isPointerType) {
-                            lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}",  ${identifierStr} ? base::ToString(*${identifierStr}) : "");\n`;
-                        } else {
-                            lineData += `xtrace->LocalVarUpdate(xtrace_mrid,"${identifierStr}", base::ToString(${identifierStr}));\n`;
-                        }
-                    }
-                });
+                lineData += this.generateParameterLoggingCode(params);
             }
         }
 
-        const assignmentStatement = childNode.namedChildren.filter((x) => x.type.includes("init_declarator") || x.type.includes("assignment_expression"));
-        if (assignmentStatement && childNode.type != "for_statement") {
-            let identifiers, valueTypes, pointerTypes;
-            assignmentStatement.forEach((param) => {
-                identifiers = param.namedChildren.find((x) => x.type.includes("identifier"));
-                valueTypes = param.namedChildren.find((x) => x.type.includes("number_literal") || x.type.includes("string_literal") || x.type.includes("identifier"));
-                pointerTypes = param.namedChildren.find((x) => x.type.includes("pointer_declarator"));
-                if (pointerTypes) {
-                    identifiers = pointerTypes.namedChildren.find((x) => x.type.includes("identifier"));
-                }
-            });
-            let valueType = valueTypes ? valueTypes.type : null;
-            let identifier = identifiers ? identifiers.text : null;
-            let isPrimitive = false;
-            let primitive_type = "";
-            if (valueType === "identifier") {
-                const primitiveTypeNode = childNode.namedChildren.find((x) => x.type.includes("primitive_type"));
-                if (primitiveTypeNode) {
-                    isPrimitive = true;
-                } else if ((childNode as any).typeNode) {
-                    const type_str = (childNode as any).typeNode.text;
-                    if (primitiveTypes.includes(type_str.toLowerCase())) {
-                        isPrimitive = true;
-                        primitive_type = type_str;
-                    }
-                }
-            }
-
-            if (identifier) {
-                if (pointerTypes) {
-                    lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", ${identifier} ? base::ToString(*${identifier}) : "");\n`;
-                } else {
-                    lineDataAfterExec += `xtrace->LocalVarUpdate(xtrace_mrid, "${identifier}", base::ToString(${identifier}));\n`;
-                }
+        // Handle assignments and generate variable update code
+        if (childNode.type !== "for_statement") {
+            const assignmentInfo = this.extractAssignmentInfo(childNode);
+            if (assignmentInfo.identifier) {
+                lineDataAfterExec += this.generateVariableUpdateCode(
+                    assignmentInfo.identifier, 
+                    assignmentInfo.isPointer
+                );
             }
         }
 
-        lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `
+        // Add line run logging
+        lineData += this.generateLineRunCode(lineNumber);
 
-        // if (index === totalStatements - 1) {
-        //     lineData += `xtrace->FlushAllEventsToJSONFile(); `
-        // }
-
-        this.modifiedSourceCode[lineNumber] = this.modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + this.modifiedSourceCode[lineNumber].slice(columnNumber).trim();
-        this.modifiedSourceCode[endLineNumber] += lineDataAfterExec;
+        // Insert code into the source
+        this.modifiedSourceCode[lineNumber] = this.insertAtColumnPosition(
+            this.modifiedSourceCode[lineNumber],
+            columnNumber,
+            lineData
+        );
+        
+        if (lineDataAfterExec) {
+            this.modifiedSourceCode[endLineNumber] += lineDataAfterExec;
+        }
     }
 
-    private handleSyntaxNode(node: any) {
-        let statements = [];
+    private generateMethodEntryCode(methodName: string, shouldResetCodeRun: boolean): string {
+        let code = `blink::XTrace *xtrace = blink::XTrace::getInstance(); `;
+        
+        if (shouldResetCodeRun) {
+            code += `xtrace->ResetCodeRunId("${methodName}"); `;
+        }
+        
+        code += `std::string xtrace_mrid = xtrace->OnMethodEnter("${fileName}", "${methodName}", "${cvid}" );\n `;
+        return code;
+    }
 
-        switch (node.type) {
-            case "if_statement": {
-                statements = node.consequenceNode.namedChildren;
-                if (node.alternativeNode) {
-                    statements = statements.concat(node.alternativeNode);
-                }
-                break;
+    private generateParameterLoggingCode(params: SyntaxNode): string {
+        let code = "";
+        
+        params.namedChildren.forEach((param: any) => {
+            // Extract parameter identifier
+            let identifierStr = "";
+            if(param.declaratorNode?.type === "identifier") {
+                identifierStr = param.declaratorNode?.text;
+            } else {
+                const identifierNode = param.declaratorNode?.namedChildren?.find((x) => 
+                    x.type.includes("identifier")
+                );
+                identifierStr = identifierNode ? identifierNode.text : "";
             }
+            
+            const isPointerType = param.declaratorNode?.type === "pointer_declarator";
+            
+            if (identifierStr) {
+                code += this.generateVariableUpdateCode(identifierStr, isPointerType);
+            }
+        });
+        
+        return code;
+    }
+
+    private generateVariableUpdateCode(variableName: string, isPointer: boolean): string {
+        if (isPointer) {
+            return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", ${variableName} ? base::ToString(*${variableName}) : "");\n`;
+        } else {
+            return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", base::ToString(${variableName}));\n`;
+        }
+    }
+
+    private generateLineRunCode(lineNumber: number): string {
+        return `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `;
+    }
+
+    private insertAtColumnPosition(line: string, column: number, text: string): string {
+        return line.slice(0, column) + text + line.slice(column).trim();
+    }
+
+    /**
+     * Syntax node handling
+     */
+    private handleSyntaxNode(node: any): void {
+        let statements: SyntaxNode[] = [];
+        
+        switch (node.type) {
+            case "if_statement": 
+                this.handleIfStatement(node);
+                break;
+                
             case "switch_statement":
             case "for_statement":
             case "while_statement":
-            case "for_range_loop": {
-                statements = node.bodyNode.namedChildren;
+            case "for_range_loop": 
+                this.handleLoopOrSwitchStatement(node);
                 break;
-            }
-            case "lambda_expression": {
+                
+            case "lambda_expression": 
                 this.handleFunctionDefinition(node, true);
                 return;
-            }
-            case "else_clause": {
-                if (node.namedChildren[0].type.includes("compound")) {
-                    statements = node.namedChildren[0].namedChildren;
-                } else if (node.namedChildren[0].type.includes("if")) {
-                    node = node.namedChildren[0];
-                    statements = node.consequenceNode.namedChildren;
-                    if (node.alternativeNode) {
-                        statements = statements.concat(node.alternativeNode);
-                    }
-                } else {
-                    statements = node.namedChildren;
-                }
+                
+            case "else_clause": 
+                this.handleElseClause(node);
                 break;
-            }
-            case "declaration": {
+                
+            case "declaration": 
+                // Special handling for declarations if needed
                 break;
-            }
-            default: {
-                statements = node.namedChildren;
+                
+            default: 
+                this.handleGenericNode(node);
                 break;
-            }
         }
-        statements.forEach((childNode: SyntaxNode, index: number) => {
+    }
+
+    private handleIfStatement(node: any): void {
+        const statements = node.consequenceNode.namedChildren;
+        this.processNodeStatements(statements);
+        
+        if (node.alternativeNode) {
+            this.processNodeStatements([node.alternativeNode]);
+        }
+    }
+
+    private handleLoopOrSwitchStatement(node: any): void {
+        if (node.bodyNode && node.bodyNode.namedChildren) {
+            this.processNodeStatements(node.bodyNode.namedChildren);
+        }
+    }
+
+    private handleElseClause(node: any): void {
+        if (!node.namedChildren || node.namedChildren.length === 0) return;
+        
+        if (node.namedChildren[0].type.includes("compound")) {
+            this.processNodeStatements(node.namedChildren[0].namedChildren);
+        } else if (node.namedChildren[0].type.includes("if")) {
+            this.handleIfStatement(node.namedChildren[0]);
+        } else {
+            this.processNodeStatements(node.namedChildren);
+        }
+    }
+
+    private handleGenericNode(node: any): void {
+        if (node.namedChildren) {
+            this.processNodeStatements(node.namedChildren);
+        }
+    }
+
+    private processNodeStatements(statements: SyntaxNode[]): void {
+        statements.forEach((childNode: SyntaxNode) => {
             if (this.isValidStatementType(childNode.type)) {
                 const lineNumber = childNode.startPosition.row;
                 const columnNumber = childNode.startPosition.column;
-                let lineData = "";
-                lineData += `xtrace->LogLineRun(xtrace_mrid, ${lineNumber}); `;
-                this.modifiedSourceCode[lineNumber] = this.modifiedSourceCode[lineNumber].slice(0, columnNumber) + lineData + this.modifiedSourceCode[lineNumber].slice(columnNumber).trim();
+                
+                const lineData = this.generateLineRunCode(lineNumber);
+                this.modifiedSourceCode[lineNumber] = this.insertAtColumnPosition(
+                    this.modifiedSourceCode[lineNumber], 
+                    columnNumber, 
+                    lineData
+                );
             }
+            
             if (childNode.namedChildCount > 0) {
                 this.handleSyntaxNode(childNode);
             }
         });
-    }
-
-    private isValidStatementType(type: string) {
-        return !type.includes("else") && !type.includes("case") && (type.includes("statement") || type.includes("declaration") || type.includes("definition") || type.includes("for_range_loop"));
     }
 }
