@@ -74,7 +74,7 @@ export class CodeLogger {
 
         // Process statements in the function body
         const statements = this.getValidStatements(bodyNode);
-        this.processStatements(statements, methodInfo);
+        this.processNodes(statements, methodInfo, true);
     }
 
     private extractMethodInfo(declaratorNode: SyntaxNode, isLambda: boolean): MethodInfo {
@@ -101,9 +101,18 @@ export class CodeLogger {
         return bodyNode.namedChildren.filter(x => this.isValidStatementType(x.type));
     }
 
-    private processStatements(statements: SyntaxNode[], methodInfo: MethodInfo): void {
+    /**
+     * Unified statement processing methods
+     */
+    private processNodes(
+        statements: SyntaxNode[], 
+        methodInfo?: MethodInfo, 
+        isTopLevelFunction: boolean = false
+    ): void {
         statements.forEach((childNode: SyntaxNode, index: number) => {
-            this.addLogLine(childNode, index, statements.length, methodInfo);
+            if (this.isValidStatementType(childNode.type)) {
+                this.insertLoggingCode(childNode, index, statements.length, methodInfo, isTopLevelFunction);
+            }
             
             if (childNode.namedChildCount > 0) {
                 this.handleSyntaxNode(childNode);
@@ -245,13 +254,13 @@ export class CodeLogger {
     /**
      * Code generation methods
      */
-    private addLogLine(
+    private insertLoggingCode(
         childNode: SyntaxNode, 
         index: number, 
         totalStatements: number, 
-        methodInfo: MethodInfo
+        methodInfo?: MethodInfo,
+        isTopLevelFunction: boolean = false
     ): void {
-        const { name: methodName, shouldResetCodeRun, params } = methodInfo;
         const lineNumber = childNode.startPosition.row;
         const endLineNumber = childNode.endPosition.row;
         const columnNumber = childNode.startPosition.column;
@@ -259,18 +268,21 @@ export class CodeLogger {
         let lineData = "";
         let lineDataAfterExec = "";
 
-        // Generate method entry code for the first statement
-        if (index === 0) {
-            lineData += this.generateMethodEntryCode(methodName, shouldResetCodeRun);
+        // Method entry code (only for first statement in top-level functions)
+        if (isTopLevelFunction && index === 0 && methodInfo) {
+            lineData += this.generateMethodEntryCode(methodInfo.name, methodInfo.shouldResetCodeRun);
             
             // Add parameter logging if params exist
-            if (params) {
-                lineData += this.generateParameterLoggingCode(params);
+            if (methodInfo.params) {
+                lineData += this.generateParameterLoggingCode(methodInfo.params);
             }
         }
 
-        // Handle assignments and generate variable update code
-        if (childNode.type !== "for_statement") {
+        // For all statements - add line run logging
+        lineData += this.generateLineRunCode(lineNumber);
+
+        // Handle variable tracking (for methods with methodInfo and non-for statements)
+        if (methodInfo && childNode.type !== "for_statement") {
             const assignmentInfo = this.extractAssignmentInfo(childNode);
             if (assignmentInfo.identifier) {
                 lineDataAfterExec += this.generateVariableUpdateCode(
@@ -279,9 +291,6 @@ export class CodeLogger {
                 );
             }
         }
-
-        // Add line run logging
-        lineData += this.generateLineRunCode(lineNumber);
 
         // Insert code into the source
         this.modifiedSourceCode[lineNumber] = this.insertAtColumnPosition(
@@ -385,16 +394,16 @@ export class CodeLogger {
 
     private handleIfStatement(node: any): void {
         const statements = node.consequenceNode.namedChildren;
-        this.processNodeStatements(statements);
+        this.processNodes(statements);
         
         if (node.alternativeNode) {
-            this.processNodeStatements([node.alternativeNode]);
+            this.processNodes([node.alternativeNode]);
         }
     }
 
     private handleLoopOrSwitchStatement(node: any): void {
         if (node.bodyNode && node.bodyNode.namedChildren) {
-            this.processNodeStatements(node.bodyNode.namedChildren);
+            this.processNodes(node.bodyNode.namedChildren);
         }
     }
 
@@ -402,37 +411,17 @@ export class CodeLogger {
         if (!node.namedChildren || node.namedChildren.length === 0) return;
         
         if (node.namedChildren[0].type.includes("compound")) {
-            this.processNodeStatements(node.namedChildren[0].namedChildren);
+            this.processNodes(node.namedChildren[0].namedChildren);
         } else if (node.namedChildren[0].type.includes("if")) {
             this.handleIfStatement(node.namedChildren[0]);
         } else {
-            this.processNodeStatements(node.namedChildren);
+            this.processNodes(node.namedChildren);
         }
     }
 
     private handleGenericNode(node: any): void {
         if (node.namedChildren) {
-            this.processNodeStatements(node.namedChildren);
+            this.processNodes(node.namedChildren);
         }
-    }
-
-    private processNodeStatements(statements: SyntaxNode[]): void {
-        statements.forEach((childNode: SyntaxNode) => {
-            if (this.isValidStatementType(childNode.type)) {
-                const lineNumber = childNode.startPosition.row;
-                const columnNumber = childNode.startPosition.column;
-                
-                const lineData = this.generateLineRunCode(lineNumber);
-                this.modifiedSourceCode[lineNumber] = this.insertAtColumnPosition(
-                    this.modifiedSourceCode[lineNumber], 
-                    columnNumber, 
-                    lineData
-                );
-            }
-            
-            if (childNode.namedChildCount > 0) {
-                this.handleSyntaxNode(childNode);
-            }
-        });
     }
 }
