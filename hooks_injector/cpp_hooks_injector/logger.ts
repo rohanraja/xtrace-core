@@ -19,6 +19,14 @@ interface AssignmentInfo {
 }
 
 /**
+ * Extracted to a separate interface to reuse when analyzing identifiers
+ */
+interface IdentifierInfo {
+    name: string;
+    isPointer: boolean;
+}
+
+/**
  * CodeLogger class for adding logging statements to C++ code
  */
 export class CodeLogger {
@@ -183,6 +191,121 @@ export class CodeLogger {
     }
 
     /**
+     * Common utility methods for node analysis
+     */
+    private extractIdentifierInfo(node: SyntaxNode, isParameter: boolean = false): IdentifierInfo | null {
+        // For parameters, we need special handling
+        if (isParameter) {
+            // Check for pointer type in parameter type
+            const isPointer = this.isPointerParameter(node);
+            
+            // Extract name from parameter node structure
+            let name = "";
+            if (node.declaratorNode) {
+                name = this.extractParameterName(node.declaratorNode);
+            }
+            
+            if (name) {
+                return { name, isPointer };
+            }
+        }
+        
+        // Standard identifier extraction for non-parameters
+        // Check if node is identifier itself
+        if (node.type === "identifier") {
+            return {
+                name: node.text,
+                isPointer: false
+            };
+        }
+        
+        // Look for pointer declarator first
+        const pointerTypeNode = node.namedChildren.find(x => x.type.includes("pointer_declarator"));
+        if (pointerTypeNode) {
+            const identifierNode = pointerTypeNode.namedChildren.find(x => x.type.includes("identifier"));
+            if (identifierNode) {
+                return {
+                    name: identifierNode.text,
+                    isPointer: true
+                };
+            }
+        }
+        
+        // Look for direct identifier
+        const identifierNode = node.namedChildren.find(x => x.type.includes("identifier"));
+        if (identifierNode) {
+            return {
+                name: identifierNode.text,
+                isPointer: false
+            };
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if a parameter is a pointer type
+     */
+    private isPointerParameter(param: any): boolean {
+        // Check if the parameter has a pointer_declarator
+        if (param.declaratorNode && param.declaratorNode.type === "pointer_declarator") {
+            return true;
+        }
+        
+        // Check nested declarator for pointer type
+        if (param.declaratorNode && param.declaratorNode.namedChildren) {
+            return param.declaratorNode.namedChildren.some(
+                (child: SyntaxNode) => child.type === "pointer_declarator"
+            );
+        }
+        
+        // Check if parameter has pointer in the type
+        if (param.typeNode && param.typeNode.text.includes("*")) {
+            return true;
+        }
+        
+        // Check for abstract declarator with pointer
+        const abstractDeclarator = param.namedChildren?.find(
+            (x: SyntaxNode) => x.type === "abstract_pointer_declarator"
+        );
+        if (abstractDeclarator) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Extract name from parameter declarator node
+     */
+    private extractParameterName(declaratorNode: SyntaxNode): string {
+        // Direct identifier
+        if (declaratorNode.type === "identifier") {
+            return declaratorNode.text;
+        }
+        
+        // Identifier in pointer declarator
+        if (declaratorNode.type === "pointer_declarator") {
+            const nestedIdentifier = declaratorNode.namedChildren.find(
+                (child: SyntaxNode) => child.type === "identifier"
+            );
+            if (nestedIdentifier) {
+                return nestedIdentifier.text;
+            }
+        }
+        
+        // Recursively search for an identifier in children
+        for (const child of declaratorNode.namedChildren) {
+            const name = this.extractParameterName(child);
+            if (name) {
+                return name;
+            }
+        }
+        
+        return "";
+    }
+
+    /**
      * Assignment handling
      */
     private extractAssignmentInfo(childNode: SyntaxNode): AssignmentInfo {
@@ -199,9 +322,11 @@ export class CodeLogger {
         
         if (assignmentStatement.length > 0) {
             assignmentStatement.forEach((param) => {
-                let identifierNode = param.namedChildren.find((x) => 
-                    x.type.includes("identifier")
-                );
+                const identifierInfo = this.extractIdentifierInfo(param);
+                if (identifierInfo) {
+                    identifier = identifierInfo.name;
+                    isPointer = identifierInfo.isPointer;
+                }
                 
                 const valueTypeNode = param.namedChildren.find((x) => 
                     x.type.includes("number_literal") || 
@@ -209,18 +334,6 @@ export class CodeLogger {
                     x.type.includes("identifier")
                 );
                 
-                const pointerTypeNode = param.namedChildren.find((x) => 
-                    x.type.includes("pointer_declarator")
-                );
-                
-                if (pointerTypeNode) {
-                    identifierNode = pointerTypeNode.namedChildren.find((x) => 
-                        x.type.includes("identifier")
-                    );
-                    isPointer = true;
-                }
-                
-                identifier = identifierNode ? identifierNode.text : null;
                 valueType = valueTypeNode ? valueTypeNode.type : null;
             });
             
@@ -278,7 +391,7 @@ export class CodeLogger {
             }
         }
 
-        // For all statements - add line run logging
+        // Add line run logging
         lineData += this.generateLineRunCode(lineNumber);
 
         // Handle variable tracking (for methods with methodInfo and non-for statements)
@@ -319,21 +432,11 @@ export class CodeLogger {
         let code = "";
         
         params.namedChildren.forEach((param: any) => {
-            // Extract parameter identifier
-            let identifierStr = "";
-            if(param.declaratorNode?.type === "identifier") {
-                identifierStr = param.declaratorNode?.text;
-            } else {
-                const identifierNode = param.declaratorNode?.namedChildren?.find((x) => 
-                    x.type.includes("identifier")
-                );
-                identifierStr = identifierNode ? identifierNode.text : "";
-            }
+            // Use the enhanced method with isParameter flag set to true
+            const identifierInfo = this.extractIdentifierInfo(param, true);
             
-            const isPointerType = param.declaratorNode?.type === "pointer_declarator";
-            
-            if (identifierStr) {
-                code += this.generateVariableUpdateCode(identifierStr, isPointerType);
+            if (identifierInfo && identifierInfo.name) {
+                code += this.generateVariableUpdateCode(identifierInfo.name, identifierInfo.isPointer);
             }
         });
         
