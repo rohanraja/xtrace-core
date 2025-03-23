@@ -5,12 +5,9 @@ const JSON5 = require('json5');
 const { compileFile, runBinary, copyXTraceFolder } = require("../hooks_injector/testing/snapshot-tester/compile");
 const { parseFileToHookedFolder, buildParser } = require('../hooks_injector/testing/snapshot-tester/parse-file');
 const { getBinaryLogFilePath, getOutputBinaryPath } = require('../utils/paths');
+const { codeOpen } = require('../common/utils/vscode_utils.js');
+const { openUrl } = require('../common/utils/web_utils.js');
 
-var start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
-
-const open = (url) => {
-    exec(`${start} ${url}`);
-};
 
 
 global.hook_and_run_file = (params) => {
@@ -90,7 +87,7 @@ global.open_last_recording = (params) => {
     const url = fs.readFileSync('tmp/last_recording_url', 'utf-8');
     console.log(`Opening last recording: ${url}`);
     // Open url in browser
-    open(url);
+    openUrl(url);
 }
 function removeUntilFirstBrace(str) {
     const index = str.indexOf('{');
@@ -172,18 +169,6 @@ global.create_config_from_cl = async (params) => {
 
 // Utilities
 
-
-
-function codeOpen(fileName){
-    // exec command to open file in vscode
-    exec(`code ${fileName}`, (err, stdout, stderr) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        console.log(stdout);
-    });
-}
 
 function runAction(actionName, parameterList) {
     if (typeof global[actionName] === 'function') {

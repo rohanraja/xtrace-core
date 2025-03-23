@@ -8,9 +8,9 @@ function killAllProcessWithName(processName) {
     if (osName === 'win32') {
         command = `taskkill /F /IM ${processName}`;
     } else if (osName === 'darwin') {
-        command = `pkill -f ${processName}`;
+        command = `pkill -f '${processName}'`;
     } else {
-        command = `pkill -f ${processName}`;
+        command = `pkill -f '${processName}'`;
     }
     try {
         execSync(command);

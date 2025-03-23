@@ -9,7 +9,7 @@ with the filepath as argument and returns the output of the hooks_injector
 */
 function parseFile(filePath) {
 
-    const fileNameOnly = filePath.split("/").pop();
+    const fileNameOnly = path.basename(filePath);
 
     const output = execSync(
         `node dist/out.js ${filePath}`, {

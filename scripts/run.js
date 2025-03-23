@@ -55,7 +55,7 @@ async function main(){
     }
 
     // get filename from path
-    const fileNameOnly = filePath.split("/")[filePath.split("/").length-1];
+    const fileNameOnly = path.basename(filePath);
 
     const fileSafeName = fileNameOnly
 
