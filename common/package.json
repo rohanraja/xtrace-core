@@ -1,18 +1,15 @@
 {
-  "name": "scripts",
+  "name": "common",
   "version": "1.0.0",
-  "description": "",
-  "main": "input.js",
+  "description": "Commons common functions and utility methods that could be used even outside this project",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.8.4",
-    "dotenv": "^16.4.7",
-    "form-data": "^4.0.0",
-    "json5": "^2.2.3"
+    "form-data": "^4.0.2"
   }
 }

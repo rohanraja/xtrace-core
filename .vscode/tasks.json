@@ -226,7 +226,7 @@
 			],
 		},
 		{
-			"label": "Logs.Open last run",
+			"label": "Logs.LastRun.Open",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -235,7 +235,7 @@
 			],
 		},
 		{
-			"label": "Open active run config file",
+			"label": "Config.Active.Open",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -244,7 +244,7 @@
 			],
 		},
 		{
-			"label": "Recording.Open last run",
+			"label": "Recording.LastRun.Open",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -253,7 +253,7 @@
 			],
 		},
 		{
-			"label": "Code.Open whitelist files",
+			"label": "Code.Hooked.WhitelistFiles.Open",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -262,7 +262,7 @@
 			],
 		},
 		{
-			"label": "Code.Open src dir",
+			"label": "Code.Hooked.SrcDir.Open",
 			"type": "shell",
 			"command": "node",
 			"args": [
@@ -277,6 +277,7 @@
 			"args": [
 				"./scripts/ui.js",
 				"create_config_from_cl",
+				"${input:clNumber}"
 			],
 		},
 		{
@@ -326,6 +327,11 @@
 	],
 	"inputs": [
 		{
+			"id": "clNumber",
+			"type": "promptString",
+			"description": "Enter the CL number"
+		},
+		{
 			"id": "cppFileName",
 			"type": "promptString",
 			"description": "Enter the name of the C++ file (without extension)"
@@ -351,6 +357,7 @@
                 "run-web-test",
                 "run-chrome",
                 "upload-recording",
+				"autogn-configure"
             ]
         }
 	]

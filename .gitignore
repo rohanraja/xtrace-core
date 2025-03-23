@@ -9,6 +9,7 @@ first_party
 tests/current
 node_modules
 logs/*.log
+logs/*.md
 run_configs
 config/.env
 

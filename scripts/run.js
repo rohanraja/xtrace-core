@@ -1,4 +1,4 @@
-const run = require('./utils.js').run;
+const { run } = require('../common/utils/process_utils.js');
 const path = require('path');
 const fs = require('fs');
 const { envPath } = require('../utils/paths.js');
@@ -41,11 +41,11 @@ async function main(){
 
     // Find the next serial number for the log file
     while(fs.existsSync(logFolder +
-        fileSafeName + `_${sno}`  + ".log")){
+        fileSafeName + `_${sno}`  + ".md")){
         sno++;
     }
 
-    const logFile = logFolder + fileSafeName + `_${sno}`  + ".log";
+    const logFile = logFolder + fileSafeName + `_${sno}`  + ".md";
 
     // Copy log filename to tmp/last_log_file
     fs.writeFileSync(path.join('tmp/last_log_file'), logFile);
@@ -56,7 +56,7 @@ async function main(){
     };
 
     // Write starting date, time to log file
-    fs.appendFileSync(logFile, "Starting new run at :" + date + "\n");
+    fs.appendFileSync(logFile, "## Starting new run at :" + date + "\n");
 
     let outPut = "";
     try{
@@ -71,13 +71,7 @@ async function main(){
     const timeTaken = endTime - startTime;
     const timeTakenInMinutes = timeTaken / 60000;
     console.log(`Time taken: ${timeTakenInMinutes} minutes`);
-    fs.appendFileSync(logFile, `Time taken: ${timeTakenInMinutes} minutes`);
-
-    // Copy logFile to tmp/lastRun.log
-    fs.copyFileSync(logFile, path.join(__dirname, '..', 'tmp/lastRun.log'));
-
-    // Write output to log file
-    // fs.writeFileSync(logFile + "/" + date + ".log", outPut);
+    fs.appendFileSync(logFile, `## Time taken: ${timeTakenInMinutes} minutes`);
 }
 
 main();

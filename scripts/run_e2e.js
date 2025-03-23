@@ -10,12 +10,11 @@ Input:
 
 const path = require('path');
 const fs = require('fs');
-const run = require('./utils.js').run;
-const uploadFile = require('./utils.js').uploadFile;
+const uploadFile = require('../common/utils/web_utils.js').uploadFile;
 const runStepWithFilter = require('./utils.js').runStep;
 const JSON5 = require('json5');
 const { convertFileToJsonArray } = require('./json_utils.js');
-const { killAllProcessWithName } = require('../common/utils/process_utils.js');
+const { killAllProcessWithName, run } = require('../common/utils/process_utils.js');
 const { chromeProcessImageName, contentShellProcessImageName } = require('../clients/chromium/utils/path_utils.js');
 
 async function main() {
@@ -31,7 +30,7 @@ async function main() {
 
   const config = JSON5.parse(json_config);
 
-  console.log("Running with config: ", JSON.stringify(config, null, 2));
+  console.log("### Running with config: ", JSON.stringify(config, null, 2));
 
   let run_filter = config.run_filter;
 
@@ -52,7 +51,10 @@ async function main() {
   // 0.1 Setup paths
   const isWin = process.platform === "win32";
   const cr_src_folder = path.join(test_input.cr_path, "src");
-  const cr_debug_folder = path.join(cr_src_folder, "out", test_input.debug_folder_name);
+
+  const buildFolderName = `${test_input.build_type}_${test_input.build_arch}`;
+
+  const cr_debug_folder = path.join(cr_src_folder, "out", test_input.debug_folder_name || buildFolderName);
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
   const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
@@ -108,10 +110,16 @@ async function main() {
   await runStep("cl-fetch", async () => {
     const cl = test_input.cl;
     const patchSet = test_input.patch_set;
+    const branch = test_input.branch;
+    // If no cl or patch set, just return
+    if(!cl && !patchSet && !branch){
+      return;
+    }
+
+    const currentBranch = await runInEnv(`git rev-parse --abbrev-ref HEAD`, cr_src_folder);
     if(cl && patchSet){ 
 
       const targetBranch = `change-${cl}-${patchSet}`;
-      const currentBranch = await runInEnv(`git rev-parse --abbrev-ref HEAD`, cr_src_folder);
       console.log("Current branch: ", currentBranch);
       if(currentBranch.includes(targetBranch)){
         console.log("Already on branch: ", targetBranch);
@@ -125,6 +133,15 @@ async function main() {
         branchChanged = true;
       }
 
+    } else if(branch){
+      if(currentBranch == branch){
+        return;
+      }
+
+      console.log("Fetching and checking out branch: ", branch);
+      await runInEnv(`git fetch origin main`, cr_src_folder);
+      await runInEnv(`git checkout -b ${branch} origin/main`, cr_src_folder);
+      branchChanged = true;
     }
   });
 
@@ -134,6 +151,20 @@ async function main() {
       await runInEnv(`gclient sync -fD`, cr_src_folder);
     }else{
       console.log("Branch not changed, skipping gclient sync");
+    }
+  });
+
+  await runStep("autogn-configure", async () => {
+    if(test_input.regenerateBuildFolder){
+      console.log("Running autogn");
+      if(fs.existsSync(cr_debug_folder)){
+        // Delete the build folder if it exists
+        console.log(`Deleting build folder: ${cr_debug_folder}`);
+        fs.rmSync(cr_debug_folder, { recursive: true, force: true });
+      }
+      await runInEnv(`autogn ${test_input.build_arch} ${test_input.build_type}`, cr_src_folder);
+    }else{
+      console.log("Regenerate build folder not set, skipping autogn");
     }
   });
 
