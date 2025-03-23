@@ -6,6 +6,8 @@ import { CodeLogger } from './logger';
 import { CodeFormatter } from './formatter';
 import Parser, { SyntaxNode, Tree } from 'tree-sitter';
 
+require('dotenv').config({ path: "../../config/.env", override: true });
+
 // Read source code from file or stdin
 let sourceCode = "";
 if (process.argv.length > 2) {

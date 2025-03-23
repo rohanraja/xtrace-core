@@ -1,32 +1,12 @@
 const run = require('./utils.js').run;
 const path = require('path');
 const fs = require('fs');
-const JSON5 = require('json5');
-// Wrapper around "run_e2e.js" to captures the output in a log file
-
-const config_path = path.join(__dirname, '..', 'runs', 'config.json');
-
-// Load config_path json and apply to process.env
-let config = {};
-if(fs.existsSync(config_path)){
-    try{
-        config = JSON5.parse(fs.readFileSync(config_path, 'utf-8'));
-    }catch(e){
-        console.log(`Error while reading config file ${config_path} ${e}`);
-    }
-}
-if(config){
-    for (const [key, value] of Object.entries(config)) {
-        if(key in process.env){
-            console.log(`Overriding env variable ${key} with value ${value}`);
-        }
-        process.env[key] = value;
-    }
-    console.log(`Loaded config from ${config_path}`);
-}
+const { envPath } = require('../utils/paths.js');
+require('dotenv').config({ path: envPath });
 
 let sno = 0;
 
+// Wrapper around "run_e2e.js" to captures the output in a log file
 async function main(){
 
     // Start time for perf

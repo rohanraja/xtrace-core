@@ -2,6 +2,8 @@ const path = require('path');
 
 const repoRoot = path.join(__dirname, '..');
 
+// Config paths
+const envPath = path.join(repoRoot, 'config', '.env');
 
 // Tests paths
 const snapshotTesterPath = path.join(repoRoot, "hooks_injector", "testing", "snapshot-tester");
@@ -36,5 +38,6 @@ module.exports = {
     repoRoot,
     cppHookInjectorPath,
     xTracePath,
-    baseFolderForXTrace
+    baseFolderForXTrace,
+    envPath,
 };
