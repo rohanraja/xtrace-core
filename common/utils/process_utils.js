@@ -1,7 +1,6 @@
 const { execSync } = require('child_process');
 const { spawn } = require('child_process');
 
-
 async function run(command, cwd_p, env, onOutput) {
   const cwd = cwd_p || process.cwd();
   const [cmd, ...args] = command.split(' ');

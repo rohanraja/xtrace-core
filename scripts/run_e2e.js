@@ -12,6 +12,7 @@ const path = require('path');
 const fs = require('fs');
 const uploadFile = require('../common/utils/web_utils.js').uploadFile;
 const runStepWithFilter = require('./utils.js').runStep;
+const { ChromeBuildScripts } = require('../clients/chromium/utils/chrome_build_scripts.js');
 const JSON5 = require('json5');
 const { convertFileToJsonArray } = require('./json_utils.js');
 const { killAllProcessWithName, run } = require('../common/utils/process_utils.js');
@@ -47,6 +48,16 @@ async function main() {
   const code_run_name_prefix = `${username}/${config.name}/${sno}`;
 
   const test_input = config;
+
+  // ChromeBuildConfig
+  const chromeBuildConfig = {
+    name: config.name,
+    build_arch: config.build_arch,
+    build_type: config.build_type,
+    cr_path: config.cr_path,
+  };
+
+  const chromeBuildScript = new ChromeBuildScripts(chromeBuildConfig);
 
   // 0.1 Setup paths
   const isWin = process.platform === "win32";
@@ -202,21 +213,15 @@ async function main() {
   // TODO - Check if build failed then exit
   await runStep("build-webtest", async () => {
     if(!run_chrome){
-      try{
-        killAllProcessWithName(contentShellProcessImageName());
-      }catch(e){
-        console.log("No content_shell running");
-      }
-
-      console.log("Building content_shell");
-      await runInEnv(`autoninja content_shell`, cr_debug_folder);
+      return chromeBuildScript.buildContentShell();
     }
   });
 
   await runStep("build-chrome", async () => {
     if(run_chrome){
-
       console.log("Building chrome");
+
+      return chromeBuildScript.buildChrome();
 
       // Close any running process
       try{
