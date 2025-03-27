@@ -125,7 +125,7 @@ export class CodeLogger {
             }
             
             if (childNode.namedChildCount > 0) {
-                this.handleSyntaxNode(childNode);
+                this.handleSyntaxNode(childNode, methodInfo);
             }
         });
     }
@@ -561,19 +561,19 @@ export class CodeLogger {
     /**
      * Syntax node handling
      */
-    private handleSyntaxNode(node: any): void {
+    private handleSyntaxNode(node: any, methodInfo?: MethodInfo): void {
         let statements: SyntaxNode[] = [];
         
         switch (node.type) {
             case "if_statement": 
-                this.handleIfStatement(node);
+                this.handleIfStatement(node, methodInfo);
                 break;
                 
             case "switch_statement":
             case "for_statement":
             case "while_statement":
             case "for_range_loop": 
-                this.handleLoopOrSwitchStatement(node);
+                this.handleLoopOrSwitchStatement(node, methodInfo);
                 break;
                 
             case "lambda_expression": 
@@ -581,7 +581,7 @@ export class CodeLogger {
                 return;
                 
             case "else_clause": 
-                this.handleElseClause(node);
+                this.handleElseClause(node, methodInfo);
                 break;
                 
             case "declaration": 
@@ -589,41 +589,41 @@ export class CodeLogger {
                 break;
                 
             default: 
-                this.handleGenericNode(node);
+                this.handleGenericNode(node, methodInfo);
                 break;
         }
     }
 
-    private handleIfStatement(node: any): void {
+    private handleIfStatement(node: any, methodInfo?: MethodInfo): void {
         const statements = node.consequenceNode.namedChildren;
-        this.processNodes(statements);
+        this.processNodes(statements, methodInfo);
         
         if (node.alternativeNode) {
-            this.processNodes([node.alternativeNode]);
+            this.processNodes([node.alternativeNode], methodInfo);
         }
     }
 
-    private handleLoopOrSwitchStatement(node: any): void {
+    private handleLoopOrSwitchStatement(node: any, methodInfo?: MethodInfo): void {
         if (node.bodyNode && node.bodyNode.namedChildren) {
-            this.processNodes(node.bodyNode.namedChildren);
+            this.processNodes(node.bodyNode.namedChildren, methodInfo);
         }
     }
 
-    private handleElseClause(node: any): void {
+    private handleElseClause(node: any, methodInfo?: MethodInfo): void {
         if (!node.namedChildren || node.namedChildren.length === 0) return;
         
         if (node.namedChildren[0].type.includes("compound")) {
-            this.processNodes(node.namedChildren[0].namedChildren);
+            this.processNodes(node.namedChildren[0].namedChildren, methodInfo);
         } else if (node.namedChildren[0].type.includes("if")) {
-            this.handleIfStatement(node.namedChildren[0]);
+            this.handleIfStatement(node.namedChildren[0], methodInfo);
         } else {
-            this.processNodes(node.namedChildren);
+            this.processNodes(node.namedChildren, methodInfo);
         }
     }
 
-    private handleGenericNode(node: any): void {
+    private handleGenericNode(node: any, methodInfo?: MethodInfo): void {
         if (node.namedChildren) {
-            this.processNodes(node.namedChildren);
+            this.processNodes(node.namedChildren, methodInfo);
         }
     }
 }

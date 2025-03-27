@@ -350,10 +350,16 @@ AdjustSelectionByUserSelect(Node *anchor_node,
        !iter.AtStart(); iter.Decrement()) {
     xtrace->LogLineRun(xtrace_mrid, 207);
     PositionInFlatTree current_pos = iter.ComputePosition();
+    xtrace->LocalVarUpdate(xtrace_mrid, "current_pos",
+                           base::ToString(current_pos));
+
     xtrace->LogLineRun(xtrace_mrid, 208);
     if (current_pos <= anchor) {
       xtrace->LogLineRun(xtrace_mrid, 209);
       new_start_pos = anchor;
+      xtrace->LocalVarUpdate(xtrace_mrid, "new_start_pos",
+                             base::ToString(new_start_pos));
+
       xtrace->LogLineRun(xtrace_mrid, 210);
       break;
     }
@@ -363,6 +369,9 @@ AdjustSelectionByUserSelect(Node *anchor_node,
         IsNonSelectable(iter.GetNode())) {
       xtrace->LogLineRun(xtrace_mrid, 215);
       new_start_pos = current_pos;
+      xtrace->LocalVarUpdate(xtrace_mrid, "new_start_pos",
+                             base::ToString(new_start_pos));
+
       xtrace->LogLineRun(xtrace_mrid, 216);
       break;
     }
@@ -384,10 +393,16 @@ AdjustSelectionByUserSelect(Node *anchor_node,
        !iter.AtEnd(); iter.Increment()) {
     xtrace->LogLineRun(xtrace_mrid, 226);
     PositionInFlatTree current_pos = iter.ComputePosition();
+    xtrace->LocalVarUpdate(xtrace_mrid, "current_pos",
+                           base::ToString(current_pos));
+
     xtrace->LogLineRun(xtrace_mrid, 227);
     if (current_pos >= focus) {
       xtrace->LogLineRun(xtrace_mrid, 228);
       new_end_pos = focus;
+      xtrace->LocalVarUpdate(xtrace_mrid, "new_end_pos",
+                             base::ToString(new_end_pos));
+
       xtrace->LogLineRun(xtrace_mrid, 229);
       break;
     }
@@ -397,6 +412,9 @@ AdjustSelectionByUserSelect(Node *anchor_node,
         IsNonSelectable(iter.GetNode())) {
       xtrace->LogLineRun(xtrace_mrid, 234);
       new_end_pos = current_pos;
+      xtrace->LocalVarUpdate(xtrace_mrid, "new_end_pos",
+                             base::ToString(new_end_pos));
+
       xtrace->LogLineRun(xtrace_mrid, 235);
       break;
     }
@@ -534,6 +552,8 @@ ExtendSelectionAsDirectional(const PositionInFlatTreeWithAffinity &position,
     xtrace->LogLineRun(xtrace_mrid, 311);
     const PositionInFlatTree &new_start = ComputeStartRespectingGranularity(
         PositionInFlatTreeWithAffinity(position), granularity);
+    xtrace->LocalVarUpdate(xtrace_mrid, "new_start", base::ToString(new_start));
+
     xtrace->LogLineRun(xtrace_mrid, 313);
     const PositionInFlatTree &new_end =
         selection.IsAnchorFirst()
@@ -541,6 +561,8 @@ ExtendSelectionAsDirectional(const PositionInFlatTreeWithAffinity &position,
                   new_start, PositionInFlatTreeWithAffinity(anchor),
                   granularity)
             : anchor;
+    xtrace->LocalVarUpdate(xtrace_mrid, "new_end", base::ToString(new_end));
+
     xtrace->LogLineRun(xtrace_mrid, 319);
     if (new_start.IsNull() || new_end.IsNull()) {
       // By some reasons, we fail to extend `selection`.
@@ -738,6 +760,10 @@ bool SelectionController::HandleSingleClick(
       selection.Anchor() == position_to_use.GetPosition()) {
     xtrace->LogLineRun(xtrace_mrid, 430);
     mouse_down_was_single_click_on_caret_ = true;
+    xtrace->LocalVarUpdate(
+        xtrace_mrid, "mouse_down_was_single_click_on_caret_",
+        base::ToString(mouse_down_was_single_click_on_caret_));
+
     xtrace->LogLineRun(xtrace_mrid, 431);
     HandleTapOnCaret(event, selection.AsSelection());
     xtrace->LogLineRun(xtrace_mrid, 432);
@@ -751,10 +777,16 @@ bool SelectionController::HandleSingleClick(
     xtrace->LogLineRun(xtrace_mrid, 438);
     const PhysicalOffset v_point(view->ConvertFromRootFrame(
         gfx::ToFlooredPoint(event.Event().PositionInRootFrame())));
+    xtrace->LocalVarUpdate(xtrace_mrid, "v_point", base::ToString(v_point));
+
     xtrace->LogLineRun(xtrace_mrid, 440);
     if (!extend_selection && Selection().Contains(v_point)) {
       xtrace->LogLineRun(xtrace_mrid, 441);
       mouse_down_was_single_click_in_selection_ = true;
+      xtrace->LocalVarUpdate(
+          xtrace_mrid, "mouse_down_was_single_click_in_selection_",
+          base::ToString(mouse_down_was_single_click_in_selection_));
+
       xtrace->LogLineRun(xtrace_mrid, 442);
       if (!event.Event().FromTouch())
         return false;
@@ -773,8 +805,14 @@ bool SelectionController::HandleSingleClick(
     const PositionInFlatTreeWithAffinity adjusted_position =
         AdjustPositionRespectUserSelectAll(inner_node, selection.Start(),
                                            selection.End(), position_to_use);
+    xtrace->LocalVarUpdate(xtrace_mrid, "adjusted_position",
+                           base::ToString(adjusted_position));
+
     xtrace->LogLineRun(xtrace_mrid, 456);
     const TextGranularity granularity = Selection().Granularity();
+    xtrace->LocalVarUpdate(xtrace_mrid, "granularity",
+                           base::ToString(granularity));
+
     xtrace->LogLineRun(xtrace_mrid, 457);
     if (adjusted_position.IsNull()) {
       xtrace->LogLineRun(xtrace_mrid, 458);
@@ -826,9 +864,15 @@ bool SelectionController::HandleSingleClick(
     xtrace->LogLineRun(xtrace_mrid, 489);
     const bool is_text_box_empty =
         !RootEditableElement(*inner_node)->HasChildren();
+    xtrace->LocalVarUpdate(xtrace_mrid, "is_text_box_empty",
+                           base::ToString(is_text_box_empty));
+
     xtrace->LogLineRun(xtrace_mrid, 491);
     const bool not_left_click =
         event.Event().button != WebPointerProperties::Button::kLeft;
+    xtrace->LocalVarUpdate(xtrace_mrid, "not_left_click",
+                           base::ToString(not_left_click));
+
     xtrace->LogLineRun(xtrace_mrid, 493);
     if (!is_text_box_empty || not_left_click)
       is_handle_visible = event.Event().FromTouch();
@@ -931,6 +975,9 @@ bool SelectionController::HandleTapInsideSelection(
     const bool did_select = SelectClosestWordFromHitTestResult(
         event.GetHitTestResult(), AppendTrailingWhitespace::kDontAppend,
         SelectInputEventType::kTouch);
+    xtrace->LocalVarUpdate(xtrace_mrid, "did_select",
+                           base::ToString(did_select));
+
     xtrace->LogLineRun(xtrace_mrid, 559);
     if (did_select) {
       xtrace->LogLineRun(xtrace_mrid, 560);
@@ -1140,6 +1187,8 @@ bool SelectionController::UpdateSelectionForMouseDownDispatchingSelectStart(
   {
     xtrace->LogLineRun(xtrace_mrid, 686);
     SelectionInFlatTree::InvalidSelectionResetter resetter(selection);
+    xtrace->LocalVarUpdate(xtrace_mrid, "resetter", base::ToString(resetter));
+
     xtrace->LogLineRun(xtrace_mrid, 687);
     if (DispatchSelectStart(target_node) != DispatchEventResult::kNotCanceled)
       return false;
@@ -1164,6 +1213,9 @@ bool SelectionController::UpdateSelectionForMouseDownDispatchingSelectStart(
   if (visible_selection.IsRange()) {
     xtrace->LogLineRun(xtrace_mrid, 702);
     selection_state_ = SelectionState::kExtendedSelection;
+    xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
+                           base::ToString(selection_state_));
+
     xtrace->LogLineRun(xtrace_mrid, 703);
     SetNonDirectionalSelectionIfNeeded(visible_selection, set_selection_options,
                                        kDoNotAdjustEndpoints);
@@ -1255,12 +1307,16 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
     // select that 'empty' area.
     xtrace->LogLineRun(xtrace_mrid, 756);
     EphemeralRangeInFlatTree range = new_selection.ComputeRange();
+    xtrace->LocalVarUpdate(xtrace_mrid, "range", base::ToString(range));
+
     xtrace->LogLineRun(xtrace_mrid, 757);
     const String word =
         PlainText(range, TextIteratorBehavior::Builder()
                              .SetEmitsObjectReplacementCharacter(IsEditable(
                                  *range.StartPosition().AnchorNode()))
                              .Build());
+    xtrace->LocalVarUpdate(xtrace_mrid, "word", base::ToString(word));
+
     xtrace->LogLineRun(xtrace_mrid, 762);
     if (word.length() >= 1 && word[0] == '\n') {
       // We should not select word from end of line, e.g.
@@ -1275,6 +1331,9 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
     xtrace->LogLineRun(xtrace_mrid, 770);
     Element *const editable =
         RootEditableElementOf(new_selection.ComputeStartPosition());
+    xtrace->LocalVarUpdate(xtrace_mrid, "editable",
+                           editable ? base::ToString(*editable) : "");
+
     xtrace->LogLineRun(xtrace_mrid, 772);
     if (editable && pos.GetPosition() ==
                         VisiblePositionInFlatTree::LastPositionInNode(*editable)
@@ -1580,6 +1639,9 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
       adjusted_selection.Focus() != focus.GetPosition()) {
     xtrace->LogLineRun(xtrace_mrid, 951);
     original_anchor_in_flat_tree_ = anchor;
+    xtrace->LocalVarUpdate(xtrace_mrid, "original_anchor_in_flat_tree_",
+                           base::ToString(original_anchor_in_flat_tree_));
+
     xtrace->LogLineRun(xtrace_mrid, 952);
     SetExecutionContext(frame_->DomWindow());
     xtrace->LogLineRun(xtrace_mrid, 953);
@@ -1597,6 +1659,8 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
     }
     xtrace->LogLineRun(xtrace_mrid, 963);
     original_anchor_in_flat_tree_ = PositionInFlatTreeWithAffinity();
+    xtrace->LocalVarUpdate(xtrace_mrid, "original_anchor_in_flat_tree_",
+                           base::ToString(original_anchor_in_flat_tree_));
   }
 
   xtrace->LogLineRun(xtrace_mrid, 966);
@@ -1719,6 +1783,9 @@ bool SelectionController::HandleDoubleClick(
     // from setting caret selection.
     xtrace->LogLineRun(xtrace_mrid, 1040);
     selection_state_ = SelectionState::kExtendedSelection;
+    xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
+                           base::ToString(selection_state_));
+
     xtrace->LogLineRun(xtrace_mrid, 1041);
     return true;
   }
@@ -1864,6 +1931,9 @@ bool SelectionController::HandleMousePressEvent(
     // "gesture-tap-frame-removed.html" reaches here.
     xtrace->LogLineRun(xtrace_mrid, 1120);
     mouse_down_allows_multi_click_ = !event.Event().FromTouch();
+    xtrace->LocalVarUpdate(xtrace_mrid, "mouse_down_allows_multi_click_",
+                           base::ToString(mouse_down_allows_multi_click_));
+
   } else {
     // Avoid double-tap touch gesture confusion by restricting multi-click side
     // effects, e.g., word selection, to editable regions.
@@ -1872,6 +1942,8 @@ bool SelectionController::HandleMousePressEvent(
         !event.Event().FromTouch() ||
         IsEditablePosition(
             Selection().ComputeVisibleSelectionInDOMTreeDeprecated().Start());
+    xtrace->LocalVarUpdate(xtrace_mrid, "mouse_down_allows_multi_click_",
+                           base::ToString(mouse_down_allows_multi_click_));
   }
 
   xtrace->LogLineRun(xtrace_mrid, 1130);
@@ -1906,10 +1978,16 @@ WebInputEventResult SelectionController::HandleMouseDraggedEvent(
   if (selection_state_ != SelectionState::kExtendedSelection) {
     xtrace->LogLineRun(xtrace_mrid, 1146);
     HitTestRequest request(HitTestRequest::kReadOnly | HitTestRequest::kActive);
+    xtrace->LocalVarUpdate(xtrace_mrid, "request", base::ToString(request));
+
     xtrace->LogLineRun(xtrace_mrid, 1147);
     HitTestLocation location(mouse_down_pos);
+    xtrace->LocalVarUpdate(xtrace_mrid, "location", base::ToString(location));
+
     xtrace->LogLineRun(xtrace_mrid, 1148);
     HitTestResult result(request, location);
+    xtrace->LocalVarUpdate(xtrace_mrid, "result", base::ToString(result));
+
     xtrace->LogLineRun(xtrace_mrid, 1149);
     frame_->GetDocument()->GetLayoutView()->HitTest(location, result);
 
@@ -2017,6 +2095,9 @@ bool SelectionController::HandleMouseReleaseEvent(
     SelectionInFlatTree::Builder builder;
     xtrace->LogLineRun(xtrace_mrid, 1202);
     Node *node = event.InnerNode();
+    xtrace->LocalVarUpdate(xtrace_mrid, "node",
+                           node ? base::ToString(*node) : "");
+
     xtrace->LogLineRun(xtrace_mrid, 1203);
     if (node && node->GetLayoutObject() && IsEditable(*node)) {
       xtrace->LogLineRun(xtrace_mrid, 1204);
@@ -2024,6 +2105,8 @@ bool SelectionController::HandleMouseReleaseEvent(
           CreateVisiblePosition(
               PositionWithAffinityOfHitTestResult(event.GetHitTestResult()))
               .ToPositionWithAffinity();
+      xtrace->LocalVarUpdate(xtrace_mrid, "pos", base::ToString(pos));
+
       xtrace->LogLineRun(xtrace_mrid, 1208);
       if (pos.IsNotNull())
         builder.Collapse(pos);
@@ -2031,6 +2114,9 @@ bool SelectionController::HandleMouseReleaseEvent(
 
     xtrace->LogLineRun(xtrace_mrid, 1212);
     const SelectionInFlatTree new_selection = builder.Build();
+    xtrace->LocalVarUpdate(xtrace_mrid, "new_selection",
+                           base::ToString(new_selection));
+
     xtrace->LogLineRun(xtrace_mrid, 1213);
     if (Selection().ComputeVisibleSelectionInFlatTree() !=
         CreateVisibleSelection(new_selection)) {
@@ -2041,6 +2127,7 @@ bool SelectionController::HandleMouseReleaseEvent(
 
     xtrace->LogLineRun(xtrace_mrid, 1219);
     handled = true;
+    xtrace->LocalVarUpdate(xtrace_mrid, "handled", base::ToString(handled));
   }
 
   xtrace->LogLineRun(xtrace_mrid, 1222);
@@ -2056,6 +2143,7 @@ bool SelectionController::HandleMouseReleaseEvent(
     // anyway.
     xtrace->LogLineRun(xtrace_mrid, 1230);
     handled = HandlePasteGlobalSelection(event.Event()) || handled;
+    xtrace->LocalVarUpdate(xtrace_mrid, "handled", base::ToString(handled));
   }
 
   xtrace->LogLineRun(xtrace_mrid, 1233);
@@ -2387,6 +2475,9 @@ void SelectionController::NotifySelectionChanged() {
   if (selection.IsNone()) {
     xtrace->LogLineRun(xtrace_mrid, 1420);
     selection_state_ = SelectionState::kHaveNotStartedSelection;
+    xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
+                           base::ToString(selection_state_));
+
     xtrace->LogLineRun(xtrace_mrid, 1421);
     return;
   }
@@ -2394,6 +2485,9 @@ void SelectionController::NotifySelectionChanged() {
   if (selection.IsCaret()) {
     xtrace->LogLineRun(xtrace_mrid, 1424);
     selection_state_ = SelectionState::kPlacedCaret;
+    xtrace->LocalVarUpdate(xtrace_mrid, "selection_state_",
+                           base::ToString(selection_state_));
+
     xtrace->LogLineRun(xtrace_mrid, 1425);
     return;
   }

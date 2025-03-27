@@ -441,6 +441,9 @@ void ClipboardPromise::HandleRead(ClipboardUnsanitizedFormats *formats) {
   if (formats && formats->hasUnsanitized() && !formats->unsanitized().empty()) {
     xtrace->LogLineRun(xtrace_mrid, 244);
     Vector<String> unsanitized_formats = formats->unsanitized();
+    xtrace->LocalVarUpdate(xtrace_mrid, "unsanitized_formats",
+                           base::ToString(unsanitized_formats));
+
     xtrace->LogLineRun(xtrace_mrid, 245);
     if (unsanitized_formats.size() > 1) {
       xtrace->LogLineRun(xtrace_mrid, 246);
@@ -464,6 +467,8 @@ void ClipboardPromise::HandleRead(ClipboardUnsanitizedFormats *formats) {
     // for now.
     xtrace->LogLineRun(xtrace_mrid, 260);
     will_read_unprocessed_html_ = true;
+    xtrace->LocalVarUpdate(xtrace_mrid, "will_read_unprocessed_html_",
+                           base::ToString(will_read_unprocessed_html_));
   }
 
   xtrace->LogLineRun(xtrace_mrid, 263);
@@ -650,6 +655,8 @@ void ClipboardPromise::ResolveRead() {
     xtrace->LogLineRun(xtrace_mrid, 363);
     auto promise =
         ToResolvedPromise<V8UnionBlobOrString>(script_state, item.second);
+    xtrace->LocalVarUpdate(xtrace_mrid, "promise", base::ToString(promise));
+
     xtrace->LogLineRun(xtrace_mrid, 365);
     items.emplace_back(item.first, promise);
   }
@@ -834,10 +841,15 @@ void ClipboardPromise::WriteClipboardItemData(
 
     xtrace->LogLineRun(xtrace_mrid, 460);
     const String &type = write_clipboard_item_types_[clipboard_item_index];
+    xtrace->LocalVarUpdate(xtrace_mrid, "type", base::ToString(type));
+
     xtrace->LogLineRun(xtrace_mrid, 461);
     if (clipboard_item_data->IsBlob()) {
       xtrace->LogLineRun(xtrace_mrid, 462);
       const String &type_with_args = clipboard_item_data->GetAsBlob()->type();
+      xtrace->LocalVarUpdate(xtrace_mrid, "type_with_args",
+                             base::ToString(type_with_args));
+
       // For web custom types, extract the MIME type after removing the "web "
       // prefix. For normal (not-custom) write, blobs may have a full MIME type
       // with args (ex. 'text/plain;charset=utf-8'), whereas the type must not
@@ -845,6 +857,9 @@ void ClipboardPromise::WriteClipboardItemData(
       // contained in type.
       xtrace->LogLineRun(xtrace_mrid, 468);
       String web_custom_format = Clipboard::ParseWebCustomFormat(type);
+      xtrace->LocalVarUpdate(xtrace_mrid, "web_custom_format",
+                             base::ToString(web_custom_format));
+
       xtrace->LogLineRun(xtrace_mrid, 469);
       if ((!type_with_args.Contains(type.LowerASCII()) &&
            web_custom_format.empty()) ||
@@ -909,6 +924,8 @@ void ClipboardPromise::HandleWriteWithPermission(
   for (const auto &type_and_promise : clipboard_item_data_with_promises_) {
     xtrace->LogLineRun(xtrace_mrid, 508);
     const String &type = type_and_promise.first;
+    xtrace->LocalVarUpdate(xtrace_mrid, "type", base::ToString(type));
+
     xtrace->LogLineRun(xtrace_mrid, 509);
     write_clipboard_item_types_.emplace_back(type);
     xtrace->LogLineRun(xtrace_mrid, 510);
