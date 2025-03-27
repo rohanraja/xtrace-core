@@ -14,6 +14,7 @@ interface AssignmentInfo {
     identifier: string | null;
     valueType: string | null;
     isPointer: boolean;
+    isReference: boolean;  // Added reference tracking
     isPrimitive: boolean;
     primitiveType: string;
 }
@@ -24,6 +25,7 @@ interface AssignmentInfo {
 interface IdentifierInfo {
     name: string;
     isPointer: boolean;
+    isReference: boolean;  // Added reference tracking
 }
 
 /**
@@ -196,8 +198,9 @@ export class CodeLogger {
     private extractIdentifierInfo(node: SyntaxNode, isParameter: boolean = false): IdentifierInfo | null {
         // For parameters, we need special handling
         if (isParameter) {
-            // Check for pointer type in parameter type
+            // Check for pointer or reference type in parameter
             const isPointer = this.isPointerParameter(node);
+            const isReference = this.isReferenceParameter(node);
             
             // Extract name from parameter node structure
             let name = "";
@@ -206,7 +209,7 @@ export class CodeLogger {
             }
             
             if (name) {
-                return { name, isPointer };
+                return { name, isPointer, isReference };
             }
         }
         
@@ -215,7 +218,8 @@ export class CodeLogger {
         if (node.type === "identifier") {
             return {
                 name: node.text,
-                isPointer: false
+                isPointer: false,
+                isReference: false
             };
         }
         
@@ -226,7 +230,21 @@ export class CodeLogger {
             if (identifierNode) {
                 return {
                     name: identifierNode.text,
-                    isPointer: true
+                    isPointer: true,
+                    isReference: false
+                };
+            }
+        }
+        
+        // Look for reference declarator
+        const referenceTypeNode = node.namedChildren.find(x => x.type.includes("reference_declarator"));
+        if (referenceTypeNode) {
+            const identifierNode = referenceTypeNode.namedChildren.find(x => x.type.includes("identifier"));
+            if (identifierNode) {
+                return {
+                    name: identifierNode.text,
+                    isPointer: false,
+                    isReference: true
                 };
             }
         }
@@ -236,7 +254,8 @@ export class CodeLogger {
         if (identifierNode) {
             return {
                 name: identifierNode.text,
-                isPointer: false
+                isPointer: false,
+                isReference: false
             };
         }
         
@@ -269,6 +288,30 @@ export class CodeLogger {
             (x: SyntaxNode) => x.type === "abstract_pointer_declarator"
         );
         if (abstractDeclarator) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if a parameter is a reference type
+     */
+    private isReferenceParameter(param: any): boolean {
+        // Check if the parameter has a reference_declarator
+        if (param.declaratorNode && param.declaratorNode.type === "reference_declarator") {
+            return true;
+        }
+        
+        // Check nested declarator for reference type
+        if (param.declaratorNode && param.declaratorNode.namedChildren) {
+            return param.declaratorNode.namedChildren.some(
+                (child: SyntaxNode) => child.type === "reference_declarator"
+            );
+        }
+        
+        // Check if parameter has reference in the type
+        if (param.typeNode && param.typeNode.text.includes("&")) {
             return true;
         }
         
@@ -309,42 +352,90 @@ export class CodeLogger {
      * Assignment handling
      */
     private extractAssignmentInfo(childNode: SyntaxNode): AssignmentInfo {
+        // Try to identify declaration types
+        const isDeclaration = childNode.type.includes("declaration");
+        const hasDeclarator = isDeclaration && childNode.namedChildren.some(x => 
+            x.type.includes("declarator") || 
+            x.type.includes("init_declarator")
+        );
+        
+        // Find assignment expressions in statements and declarations
         const assignmentStatement = childNode.namedChildren.filter((x) => 
             x.type.includes("init_declarator") || 
-            x.type.includes("assignment_expression")
+            x.type.includes("assignment_expression") ||
+            x.type.includes("declarator")
         );
         
         let identifier = null;
         let valueType = null;
         let isPointer = false;
+        let isReference = false;
         let isPrimitive = false;
         let primitiveType = "";
         
-        if (assignmentStatement.length > 0) {
-            assignmentStatement.forEach((param) => {
-                const identifierInfo = this.extractIdentifierInfo(param);
-                if (identifierInfo) {
-                    identifier = identifierInfo.name;
-                    isPointer = identifierInfo.isPointer;
+        // Process declarations with initializations
+        if ((hasDeclarator || childNode.type === "expression_statement") && assignmentStatement.length > 0) {
+            for (const param of assignmentStatement) {
+                // Handle regular assignment expression
+                if (param.type === "assignment_expression") {
+                    const leftNode = param.namedChildren[0];
+                    
+                    if (leftNode && leftNode.type === "identifier") {
+                        identifier = leftNode.text;
+                        isPointer = false; // Simple assignments typically aren't pointers
+                        isReference = false;
+                    }
+                    
+                    const valueTypeNode = param.namedChildren[1]; // Right side of assignment
+                    valueType = valueTypeNode ? valueTypeNode.type : null;
+                    
+                    // We found what we needed, can break early
+                    if (identifier) break;
+                } else {
+                    // Try to extract the identifier directly for declarations
+                    let identifierInfo = this.extractIdentifierInfo(param);
+                    
+                    // If not found, search deeper in the node structure
+                    if (!identifierInfo) {
+                        // Find inside declarator node
+                        const declaratorNodes = param.namedChildren.filter(x => 
+                            x.type.includes("declarator")
+                        );
+                        
+                        for (const declNode of declaratorNodes) {
+                            identifierInfo = this.extractIdentifierInfo(declNode);
+                            if (identifierInfo) break;
+                        }
+                    }
+                    
+                    // Set values if identifier was found
+                    if (identifierInfo) {
+                        identifier = identifierInfo.name;
+                        isPointer = identifierInfo.isPointer;
+                        isReference = identifierInfo.isReference;
+                    }
+                    
+                    // Find the value type
+                    const valueTypeNode = param.namedChildren.find((x) => 
+                        x.type.includes("number_literal") || 
+                        x.type.includes("string_literal") || 
+                        x.type.includes("identifier") ||
+                        x.type.includes("call_expression")
+                    );
+                    
+                    valueType = valueTypeNode ? valueTypeNode.type : null;
                 }
-                
-                const valueTypeNode = param.namedChildren.find((x) => 
-                    x.type.includes("number_literal") || 
-                    x.type.includes("string_literal") || 
-                    x.type.includes("identifier")
-                );
-                
-                valueType = valueTypeNode ? valueTypeNode.type : null;
-            });
+            }
             
             // Check if primitive type
-            if (valueType === "identifier") {
+            if (isDeclaration) {
                 const primitiveTypeNode = childNode.namedChildren.find((x) => 
                     x.type.includes("primitive_type")
                 );
                 
                 if (primitiveTypeNode) {
                     isPrimitive = true;
+                    primitiveType = primitiveTypeNode.text;
                 } else if ((childNode as any).typeNode) {
                     const typeStr = (childNode as any).typeNode.text;
                     if (primitiveTypes.includes(typeStr.toLowerCase())) {
@@ -359,6 +450,7 @@ export class CodeLogger {
             identifier, 
             valueType, 
             isPointer, 
+            isReference,
             isPrimitive, 
             primitiveType 
         };
@@ -400,7 +492,8 @@ export class CodeLogger {
             if (assignmentInfo.identifier) {
                 lineDataAfterExec += this.generateVariableUpdateCode(
                     assignmentInfo.identifier, 
-                    assignmentInfo.isPointer
+                    assignmentInfo.isPointer,
+                    assignmentInfo.isReference
                 );
             }
         }
@@ -436,16 +529,22 @@ export class CodeLogger {
             const identifierInfo = this.extractIdentifierInfo(param, true);
             
             if (identifierInfo && identifierInfo.name) {
-                code += this.generateVariableUpdateCode(identifierInfo.name, identifierInfo.isPointer);
+                code += this.generateVariableUpdateCode(
+                    identifierInfo.name, 
+                    identifierInfo.isPointer,
+                    identifierInfo.isReference
+                );
             }
         });
         
         return code;
     }
 
-    private generateVariableUpdateCode(variableName: string, isPointer: boolean): string {
+    private generateVariableUpdateCode(variableName: string, isPointer: boolean, isReference: boolean = false): string {
         if (isPointer) {
             return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", ${variableName} ? base::ToString(*${variableName}) : "");\n`;
+        } else if (isReference) {
+            return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", base::ToString(${variableName}));\n`;
         } else {
             return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", base::ToString(${variableName}));\n`;
         }

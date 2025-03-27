@@ -344,6 +344,8 @@ void ClipboardPromise::WriteNextRepresentation() {
   }
   xtrace->LogLineRun(xtrace_mrid, 195);
   ScriptState::Scope scope(GetScriptState());
+  xtrace->LocalVarUpdate(xtrace_mrid, "scope", base::ToString(scope));
+
   xtrace->LogLineRun(xtrace_mrid, 196);
   LocalFrame *local_frame = GetLocalFrame();
   xtrace->LocalVarUpdate(xtrace_mrid, "local_frame",
@@ -366,9 +368,13 @@ void ClipboardPromise::WriteNextRepresentation() {
   xtrace->LogLineRun(xtrace_mrid, 207);
   const String &type =
       clipboard_item_data_[clipboard_representation_index_].first;
+  xtrace->LocalVarUpdate(xtrace_mrid, "type", base::ToString(type));
+
   xtrace->LogLineRun(xtrace_mrid, 209);
   const Member<V8UnionBlobOrString> &clipboard_item_data =
       clipboard_item_data_[clipboard_representation_index_].second;
+  xtrace->LocalVarUpdate(xtrace_mrid, "clipboard_item_data",
+                         base::ToString(clipboard_item_data));
 
   xtrace->LogLineRun(xtrace_mrid, 212);
   DCHECK(!clipboard_writer_);
@@ -405,6 +411,8 @@ void ClipboardPromise::RejectFromReadOrDecodeFailure() {
   }
   xtrace->LogLineRun(xtrace_mrid, 229);
   ScriptState::Scope scope(GetScriptState());
+  xtrace->LocalVarUpdate(xtrace_mrid, "scope", base::ToString(scope));
+
   xtrace->LogLineRun(xtrace_mrid, 230);
   String exception_text =
       RuntimeEnabledFeatures::ClipboardItemWithDOMStringSupportEnabled()
@@ -625,6 +633,8 @@ void ClipboardPromise::ResolveRead() {
   }
   xtrace->LogLineRun(xtrace_mrid, 355);
   ScriptState::Scope scope(script_state);
+  xtrace->LocalVarUpdate(xtrace_mrid, "scope", base::ToString(scope));
+
   xtrace->LogLineRun(xtrace_mrid, 356);
   HeapVector<std::pair<String, MemberScriptPromise<V8UnionBlobOrString>>> items;
   xtrace->LogLineRun(xtrace_mrid, 357);
@@ -920,6 +930,8 @@ void ClipboardPromise::HandleWriteWithPermission(
 
   xtrace->LogLineRun(xtrace_mrid, 519);
   ScriptState::Scope scope(script_state);
+  xtrace->LocalVarUpdate(xtrace_mrid, "scope", base::ToString(scope));
+
   xtrace->LogLineRun(xtrace_mrid, 520);
   PromiseAll<V8UnionBlobOrString>::Create(script_state, promise_list)
       .Then(script_state,
@@ -1027,6 +1039,8 @@ void ClipboardPromise::ValidatePreconditions(
   DCHECK(context);
   xtrace->LogLineRun(xtrace_mrid, 571);
   LocalDOMWindow &window = *To<LocalDOMWindow>(context);
+  xtrace->LocalVarUpdate(xtrace_mrid, "window", base::ToString(window));
+
   xtrace->LogLineRun(xtrace_mrid, 572);
   DCHECK(window.IsSecureContext()); // [SecureContext] in IDL
 
@@ -1044,6 +1058,8 @@ void ClipboardPromise::ValidatePreconditions(
       "The Clipboard API has been blocked because of a permissions policy "
       "applied to the current document. See https://goo.gl/EuHzyv for more "
       "details.";
+  xtrace->LocalVarUpdate(xtrace_mrid, "kFeaturePolicyMessage",
+                         base::ToString(kFeaturePolicyMessage));
 
   xtrace->LogLineRun(xtrace_mrid, 585);
   if ((permission == mojom::blink::PermissionName::CLIPBOARD_READ &&

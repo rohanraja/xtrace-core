@@ -283,8 +283,12 @@ AdjustSelectionWithTrailingWhitespace(const SelectionInFlatTree &selection) {
     return selection;
   xtrace->LogLineRun(xtrace_mrid, 175);
   const PositionInFlatTree &end = selection.ComputeEndPosition();
+  xtrace->LocalVarUpdate(xtrace_mrid, "end", base::ToString(end));
+
   xtrace->LogLineRun(xtrace_mrid, 176);
   const PositionInFlatTree &new_end = SkipWhitespace(end);
+  xtrace->LocalVarUpdate(xtrace_mrid, "new_end", base::ToString(new_end));
+
   xtrace->LogLineRun(xtrace_mrid, 177);
   if (end == new_end)
     return selection;
@@ -520,6 +524,8 @@ ExtendSelectionAsDirectional(const PositionInFlatTreeWithAffinity &position,
   DCHECK(position.IsNotNull());
   xtrace->LogLineRun(xtrace_mrid, 306);
   const PositionInFlatTree &anchor = selection.Anchor();
+  xtrace->LocalVarUpdate(xtrace_mrid, "anchor", base::ToString(anchor));
+
   xtrace->LogLineRun(xtrace_mrid, 307);
   if (position.GetPosition() < anchor) {
     // Extend backward yields backward selection
@@ -561,9 +567,13 @@ ExtendSelectionAsDirectional(const PositionInFlatTreeWithAffinity &position,
       selection.IsAnchorFirst()
           ? anchor
           : ComputeStartFromEndForExtendForward(anchor, granularity);
+  xtrace->LocalVarUpdate(xtrace_mrid, "new_start", base::ToString(new_start));
+
   xtrace->LogLineRun(xtrace_mrid, 338);
   const PositionInFlatTree &new_end = ComputeEndRespectingGranularity(
       new_start, PositionInFlatTreeWithAffinity(position), granularity);
+  xtrace->LocalVarUpdate(xtrace_mrid, "new_end", base::ToString(new_end));
+
   xtrace->LogLineRun(xtrace_mrid, 340);
   if (new_start.IsNull() || new_end.IsNull()) {
     // By some reasons, we fail to extend `selection`.
@@ -601,8 +611,12 @@ ExtendSelectionAsNonDirectional(const PositionInFlatTree &position,
   // Shift+Click deselects when selection was created right-to-left
   xtrace->LogLineRun(xtrace_mrid, 359);
   const PositionInFlatTree &start = selection.ComputeStartPosition();
+  xtrace->LocalVarUpdate(xtrace_mrid, "start", base::ToString(start));
+
   xtrace->LogLineRun(xtrace_mrid, 360);
   const PositionInFlatTree &end = selection.ComputeEndPosition();
+  xtrace->LocalVarUpdate(xtrace_mrid, "end", base::ToString(end));
+
   xtrace->LogLineRun(xtrace_mrid, 361);
   if (start == end && position == start)
     return selection;
@@ -705,9 +719,14 @@ bool SelectionController::HandleSingleClick(
                 PositionInFlatTree::FirstPositionInOrBeforeNode(*inner_node))
                 .ToPositionWithAffinity()
           : visible_hit_position;
+  xtrace->LocalVarUpdate(xtrace_mrid, "position_to_use",
+                         base::ToString(position_to_use));
+
   xtrace->LogLineRun(xtrace_mrid, 423);
   const VisibleSelectionInFlatTree &selection =
       Selection().ComputeVisibleSelectionInFlatTree();
+  xtrace->LocalVarUpdate(xtrace_mrid, "selection", base::ToString(selection));
+
   xtrace->LogLineRun(xtrace_mrid, 425);
   const bool is_editable = IsEditable(*inner_node);
   xtrace->LocalVarUpdate(xtrace_mrid, "is_editable",
@@ -985,6 +1004,9 @@ WebInputEventResult SelectionController::UpdateSelectionForMouseDrag(
                 Selection().ComputeVisibleSelectionInDOMTree().Start(),
                 hit_test_result)
           : PositionWithAffinity();
+  xtrace->LocalVarUpdate(xtrace_mrid, "raw_target_position",
+                         base::ToString(raw_target_position));
+
   xtrace->LogLineRun(xtrace_mrid, 605);
   const PositionInFlatTreeWithAffinity target_position =
       CreateVisiblePosition(
@@ -1032,6 +1054,9 @@ WebInputEventResult SelectionController::UpdateSelectionForMouseDrag(
   xtrace->LogLineRun(xtrace_mrid, 635);
   const VisibleSelectionInFlatTree &visible_selection =
       Selection().ComputeVisibleSelectionInFlatTree();
+  xtrace->LocalVarUpdate(xtrace_mrid, "visible_selection",
+                         base::ToString(visible_selection));
+
   xtrace->LogLineRun(xtrace_mrid, 637);
   if (visible_selection.IsNone()) {
     // TODO(editing-dev): This is an urgent fix to crbug.com/745501. We should
@@ -1055,6 +1080,8 @@ WebInputEventResult SelectionController::UpdateSelectionForMouseDrag(
                                          visible_selection.AsSelection(),
                                          Selection().Granularity())
           : SelectionInFlatTree::Builder().Collapse(adjusted_position).Build();
+  xtrace->LocalVarUpdate(xtrace_mrid, "adjusted_selection",
+                         base::ToString(adjusted_selection));
 
   // When |adjusted_selection| is caret, it's already canonical. No need to re-
   // canonicalize it.
@@ -1260,6 +1287,8 @@ bool SelectionController::SelectClosestWordFromHitTestResult(
       append_trailing_whitespace == AppendTrailingWhitespace::kShouldAppend
           ? AdjustSelectionWithTrailingWhitespace(new_selection)
           : new_selection;
+  xtrace->LocalVarUpdate(xtrace_mrid, "adjusted_selection",
+                         base::ToString(adjusted_selection));
 
   xtrace->LogLineRun(xtrace_mrid, 783);
   return UpdateSelectionForMouseDownDispatchingSelectStart(
@@ -1313,6 +1342,9 @@ void SelectionController::SelectClosestMisspellingFromHitTestResult(
   xtrace->LogLineRun(xtrace_mrid, 813);
   const PositionInFlatTree &marker_position =
       pos.GetPosition().ParentAnchoredEquivalent();
+  xtrace->LocalVarUpdate(xtrace_mrid, "marker_position",
+                         base::ToString(marker_position));
+
   xtrace->LogLineRun(xtrace_mrid, 815);
   const DocumentMarkerGroup *const marker_group =
       SpellCheckMarkerGroupAtPosition(inner_node->GetDocument().Markers(),
@@ -1348,6 +1380,9 @@ void SelectionController::SelectClosestMisspellingFromHitTestResult(
       append_trailing_whitespace == AppendTrailingWhitespace::kShouldAppend
           ? AdjustSelectionWithTrailingWhitespace(new_selection)
           : new_selection;
+  xtrace->LocalVarUpdate(xtrace_mrid, "adjusted_selection",
+                         base::ToString(adjusted_selection));
+
   xtrace->LogLineRun(xtrace_mrid, 838);
   UpdateSelectionForMouseDownDispatchingSelectStart(
       inner_node,
@@ -1463,6 +1498,8 @@ void SelectionController::SelectClosestWordOrLinkFromMouseEvent(
                 .SelectAllChildren(*url_element)
                 .Build()
           : SelectionInFlatTree();
+  xtrace->LocalVarUpdate(xtrace_mrid, "new_selection",
+                         base::ToString(new_selection));
 
   xtrace->LogLineRun(xtrace_mrid, 908);
   UpdateSelectionForMouseDownDispatchingSelectStart(
@@ -1500,6 +1537,9 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
   xtrace->LogLineRun(xtrace_mrid, 928);
   const PositionInFlatTree &anchor_position =
       original_anchor_in_flat_tree_.GetPosition();
+  xtrace->LocalVarUpdate(xtrace_mrid, "anchor_position",
+                         base::ToString(anchor_position));
+
   xtrace->LogLineRun(xtrace_mrid, 930);
   const PositionInFlatTreeWithAffinity original_anchor =
       anchor_position.IsConnected()
@@ -1528,9 +1568,13 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
           : SelectionInFlatTree::Builder()
                 .SetBaseAndExtent(anchor.GetPosition(), focus.GetPosition())
                 .Build();
+  xtrace->LocalVarUpdate(xtrace_mrid, "adjusted_selection",
+                         base::ToString(adjusted_selection));
 
   xtrace->LogLineRun(xtrace_mrid, 948);
   SelectionInFlatTree::Builder builder(new_selection);
+  xtrace->LocalVarUpdate(xtrace_mrid, "builder", base::ToString(builder));
+
   xtrace->LogLineRun(xtrace_mrid, 949);
   if (adjusted_selection.Anchor() != anchor.GetPosition() ||
       adjusted_selection.Focus() != focus.GetPosition()) {
@@ -1564,6 +1608,8 @@ void SelectionController::SetNonDirectionalSelectionIfNeeded(
 
   xtrace->LogLineRun(xtrace_mrid, 969);
   const SelectionInFlatTree &selection_in_flat_tree = builder.Build();
+  xtrace->LocalVarUpdate(xtrace_mrid, "selection_in_flat_tree",
+                         base::ToString(selection_in_flat_tree));
 
   xtrace->LogLineRun(xtrace_mrid, 971);
   const bool selection_remains_the_same =
@@ -1916,6 +1962,8 @@ void SelectionController::UpdateSelectionForMouseDrag(
 
   xtrace->LogLineRun(xtrace_mrid, 1171);
   HitTestResult result(request, location);
+  xtrace->LocalVarUpdate(xtrace_mrid, "result", base::ToString(result));
+
   xtrace->LogLineRun(xtrace_mrid, 1172);
   layout_view->HitTest(location, result);
   xtrace->LogLineRun(xtrace_mrid, 1173);
@@ -2333,6 +2381,8 @@ void SelectionController::NotifySelectionChanged() {
 
   xtrace->LogLineRun(xtrace_mrid, 1418);
   const SelectionInDOMTree &selection = Selection().GetSelectionInDOMTree();
+  xtrace->LocalVarUpdate(xtrace_mrid, "selection", base::ToString(selection));
+
   xtrace->LogLineRun(xtrace_mrid, 1419);
   if (selection.IsNone()) {
     xtrace->LogLineRun(xtrace_mrid, 1420);
