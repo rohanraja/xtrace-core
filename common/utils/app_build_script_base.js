@@ -1,6 +1,7 @@
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { run } = require('./process_utils.js');
 
 /**
  * Base class for application build scripts with common functionality
@@ -23,6 +24,7 @@ class AppBuildScriptBase {
    */
   async runCommand(command, cwd, waitForExit = false) {
     const env = waitForExit ? {...this.env, "WAIT_FOR_EXIT": "true"} : this.env;
+    return run(command, cwd, env);
     return new Promise((resolve, reject) => {
       console.log(`Running command: ${command} in ${cwd}`);
       exec(command, { cwd, env }, (error, stdout, stderr) => {
