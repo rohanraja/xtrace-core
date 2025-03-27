@@ -1,4 +1,3 @@
-
 /*
 Input:
 - Chromium source code "src" folder path (excluding src) 
@@ -103,6 +102,9 @@ async function main() {
   let envs = process.env;
   if (isWin) {
     envs = { ...process.env, Path: `C:\\Program Files\\nodejs;${test_input.cr_path}\\depot_tools\\scripts;${test_input.cr_path}\\depot_tools;${process.env.Path}` };
+  } else {
+    // For Linux and macOS, PATH is uppercase
+    envs = { ...process.env, PATH: `${test_input.cr_path}/chromium.depot_tools.cr-contrib/scripts:${test_input.cr_path}/chromium.depot_tools.cr-contrib:${process.env.PATH}` };
   }
   envs = {...envs, "XTRACE_CONFIG": JSON.stringify(config)}
   envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
