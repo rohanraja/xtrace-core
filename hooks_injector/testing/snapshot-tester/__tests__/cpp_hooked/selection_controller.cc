@@ -1183,13 +1183,8 @@ bool SelectionController::UpdateSelectionForMouseDownDispatchingSelectStart(
       !target_node->GetLayoutObject()->IsSelectable())
     return false;
 
-  xtrace->LogLineRun(xtrace_mrid, 685);
   {
-    xtrace->LogLineRun(xtrace_mrid, 686);
     SelectionInFlatTree::InvalidSelectionResetter resetter(selection);
-    xtrace->LocalVarUpdate(xtrace_mrid, "resetter", base::ToString(resetter));
-
-    xtrace->LogLineRun(xtrace_mrid, 687);
     if (DispatchSelectStart(target_node) != DispatchEventResult::kNotCanceled)
       return false;
   }

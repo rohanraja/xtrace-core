@@ -186,6 +186,8 @@ export class CodeLogger {
     private isValidStatementType(type: string): boolean {
         return !type.includes("else") && 
                !type.includes("case") && 
+               !type.includes("attribute") && 
+               !type.includes("compound_statement") && 
                (type.includes("statement") || 
                 type.includes("declaration") || 
                 type.includes("definition") || 
