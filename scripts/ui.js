@@ -46,19 +46,25 @@ global.analyse_log = (params) => {
     const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
     const config = JSON5.parse(fs.readFileSync(file, 'utf8'));
     const buildFolderName = `${config.build_type}_${config.build_arch}`;
-    const debugFolder = path.join(config.cr_path, 'out', config.debug_folder_name || buildFolderName);
+    const debugFolder = path.join(config.cr_path, 'src', 'out', config.debug_folder_name || buildFolderName);
     const xtraceLogFile = path.join(debugFolder, 'xtrace.run.log');
 
     // Run scripts/analyse_logs.js with the xtrace log file
     const scriptPath = path.join(__dirname, 'analyse_logs.js');
     const command = `node ${scriptPath} ${xtraceLogFile}`;
     console.log(`Running command: ${command}`);
-    const { stdout, stderr } = execSync(command, { cwd: __dirname });
-    if (stderr) {
-        console.error(`Error: ${stderr}`);
-    } else {
-        console.log(`Output: ${stdout}`);
-    }
+    const logs = execSync(command, { cwd: __dirname });
+    console.log(logs.toString());
+}
+
+global.open_xtrace_log = (params) => {
+    const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
+    const config = JSON5.parse(fs.readFileSync(file, 'utf8'));
+    const buildFolderName = `${config.build_type}_${config.build_arch}`;
+    const debugFolder = path.join(config.cr_path, 'src', 'out', config.debug_folder_name || buildFolderName);
+    const xtraceLogFile = path.join(debugFolder, 'xtrace.run.log');
+    console.log(`Opening xtrace log file: ${xtraceLogFile}`);
+    codeOpen(xtraceLogFile);
 }
 
 global.compile_run_active_file = (params) => {

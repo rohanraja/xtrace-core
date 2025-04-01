@@ -300,6 +300,15 @@
 			],
 		},
 		{
+			"label": "Logs.xTrace.CodeOpen",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"open_xtrace_log",
+			],
+		},
+		{
 			"label": "Compile.ActiveFile",
 			"type": "shell",
 			"command": "node",
