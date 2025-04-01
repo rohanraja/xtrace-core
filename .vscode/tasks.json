@@ -291,6 +291,15 @@
 			],
 		},
 		{
+			"label": "Logs.xTrace.Analyze",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"analyse_log",
+			],
+		},
+		{
 			"label": "Compile.ActiveFile",
 			"type": "shell",
 			"command": "node",

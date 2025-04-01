@@ -41,6 +41,26 @@ global.hook_active_file = (params) => {
     codeOpen(hookedCodeFile);
 }
 
+global.analyse_log = (params) => {
+
+    const file = fs.readFileSync('tmp/active_run_file', 'utf-8');
+    const config = JSON5.parse(fs.readFileSync(file, 'utf8'));
+    const buildFolderName = `${config.build_type}_${config.build_arch}`;
+    const debugFolder = path.join(config.cr_path, 'out', config.debug_folder_name || buildFolderName);
+    const xtraceLogFile = path.join(debugFolder, 'xtrace.run.log');
+
+    // Run scripts/analyse_logs.js with the xtrace log file
+    const scriptPath = path.join(__dirname, 'analyse_logs.js');
+    const command = `node ${scriptPath} ${xtraceLogFile}`;
+    console.log(`Running command: ${command}`);
+    const { stdout, stderr } = execSync(command, { cwd: __dirname });
+    if (stderr) {
+        console.error(`Error: ${stderr}`);
+    } else {
+        console.log(`Output: ${stdout}`);
+    }
+}
+
 global.compile_run_active_file = (params) => {
     copyXTraceFolder();
     const fileFromParams = params[0];
