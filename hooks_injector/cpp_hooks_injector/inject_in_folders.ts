@@ -88,6 +88,9 @@ function processFile(filePath: string): Promise<void> {
                 reject(`Error processing file ${filePath}: ${stderr}`);
             } else {
                 fs.writeFileSync(filePath, stdout, 'utf-8');
+                if(stderr){
+                    console.error(stderr);
+                }
                 resolve();
             }
         });

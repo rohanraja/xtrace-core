@@ -55,6 +55,11 @@ async function processLogFile() {
     const [filename, methodName] = key.split('#');
     console.log(`${index + 1}. ${methodName} (${filename}) - ${count} calls`);
   });
+
+  sortedMethods.forEach(([key, count], index) => {
+    const [filename, methodName] = key.split('#');
+    console.log(`        "${methodName}",`);
+  });
 }
 
 // Execute the main function
