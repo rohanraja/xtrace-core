@@ -58,6 +58,11 @@ class ChromeBuildScripts extends AppBuildScriptBase {
     // Setup binary names based on platform using path_utils
     this.content_shell_bin = getContentShellBuildBinPath();
     this.chromium_bin = getChromiumBuildBinPath();
+
+    this.build_target = config.ut_target || "chrome";
+    if(config.web_test){
+      this.build_target = "content_shell";
+    }
     
     
     this.branchChanged = false;
@@ -166,14 +171,14 @@ class ChromeBuildScripts extends AppBuildScriptBase {
    * @returns {Promise<void>}
    */
   async buildChrome() {
-    console.log("Building Chrome browser");
+    console.log("Building Chrome target - " + this.build_target);
     try {
       await killAllProcessWithName(chromeProcessImageName());
     } catch(e) {
       console.log("No Chrome process running or couldn't kill it");
     }
     
-    await this.runCommand("autoninja chrome", this.build_path);
+    await this.runCommand(`autoninja ${this.build_target}`, this.build_path);
   }
 
   /**

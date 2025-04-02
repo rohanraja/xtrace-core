@@ -480,7 +480,7 @@ export class CodeLogger {
             lineData += this.generateMethodEntryCode(methodInfo.name, methodInfo.shouldResetCodeRun);
             
             // Add parameter logging if params exist
-            if (methodInfo.params) {
+            if (methodInfo.params && !methodInfo.name.includes("TEST_")) {
                 lineData += this.generateParameterLoggingCode(methodInfo.params);
             }
         }

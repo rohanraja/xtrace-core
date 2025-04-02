@@ -54,6 +54,7 @@ async function main() {
     build_arch: config.build_arch,
     build_type: config.build_type,
     cr_path: config.cr_path,
+    ut_target: config.ut_target,
   };
 
   const chromeBuildScript = new ChromeBuildScripts(chromeBuildConfig);
@@ -159,7 +160,7 @@ async function main() {
   });
 
   await runStep("gclient", async () => {
-    if(branchChanged){
+    if(branchChanged || test_input.regenerateBuildFolder){
       console.log("Running gclient sync -fD");
       await runInEnv(`gclient sync -fD`, cr_src_folder);
     }else{
@@ -213,13 +214,14 @@ async function main() {
 
   // 5. Build chromium code
   // TODO - Check if build failed then exit
-  await runStep("build-webtest", async () => {
-    if(!run_chrome){
-      return chromeBuildScript.buildContentShell();
-    }
-  });
+  // await runStep("build-webtest", async () => {
+  //   if(!run_chrome){
+  //     return chromeBuildScript.buildContentShell();
+  //   }
+  // });
 
   await runStep("build-chrome", async () => {
+    return chromeBuildScript.buildChrome();
     if(run_chrome){
       console.log("Building chrome");
 
@@ -246,8 +248,32 @@ async function main() {
     });
   }
 
+  let alreadyRan = false;
+  await runStep("run-tests", async () => {
+
+    if(test_input.ut_filter) {
+      console.log("## Running unit tests with filter: ", test_input.ut_filter);
+      if (fs.existsSync(xtrace_run_json)) {
+        fs.rmSync(xtrace_run_json);
+      }
+      if (fs.existsSync(xtrace_run_log)) {
+        fs.rmSync(xtrace_run_log);
+      }
+    // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+      await runInEnv(`./${test_input.ut_target}  --gtest_filter='*${test_input.ut_filter}*'`, cr_debug_folder);
+
+      // Delay for 5 seconds for xtrace.run.json to be generated
+      await setTimeout(() => {}, 5000);
+      alreadyRan = true;
+    }
+  });
+
   await runStep("run-web-test", async () => {
 
+    if(alreadyRan){
+      console.log("## Already ran unit tests, skipping web test");
+      return;
+    }
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
     }
@@ -264,6 +290,10 @@ async function main() {
   });
 
   await runStep("run-chrome", async () => {
+    if(alreadyRan){
+      console.log("## Already ran unit tests, skipping web test");
+      return;
+    }
 
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
