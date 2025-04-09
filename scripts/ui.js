@@ -9,6 +9,12 @@ const { codeOpen } = require('../common/utils/vscode_utils.js');
 const { openUrl } = require('../common/utils/web_utils.js');
 
 
+global.setActiveConfig = (params) => {
+    const file = params[0];
+    // const configFilePath = path.join(__dirname, '../run_configs', file);
+    console.log(`Setting active config: ${file}`);
+    fs.writeFileSync('tmp/active_run_file', file);
+}
 
 global.hook_and_run_file = (params) => {
     buildParser();
@@ -126,7 +132,7 @@ function removeUntilFirstBrace(str) {
 global.create_config_from_cl = async (params) => {
     // const cl = "6225479";
     // const cl = "6225479"; // Sw
-    const cl = "6229607"; // SM
+    const cl = params[0]; // Get the CL number from the command line arguments
 
     const details_json_url = `https://chromium-review.googlesource.com/changes/chromium%2Fsrc~${cl}/detail?O=1996394`;
     try {

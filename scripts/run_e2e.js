@@ -50,6 +50,7 @@ async function main() {
 
   // ChromeBuildConfig
   const chromeBuildConfig = {
+    ...config,
     name: config.name,
     build_arch: config.build_arch,
     build_type: config.build_type,
@@ -67,7 +68,7 @@ async function main() {
 
   const cr_debug_folder = path.join(cr_src_folder, "out", test_input.debug_folder_name || buildFolderName);
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
-  const upload_url = `http://${test_input.xtrace_server_ip}:3004/api/upload`;
+  const upload_url = `http://${test_input.xtrace_server_ip}:${(test_input.xtrace_server_port || 3004)}/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
   const xtrace_run_log = path.join(cr_debug_folder, 'xtrace.run.log');
   let content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
@@ -109,6 +110,7 @@ async function main() {
   }
   envs = {...envs, "XTRACE_CONFIG": JSON.stringify(config)}
   envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
+  envs = {...envs, "DISPLAY": ":1.0"}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
   const runInEnvWaited = (command, cwd) => run(command, cwd, {...envs, "WAIT_FOR_EXIT": "true"});
@@ -260,11 +262,17 @@ async function main() {
         fs.rmSync(xtrace_run_log);
       }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
+    try{
       await runInEnv(`./${test_input.ut_target}  --gtest_filter='*${test_input.ut_filter}*'`, cr_debug_folder);
-
+    }catch(e){
+      console.log("Error running unit tests, skipping web test");
+    }finally{
       // Delay for 5 seconds for xtrace.run.json to be generated
-      await setTimeout(() => {}, 5000);
+      console.log("Delaying for 5 seconds for xtrace.run.json to be generated");
+      await new Promise(resolve => setTimeout(resolve, 5000));
       alreadyRan = true;
+    }
+
     }
   });
 
@@ -313,7 +321,7 @@ async function main() {
     await convertFileToJsonArray(xtrace_run_log, xtrace_run_json);
     console.log("Uploading xtrace.run.json");
     await uploadFile(xtrace_run_json, upload_url);
-    const recording_url = `http://${test_input.xtrace_server_ip}:3009/?user=${encodeURIComponent(code_run_name_prefix)}`;
+    const recording_url = `http://${test_input.xtrace_server_ip}:${test_input.xtrace_server_port ? test_input.xtrace_server_port + 5 : 3009}/?user=${encodeURIComponent(code_run_name_prefix)}`;
     console.log(`Visit ${recording_url} to view the trace`);
     // Write url to tmp/last_recording_url
     fs.writeFileSync('tmp/last_recording_url', recording_url);

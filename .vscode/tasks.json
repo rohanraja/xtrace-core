@@ -160,6 +160,17 @@
 			]
 		},
 		{
+			"label": "Config.SetActive",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/ui.js",
+				"setActiveConfig",
+				"${file}",
+			],
+			"problemMatcher": []
+		},
+		{
 			"label": "Config.Add new",
 			"type": "shell",
 			"command": "node",
@@ -341,6 +352,11 @@
 					"XT_RUN_FILTER": "${input:run_stage}"
 				}
 			}
+		},
+		{
+			"label": "Run.E2E.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrace 2>/dev/null || tmux new-session -d -s xtrace; tmux new-window -t xtrace -n e2e_$(date +%s) 'node ./scripts/run.js; exec $SHELL'",
 		},
 	],
 	"inputs": [
