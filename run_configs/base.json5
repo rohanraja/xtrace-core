@@ -1,7 +1,9 @@
 {
-    "name": "Double click selection CR",
-    "cr_path": "Q:/cr", // Path to chromium source code, mostly "Q:/cr"
-    "debug_folder_name": "debug_full_x64", // Build ouput folder name in "out", mostly "debug_full_x64"
+    "name": "Chromium test in wave linux 4",
+    "cr_path": "/workspace/cr_test", // Path to chromium source code, mostly "Q:/cr"
+    "build_type": "release",
+    "build_arch": "x64", // Build architecture, mostly "x64"
+    "xtrace_server_port": 7004,
     "xtrace_server_ip": "20.244.33.135",
     "path_prefix_filter": "third_party/blink/", // If all files have common prefix, that can be removed from UI.
     "folders_whitelist": [ // List of folders which should be recorded
