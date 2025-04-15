@@ -15,9 +15,9 @@ function chromeProcessImageName(){
         case 'win32':
             return "chrome.exe";
         case 'darwin':
-            return "Chromium";
+            return "chrome";
         default:
-            return "Chromium";
+            return "chrome";
     }
 }
 

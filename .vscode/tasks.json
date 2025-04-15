@@ -47,6 +47,43 @@
 			],
 		},
 		{
+			"label": "Run.GclientAndBuild",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					// "XT_RUN_FILTER": ""
+					"XT_RUN_FILTER": "gclient, build-chrome, run-chrome"
+				}
+			}
+		},
+
+		{
+			"label": "Run.BuildChromeAndRun.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=autogn-configure,build-chrome,run-chrome node ./scripts/run.js; exec $SHELL'",
+		},
+
+		{
+			"label": "Run.BuildRunTest.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=build-chrome,run-tests node ./scripts/run.js; exec $SHELL'",
+		},
+		{
+			"label": "Run.HookBuildRunTestUpload.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=copy-xtrace-lib,build-chrome,run-tests,upload-recording node ./scripts/run.js; exec $SHELL'",
+		},
+		{
+			"label": "Run.GclientBuild.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=gclient,build-chrome,run-chrome node ./scripts/run.js; exec $SHELL'",
+		},
+		{
 			"label": "Run.ALL",
 			"type": "shell",
 			"command": "node",
@@ -356,7 +393,7 @@
 		{
 			"label": "Run.E2E.Tmux",
 			"type": "shell",
-			"command": "tmux has-session -t xtrace 2>/dev/null || tmux new-session -d -s xtrace; tmux new-window -t xtrace -n e2e_$(date +%s) 'node ./scripts/run.js; exec $SHELL'",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'node ./scripts/run.js; exec $SHELL'",
 		},
 	],
 	"inputs": [

@@ -110,7 +110,6 @@ async function main() {
   }
   envs = {...envs, "XTRACE_CONFIG": JSON.stringify(config)}
   envs = {...envs, "XTRACE_PREFIX": code_run_name_prefix}
-  envs = {...envs, "DISPLAY": ":1.0"}
 
   const runInEnv = (command, cwd) => run(command, cwd, envs);
   const runInEnvWaited = (command, cwd) => run(command, cwd, {...envs, "WAIT_FOR_EXIT": "true"});
@@ -122,6 +121,7 @@ async function main() {
   });
 
   let branchChanged = false;
+  let base_pulled = false;
   // Check if CL needs to be pulled
   await runStep("cl-fetch", async () => {
     const cl = test_input.cl;
@@ -144,8 +144,10 @@ async function main() {
         console.log("Fetching and checking out branch: ", targetBranch);
         const patchSetLastTwoDigits = cl.slice(-2);
         const fetchUrl = `refs/changes/${patchSetLastTwoDigits}/${cl}/${patchSet}`;
+        await runInEnv(`git checkout -b ${targetBranch} origin/main`, cr_src_folder);
         await runInEnv(`git fetch https://chromium.googlesource.com/chromium/src ${fetchUrl}`, cr_src_folder);
-        await runInEnv(`git checkout -b ${targetBranch} FETCH_HEAD`, cr_src_folder);
+        // Merge FETCH_HEAD into current branch
+        await runInEnv(`git merge FETCH_HEAD`, cr_src_folder);
         branchChanged = true;
       }
 
@@ -162,7 +164,7 @@ async function main() {
   });
 
   await runStep("gclient", async () => {
-    if(branchChanged || test_input.regenerateBuildFolder){
+    if(base_pulled || test_input.regenerateBuildFolder || run_filter.includes("gclient")){
       console.log("Running gclient sync -fD");
       await runInEnv(`gclient sync -fD`, cr_src_folder);
     }else{
@@ -263,7 +265,7 @@ async function main() {
       }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     try{
-      await runInEnv(`./${test_input.ut_target}  --gtest_filter='*${test_input.ut_filter}*'`, cr_debug_folder);
+      await runInEnv(`./${test_input.ut_target} --no-sandbox --gtest_filter='*${test_input.ut_filter}*'`, cr_debug_folder);
     }catch(e){
       console.log("Error running unit tests, skipping web test");
     }finally{

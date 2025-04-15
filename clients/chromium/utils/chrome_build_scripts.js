@@ -173,7 +173,7 @@ class ChromeBuildScripts extends AppBuildScriptBase {
   async buildChrome() {
     console.log("Building Chrome target - " + this.build_target);
     try {
-      await killAllProcessWithName(chromeProcessImageName());
+      // await killAllProcessWithName(chromeProcessImageName());
     } catch(e) {
       console.log("No Chrome process running or couldn't kill it");
     }

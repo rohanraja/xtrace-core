@@ -100,7 +100,24 @@ public:
 
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
 
+  inline void GetTimeCountFromEnv() {
+    // Get XT_TIME_COUNT
+    const char* time_count_env = std::getenv("XT_TIME_COUNT");
+    if (time_count_env) {
+      timeCount = std::stoi(std::string(time_count_env));
+    }
+  }
+
   inline void ResetCodeRunId(std::string name){
+    // If ENV has XT_CRID_CURRENT, set crid to that
+    const char* crid_env = std::getenv("XT_CRID_CURRENT");
+    if (crid_env) {
+      crid = std::string(crid_env);
+      std::cout << "Using crid from environment variable: " << crid << std::endl;
+      GetTimeCountFromEnv();
+      // Get XT_TIME_COUNT
+      return;
+    } 
     // Get xTrace_Prefix from environment variable "XTRACE_PREFIX"
     const char* xTrace_Prefix_cstr = std::getenv("XTRACE_PREFIX");
     std::string xTrace_Prefix = xTrace_Prefix_cstr ? std::string(xTrace_Prefix_cstr) : "";
@@ -121,13 +138,32 @@ public:
     std::vector<std::string> payload;
     payload.push_back(name);
     DispatchEvent(eventType, getVectorOfStringToJson(payload));
+
+    // Set crid to ENV XT_CRID_CURRENT
+    std::string env_name = "XT_CRID_CURRENT";
+    std::string env_value = crid;
+    setenv(env_name.c_str(), env_value.c_str(), 1);
+    std::cout << "Set environment variable " << env_name << " to " << env_value << std::endl;
+
+    UpdateTimeCountInEnv();
+  }
+
+  inline void UpdateTimeCountInEnv(){
+
+    // Set timeCount to XT_TIME_COUNT
+    std::string env_time_name = "XT_TIME_COUNT";
+    std::string env_time_value = std::to_string(timeCount);
+    setenv(env_time_name.c_str(), env_time_value.c_str(), 1);
+    std::cout << "Set environment variable " << env_time_name << " to " << env_time_value << std::endl;
   }
 
   inline void LocalVarUpdate(std::string mrid, std::string varName, std::string varValue) {
 
+    GetTimeCountFromEnv();
     int timeStamp = timeCount;
     timeCount++;
     SendVarUpdate(mrid, varName, true, "", varValue, timeStamp);
+    UpdateTimeCountInEnv();
   }
 
   inline void SendVarUpdate(std::string contId, std::string varName, bool isLocal, std::string className, std::string newVal, int timeStamp) {
@@ -152,8 +188,10 @@ public:
     std::string type = "LINE_EXEC";
     std::vector<std::string> payload;
 
+    GetTimeCountFromEnv();
     int timeStamp = timeCount;
     timeCount++;
+    UpdateTimeCountInEnv();
 
     payload.push_back(mrid);
     payload.push_back(std::to_string(lineNo));
