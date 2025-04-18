@@ -40,16 +40,15 @@ class ChromeBuildScripts extends AppBuildScriptBase {
     const env = {...process.env};
     if (process.platform === "win32") {
       env.Path = `C:\\Program Files\\nodejs;${config.cr_path}\\depot_tools\\scripts;${config.cr_path}\\depot_tools;${process.env.Path}`;
-      this.binaryPostfix = ".exe";
     } else {
       // For Linux and macOS, PATH is uppercase
       env.PATH = `${config.cr_path}/chromium.depot_tools.cr-contrib/scripts:${config.cr_path}/chromium.depot_tools.cr-contrib:${process.env.PATH}`;
-      this.binaryPostfix = "";
     }
     
     // Call parent constructor with environment
     super(env);
 
+    this.binaryPostfix = process.platform === "win32" ? ".exe" : "";
     this.config = config;
     this.src_path = path.join(config.cr_path, "src");
     
