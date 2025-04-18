@@ -135,6 +135,7 @@ async function main() {
     const currentBranch = await runInEnv(`git rev-parse --abbrev-ref HEAD`, cr_src_folder);
     if(cl && patchSet){ 
 
+      let shouldMergeToMain = test_input.shouldMergeToMain;
       const targetBranch = `change-${cl}-${patchSet}`;
       console.log("Current branch: ", currentBranch);
       if(currentBranch.includes(targetBranch)){
@@ -144,10 +145,18 @@ async function main() {
         console.log("Fetching and checking out branch: ", targetBranch);
         const patchSetLastTwoDigits = cl.slice(-2);
         const fetchUrl = `refs/changes/${patchSetLastTwoDigits}/${cl}/${patchSet}`;
-        await runInEnv(`git checkout -b ${targetBranch} origin/main`, cr_src_folder);
+
+        if(shouldMergeToMain){
+          await runInEnv(`git checkout -b ${targetBranch} origin/main`, cr_src_folder);
+        }
         await runInEnv(`git fetch https://chromium.googlesource.com/chromium/src ${fetchUrl}`, cr_src_folder);
-        // Merge FETCH_HEAD into current branch
-        await runInEnv(`git merge FETCH_HEAD`, cr_src_folder);
+
+        if(!shouldMergeToMain){
+          await runInEnv(`git checkout -b ${targetBranch} FETCH_HEAD`, cr_src_folder);
+        }
+        else{
+          await runInEnv(`git merge FETCH_HEAD`, cr_src_folder);
+        }
         branchChanged = true;
       }
 

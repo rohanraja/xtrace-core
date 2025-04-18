@@ -40,9 +40,11 @@ class ChromeBuildScripts extends AppBuildScriptBase {
     const env = {...process.env};
     if (process.platform === "win32") {
       env.Path = `C:\\Program Files\\nodejs;${config.cr_path}\\depot_tools\\scripts;${config.cr_path}\\depot_tools;${process.env.Path}`;
+      this.binaryPostfix = ".exe";
     } else {
       // For Linux and macOS, PATH is uppercase
       env.PATH = `${config.cr_path}/chromium.depot_tools.cr-contrib/scripts:${config.cr_path}/chromium.depot_tools.cr-contrib:${process.env.PATH}`;
+      this.binaryPostfix = "";
     }
     
     // Call parent constructor with environment
@@ -174,6 +176,12 @@ class ChromeBuildScripts extends AppBuildScriptBase {
     console.log("Building Chrome target - " + this.build_target);
     try {
       // await killAllProcessWithName(chromeProcessImageName());
+      // Delete the target file if it exists
+      const targetFile = path.join(this.build_path, this.build_target, this.binaryPostfix);
+      if (fs.existsSync(targetFile)) {
+        console.log(`Deleting target file: ${targetFile}`);
+        fs.rmSync(targetFile, { recursive: true, force: true });
+      }
     } catch(e) {
       console.log("No Chrome process running or couldn't kill it");
     }
