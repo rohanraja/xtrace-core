@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <unistd.h>
 
 // #define ALLOW_DISCOURAGED_TYPE(x)
 
@@ -95,7 +96,10 @@ public:
   inline XTrace() {
     this->crid = generateRandomGuid();
     std::cout << "XTrace constructor" << std::endl;
-    ResetCodeRunId("Start");
+    // Get process id
+    std::string processId = std::to_string(getpid());
+    std::cout << "Process ID: " << processId << std::endl;
+    ResetCodeRunId("Start_" + processId);
   }
 
   inline ~XTrace() { std::cout << "XTrace destructor" << std::endl; }
@@ -143,7 +147,7 @@ public:
     std::string env_name = "XT_CRID_CURRENT";
     std::string env_value = crid;
     setenv(env_name.c_str(), env_value.c_str(), 1);
-    std::cout << "Set environment variable " << env_name << " to " << env_value << std::endl;
+    // std::cout << "Set environment variable " << env_name << " to " << env_value << std::endl;
 
     UpdateTimeCountInEnv();
   }
@@ -154,7 +158,7 @@ public:
     std::string env_time_name = "XT_TIME_COUNT";
     std::string env_time_value = std::to_string(timeCount);
     setenv(env_time_name.c_str(), env_time_value.c_str(), 1);
-    std::cout << "Set environment variable " << env_time_name << " to " << env_time_value << std::endl;
+    // std::cout << "Set environment variable " << env_time_name << " to " << env_time_value << std::endl;
   }
 
   inline void LocalVarUpdate(std::string mrid, std::string varName, std::string varValue) {
@@ -206,7 +210,7 @@ public:
                             std::string methodName, std::string codeVersion) {
 
     std::string mrid = generateRandomGuid();
-    std::cout << "OnMethodEnter called" << std::endl;
+    std::cout << "OnMethodEnter called for: " << methodName  << std::endl;
 
     std::string type = "METHOD_ENTER";
 
@@ -235,7 +239,7 @@ public:
   }
 
   inline void WriteStringToJsonLOGFile(std::string msg) {
-    std::cout << "WriteStringToJsonLOGFile called" << std::endl;
+    // std::cout << "WriteStringToJsonLOGFile called" << std::endl;
     std::ofstream ofs;
     ofs.open("xtrace.run.log", std::ofstream::out | std::ofstream::app);
 
@@ -252,8 +256,6 @@ public:
     }
 
     ofs.close();
-    std::cout << "Data written" << std::endl;
-
   }
 
   inline std::string getVectorOfStringToJson(std::vector<std::string> &vec) {

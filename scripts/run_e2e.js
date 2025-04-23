@@ -301,7 +301,8 @@ async function main() {
     }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     if(!run_chrome){
-      await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+      // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
+      await runInEnv(`vpython3 third_party/blink/tools/run_web_tests.py ${test_input.web_test} -t ${buildFolderName} --additional-driver-flag="${test_input.additionalFlags}" --verbose --driver-logging`, cr_src_folder);
 
       // Delay for 5 seconds for xtrace.run.json to be generated
       await setTimeout(() => {}, 5000);
@@ -322,7 +323,7 @@ async function main() {
     }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     if(run_chrome){
-      await runInEnvWaited(`${chromium_bin}  --no-sandbox ${web_page}`, cr_debug_folder);
+      await runInEnvWaited(`${chromium_bin} ${test_input.additionalFlags} --no-sandbox --enable-logging=stderr --v=0 ${web_page}`, cr_debug_folder);
     }
   });
 

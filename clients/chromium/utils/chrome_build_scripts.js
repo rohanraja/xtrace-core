@@ -62,7 +62,7 @@ class ChromeBuildScripts extends AppBuildScriptBase {
 
     this.build_target = config.ut_target || "chrome";
     if(config.web_test){
-      this.build_target = "content_shell";
+      this.build_target = "blink_tests";
     }
     
     

@@ -69,6 +69,11 @@
 		},
 
 		{
+			"label": "Run.BuildRunWebTest.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=build-chrome,run-web-test node ./scripts/run.js; exec $SHELL'",
+		},
+		{
 			"label": "Run.BuildRunTest.Tmux",
 			"type": "shell",
 			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=build-chrome,run-tests node ./scripts/run.js; exec $SHELL'",
@@ -137,6 +142,20 @@
 			"options": {
 				"env": {
 					"XT_RUN_FILTER": "copy-xtrace-lib,git-reset,inject-hooks,upload-source-code,build-webtest,run-web-test,upload-recording"
+				}
+			}
+		},
+		{
+			"label": "Run.RunChromeAndUploadRecording",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"./scripts/run.js",
+				// "./run_configs/table_selection_bug.json5"
+			],
+			"options": {
+				"env": {
+					"XT_RUN_FILTER": "run-chrome,upload-recording"
 				}
 			}
 		},
