@@ -13,6 +13,7 @@ async function runStep(step_name, fn, filterStr){
         console.log(`#### Completed step: ${step_name}`);
     } catch (error) {
         console.error(`### Error in step: ${step_name}`, error);
+        throw new Error(`Step ${step_name} failed: ${error.message}`);
     }
 }
 

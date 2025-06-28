@@ -1,5 +1,5 @@
 import { SyntaxNode, Tree } from 'tree-sitter';
-import { config, fileName, cvid, methodsToInclude, methodsToExclude, primitiveTypes } from './config';
+import { config, fileName, cvid, methodsToInclude, methodsToExclude, primitiveTypes, typesToExclude } from './config';
 
 /**
  * Interfaces and Types
@@ -495,7 +495,8 @@ export class CodeLogger {
                 lineDataAfterExec += this.generateVariableUpdateCode(
                     assignmentInfo.identifier, 
                     assignmentInfo.isPointer,
-                    assignmentInfo.isReference
+                    assignmentInfo.isReference,
+                    assignmentInfo.valueType
                 );
             }
         }
@@ -534,7 +535,7 @@ export class CodeLogger {
                 code += this.generateVariableUpdateCode(
                     identifierInfo.name, 
                     identifierInfo.isPointer,
-                    identifierInfo.isReference
+                    identifierInfo.isReference,
                 );
             }
         });
@@ -542,7 +543,12 @@ export class CodeLogger {
         return code;
     }
 
-    private generateVariableUpdateCode(variableName: string, isPointer: boolean, isReference: boolean = false): string {
+    private generateVariableUpdateCode(variableName: string, isPointer: boolean, isReference: boolean = false, valueType: string = ""): string {
+        for(const excludedType of typesToExclude) {
+            if (variableName.includes(excludedType)) {
+                return "";
+            }
+        }
         if (isPointer) {
             return `xtrace->LocalVarUpdate(xtrace_mrid,"${variableName}", ${variableName} ? base::ToString(*${variableName}) : "");\n`;
         } else if (isReference) {

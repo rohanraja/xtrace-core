@@ -10,6 +10,7 @@ async function run(command, cwd_p, env, onOutput) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, env, shell: true });
     let fullStdout = '';
+    let fullStderr = '';
 
     // On kill of parent process, kill the child process
     process.on('SIGINT', () => {
@@ -42,7 +43,8 @@ async function run(command, cwd_p, env, onOutput) {
 
     child.stderr.on('data', (data) => {
       process.stderr.write(`Error: ${data}`);
-      fullStdout += data.toString();
+      fullStderr += data.toString();
+      fullStdout += data.toString(); // Include stderr in full output for compatibility
       if(onOutput){
         onOutput(data.toString());
       }
@@ -50,8 +52,15 @@ async function run(command, cwd_p, env, onOutput) {
 
     child.on('close', (code) => {
       // console.log(`Close invoked on command ${command}`);
+      
+      // Enhanced error detection for build failures
+      const combinedOutput = fullStdout + fullStderr;
+      const hasBuildFailure = detectBuildFailure(combinedOutput, command);
+      
       if (code !== 0) {
         reject(`${fullStdout}\nExecution failed with code ${code}`);
+      } else if (hasBuildFailure) {
+        reject(`${fullStdout}\nBuild failure detected in output`);
       } else {
         resolve(fullStdout);
       }
@@ -62,6 +71,61 @@ async function run(command, cwd_p, env, onOutput) {
       reject(fullStdout);
     });
   });
+}
+
+/**
+ * Detect build failures in command output even when exit code is 0
+ * @param {string} output - Combined stdout and stderr output
+ * @param {string} command - The command that was executed
+ * @returns {boolean} True if build failure indicators are found
+ */
+function detectBuildFailure(output, command) {
+  // Common build failure patterns
+  const buildFailurePatterns = [
+    /FAILED:/i,
+    /BUILD FAILED/i,
+    /compilation terminated/i,
+    // /error:/i,
+    /fatal error:/i,
+    // /\berror\b.*:\s*\d+/i, // Error with line numbers
+    /undefined reference to/i,
+    /multiple definition of/i,
+    /permission denied/i,
+    /no such file or directory/i,
+    /cannot find -l/i, // Missing library
+    /collect2: error:/i,
+    /ld: error:/i,
+    /ninja: build stopped/i,
+    /autoninja: error/i,
+  ];
+
+  // Check for build failure patterns
+  const hasFailurePattern = buildFailurePatterns.some(pattern => pattern.test(output));
+
+  // Print the pattern matches for debugging
+  if (hasFailurePattern) {
+    console.log(`Build failure detected in command: ${command}`);
+    buildFailurePatterns.forEach(pattern => {
+      const match = output.match(pattern);
+      if (match) {
+        console.log(`Matched pattern: ${pattern} - ${match[0]}`);
+      }
+    });
+  }
+  
+  // Additional checks for specific build commands
+  if (command.includes('autoninja') || command.includes('ninja')) {
+    // For ninja builds, also check for specific ninja failure indicators
+    const ninjaFailurePatterns = [
+      /\[\d+\/\d+\] FAILED:/,
+      /ninja: build stopped: subcommand failed/,
+      /FAILED:/
+    ];
+    const hasNinjaFailure = ninjaFailurePatterns.some(pattern => pattern.test(output));
+    return hasFailurePattern || hasNinjaFailure;
+  }
+  
+  return hasFailurePattern;
 }
 
 
@@ -87,5 +151,6 @@ function killAllProcessWithName(processName) {
 
 module.exports = {
   killAllProcessWithName,
-  run
+  run,
+  detectBuildFailure
 };

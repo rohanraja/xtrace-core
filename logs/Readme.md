@@ -1,1 +1,1 @@
-All the logs from E2E automation scripts reside here.
+All the logs from E2E automation scripts reside here. Move old irrelevant logs to archive.

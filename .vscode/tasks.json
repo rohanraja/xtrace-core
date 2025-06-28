@@ -61,6 +61,11 @@
 				}
 			}
 		},
+		{
+			"label": "Run.Hook_Build.Tmux",
+			"type": "shell",
+			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'XT_RUN_FILTER=copy-xtrace-lib,build-chrome node ./scripts/run.js; exec $SHELL'",
+		},
 
 		{
 			"label": "Run.BuildChromeAndRun.Tmux",
@@ -113,7 +118,7 @@
 			],
 			"options": {
 				"env": {
-					"XT_RUN_FILTER": "copy-xtrace-lib,git-reset,inject-hooks,build-chrome"
+					"XT_RUN_FILTER": "copy-xtrace-lib,git-reset,inject-hooks,upload-source-code,build-chrome"
 				}
 			}
 		},

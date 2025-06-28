@@ -10,6 +10,7 @@ export interface InjectConfig {
     files_whitelist: string[];
     methods_whitelist: string[];
     methods_blacklist: string[];
+    ignored_types: string[];
     methods_which_split_run: string[];
     name: string;
 };
