@@ -1,0 +1,38 @@
+{
+  "name": "xtrace-clang-injector",
+  "version": "1.0.0",
+  "description": "Clang LibTooling-based C++ code injection tool for xTrace",
+  "main": "build/xtrace-clang-injector",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "configure": "bash scripts/configure.sh",
+    "build": "bash scripts/build.sh",
+    "clean": "bash scripts/clean.sh",
+    "test": "bash scripts/test.sh",
+    "install-deps": "bash scripts/install-deps.sh"
+  },
+  "keywords": [
+    "clang",
+    "libtooling",
+    "ast",
+    "c++",
+    "code-injection",
+    "static-analysis",
+    "xtrace"
+  ],
+  "author": "xTrace Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/xtrace-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/xtrace-core/issues"
+  },
+  "homepage": "https://github.com/your-org/xtrace-core#readme"
+}

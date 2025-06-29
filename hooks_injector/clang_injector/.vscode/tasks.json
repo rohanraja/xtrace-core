@@ -1,0 +1,234 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup: Install Dependencies",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "install-deps"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Install LLVM/Clang development dependencies"
+        },
+        {
+            "label": "Setup: Complete Setup",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "setup"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Complete setup: install dependencies, configure, and build"
+        },
+        {
+            "label": "Build: Configure",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "configure"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Configure the CMake build system"
+        },
+        {
+            "label": "Build: Compile",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Build the xTrace Clang Injector",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build: Clean",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "clean"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Clean build artifacts"
+        },
+        {
+            "label": "Test: Run Sample Test",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "test"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Run the injector on a sample C++ file",
+            "dependsOn": "Build: Compile"
+        },
+        {
+            "label": "Run: Process Current File",
+            "type": "shell",
+            "command": "./build/xtrace-clang-injector",
+            "args": [
+                "${file}",
+                "--",
+                "-std=c++17"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Process the currently open C++ file",
+            "dependsOn": "Build: Compile"
+        },
+        {
+            "label": "Run: Process from Stdin",
+            "type": "shell",
+            "command": "echo",
+            "args": [
+                "'${input:cppCode}'",
+                "|",
+                "./build/xtrace-clang-injector",
+                "/dev/stdin",
+                "--"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": ["-c"]
+                }
+            },
+            "detail": "Process C++ code from user input",
+            "dependsOn": "Build: Compile"
+        },
+        {
+            "label": "Debug: Build Debug Version",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug && make -j$(nproc)"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Build debug version with debugging symbols",
+            "dependsOn": "Build: Configure"
+        },
+        {
+            "label": "Run: Process with Verbose Output",
+            "type": "shell",
+            "command": "./build/xtrace-clang-injector",
+            "args": [
+                "--verbose",
+                "${file}",
+                "--",
+                "-std=c++17"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Process the currently open C++ file with verbose output",
+            "dependsOn": "Build: Compile"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "cppCode",
+            "description": "C++ code to process",
+            "default": "int main() { return 0; }",
+            "type": "promptString"
+        }
+    ]
+}
