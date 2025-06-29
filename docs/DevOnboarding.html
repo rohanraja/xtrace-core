@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Onboarding: xTrace C++ Hook Injection System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #2c3e50;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .toc li {
+            margin: 5px 0;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+        }
+        .file-tree {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 16px;
+            line-height: 1.4;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</head>
+<body>
+
+<h1>Developer Onboarding: xTrace C++ Hook Injection System</h1>
+
+<p>This document provides a comprehensive guide to understanding how the xTrace C++ hook injection system works, including both the legacy tree-sitter approach and the new Clang LibTooling approach.</p>
+
+<div class="toc">
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#system-overview">System Overview</a></li>
+<li><a href="#architecture-components">Architecture Components</a></li>
+<li><a href="#data-flow">Data Flow</a></li>
+<li><a href="#hook-injection-process">Hook Injection Process</a></li>
+<li><a href="#code-structure">Code Structure</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+</ol>
+</div>
+
+<h2 id="system-overview">System Overview</h2>
+
+<p>The xTrace C++ hook injection system automatically instruments C++ code to add debugging/tracing capabilities. It works by parsing C++ source files, identifying methods and variables, and injecting logging statements that capture execution flow and variable states.</p>
+
+<div class="mermaid">
+graph TB
+    A[C++ Source Files] --> B{Parsing Approach}
+    B -->|Legacy| C[Tree-sitter Parser]
+    B -->|New| D[Clang LibTooling]
+    C --> E[AST Analysis]
+    D --> F[Clang AST]
+    E --> G[Hook Injection]
+    F --> G
+    G --> H[Instrumented C++ Code]
+    H --> I[Chromium Build]
+    I --> J[Runtime Execution]
+    J --> K[xTrace Logs]
+    K --> L[xTrace Web UI]
+</div>
+
+<h2 id="architecture-components">Architecture Components</h2>
+
+<h3>1. Core Components State Diagram</h3>
+
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> Initialized
+    Initialized --> Parsing: Input C++ File
+    Parsing --> ASTBuilding: tree-sitter/Clang
+    ASTBuilding --> MethodDiscovery: Traverse AST
+    MethodDiscovery --> CodeGeneration: Found Methods
+    CodeGeneration --> CodeInjection: Generate Hooks
+    CodeInjection --> OutputGeneration: Rewrite Source
+    OutputGeneration --> [*]: Instrumented Code
+    
+    Parsing --> Error: Parse Failure
+    Error --> [*]: Exit
+</div>
+
+<h3>2. Data Structures</h3>
+
+<div class="mermaid">
+classDiagram
+    class MethodInfo {
+        +string name
+        +FunctionDecl* function_decl
+        +string filename
+        +SourceLocation start_loc
+        +SourceLocation body_start_loc
+        +vector~ParmVarDecl*~ parameters
+        +bool should_reset_code_run
+    }
+    
+    class AssignmentInfo {
+        +string identifier
+        +string valueType
+        +bool isPointer
+        +bool isReference
+        +bool isPrimitive
+        +string primitiveType
+        +bool hasInitializer
+    }
+    
+    class XTraceInjector {
+        -Rewriter rewriter_
+        -unique_ptr~MethodVisitor~ visitor_
+        -unique_ptr~CodeRewriter~ code_rewriter_
+        +HandleTranslationUnit()
+        +getRewrittenSource()
+    }
+    
+    class MethodVisitor {
+        -ASTContext* context_
+        -vector~MethodInfo~ discovered_methods_
+        +VisitFunctionDecl()
+        +getDiscoveredMethods()
+    }
+    
+    class CodeRewriter {
+        -Rewriter rewriter_
+        -ASTContext* context_
+        +injectAllMethods()
+        +injectMethodEntryCode()
+    }
+    
+    XTraceInjector --> MethodVisitor
+    XTraceInjector --> CodeRewriter
+    MethodVisitor --> MethodInfo
+    CodeRewriter --> AssignmentInfo
+</div>
+
+<h2 id="data-flow">Data Flow</h2>
+
+<h3>1. High-Level Processing Flow</h3>
+
+<div class="mermaid">
+sequenceDiagram
+    participant Main as main.cpp
+    participant Tool as ClangTool
+    participant Action as XTraceInjectorAction
+    participant Injector as XTraceInjector
+    participant Visitor as MethodVisitor
+    participant Rewriter as CodeRewriter
+    participant Output as stdout
+    
+    Main->>Tool: Create with file and args
+    Tool->>Action: CreateASTConsumer()
+    Action->>Injector: new XTraceInjector(rewriter)
+    Tool->>Injector: HandleTranslationUnit()
+    
+    Injector->>Visitor: new MethodVisitor(context)
+    Injector->>Visitor: TraverseDecl(TU)
+    
+    loop For each function
+        Visitor->>Visitor: VisitFunctionDecl()
+        Visitor->>Visitor: extractMethodName()
+        Visitor->>Visitor: shouldProcessMethod()
+        Visitor->>Visitor: Add to discovered_methods_
+    end
+    
+    Injector->>Rewriter: new CodeRewriter(rewriter, context)
+    Injector->>Rewriter: injectAllMethods(methods)
+    
+    Rewriter->>Rewriter: insertIncludes()
+    loop For each method
+        Rewriter->>Rewriter: injectMethodEntryCode()
+        Rewriter->>Rewriter: generateMethodEntryCode()
+        Rewriter->>Rewriter: generateParameterLogging()
+    end
+    
+    Action->>Action: EndSourceFileAction()
+    Action->>Output: Print rewritten source
+</div>
+
+<h3>2. Method Discovery Process</h3>
+
+<div class="mermaid">
+flowchart TD
+    A[Function Declaration] --> B{Has Body?}
+    B -->|No| C[Skip - Declaration Only]
+    B -->|Yes| D{In System Header?}
+    D -->|Yes| E[Skip - System Code]
+    D -->|No| F[Extract Method Name]
+    F --> G{Should Process?}
+    G -->|No| H[Skip - Excluded Method]
+    G -->|Yes| I[Create MethodInfo]
+    I --> J{Should Reset Code Run?}
+    J -->|Yes| K[Mark for Reset]
+    J -->|No| L[Regular Method]
+    K --> M[Add to discovered_methods_]
+    L --> M
+    
+    style A fill:#e1f5fe
+    style I fill:#c8e6c9
+    style M fill:#4caf50
+</div>
+
+<h2 id="hook-injection-process">Hook Injection Process</h2>
+
+<h3>1. Code Injection Strategy</h3>
+
+<div class="mermaid">
+flowchart LR
+    A[Original Method] --> B[Insert Includes]
+    B --> C[Method Entry Hook]
+    C --> D[Parameter Logging]
+    D --> E[Variable Updates]
+    E --> F[Original Code]
+    
+    subgraph "Injected Code"
+        G["#include third_party/xtrace/xtrace.h<br/>#include base/strings/to_string.h"]
+        H["XTrace *xtrace = XTrace::getInstance()<br/>string mrid = xtrace->OnMethodEnter(...)"]
+        I["xtrace->LocalVarUpdate(mrid, param, base::ToString(param))"]
+    end
+    
+    B -.-> G
+    C -.-> H
+    D -.-> I
+</div>
+
+<h3>2. Code Generation Process</h3>
+
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> AnalyzeMethod
+    AnalyzeMethod --> ExtractParameters: Get function parameters
+    ExtractParameters --> GenerateEntryCode: Create OnMethodEnter call
+    GenerateEntryCode --> GenerateParamLogging: For each parameter
+    GenerateParamLogging --> InjectCode: Insert at method start
+    InjectCode --> [*]: Complete
+    
+    note right of GenerateEntryCode
+        blink::XTrace *xtrace = blink::XTrace::getInstance()
+        std::string xtrace_mrid = xtrace->OnMethodEnter(name, GUID)
+    end note
+    
+    note right of GenerateParamLogging
+        xtrace->LocalVarUpdate(xtrace_mrid, paramName, base::ToString(paramValue))
+    end note
+</div>
+
+<h3>3. Tree-sitter vs Clang Approach Comparison</h3>
+
+<div class="mermaid">
+graph TB
+    subgraph "Tree-sitter Approach (Legacy)"
+        A1[C++ Source] --> B1[Tree-sitter Grammar]
+        B1 --> C1[Syntax Tree]
+        C1 --> D1[Manual AST Walking]
+        D1 --> E1[String Manipulation]
+        E1 --> F1[Instrumented Code]
+    end
+    
+    subgraph "Clang LibTooling Approach (New)"
+        A2[C++ Source] --> B2[Clang Parser]
+        B2 --> C2[Clang AST]
+        C2 --> D2[RecursiveASTVisitor]
+        D2 --> E2[Clang Rewriter]
+        E2 --> F2[Instrumented Code]
+    end
+    
+    style A2 fill:#c8e6c9
+    style F2 fill:#4caf50
+    style A1 fill:#ffecb3
+    style F1 fill:#ff9800
+</div>
+
+<h2 id="code-structure">Code Structure</h2>
+
+<h3>1. File Organization</h3>
+
+<div class="file-tree">
+hooks_injector/
+├── clang_injector/                    # New Clang LibTooling approach
+│   ├── src/
+│   │   ├── main.cpp                   # Entry point
+│   │   ├── XTraceInjector.cpp         # Main injector logic
+│   │   ├── MethodVisitor.cpp          # AST visitor for methods
+│   │   └── CodeRewriter.cpp           # Code rewriting logic
+│   ├── include/
+│   │   ├── XTraceInjector.h
+│   │   ├── MethodVisitor.h
+│   │   └── CodeRewriter.h
+│   ├── CMakeLists.txt                 # Build configuration
+│   └── package.json                   # NPM script wrapper
+└── cpp_hooks_injector/                # Legacy tree-sitter approach
+    ├── logger.ts                      # Main logging logic
+    ├── config.ts                      # Configuration
+    └── inject_in_folders.ts           # Folder processing
+</div>
+
+<h3>2. Key Files and Their Roles</h3>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main.cpp</code></td>
+<td>Entry point, argument parsing, ClangTool setup</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/src/main.cpp">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>XTraceInjector.h</code></td>
+<td>Main injector class and FrontendAction</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/include/XTraceInjector.h">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>XTraceInjector.cpp</code></td>
+<td>Implementation of injection orchestration</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/src/XTraceInjector.cpp">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>MethodVisitor.h</code></td>
+<td>AST visitor for discovering methods</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/include/MethodVisitor.h">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>MethodVisitor.cpp</code></td>
+<td>Method discovery and filtering logic</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/src/MethodVisitor.cpp">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>CodeRewriter.h</code></td>
+<td>Code injection and rewriting interface</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/include/CodeRewriter.h">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>CodeRewriter.cpp</code></td>
+<td>Code generation and injection implementation</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/src/CodeRewriter.cpp">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>CMakeLists.txt</code></td>
+<td>Build configuration for Clang LibTooling</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/CMakeLists.txt">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>logger.ts</code></td>
+<td>Legacy tree-sitter-based injection logic</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/cpp_hooks_injector/logger.ts">View in VS Code</a></td>
+</tr>
+<tr>
+<td><code>run_e2e.js</code></td>
+<td>End-to-end execution pipeline</td>
+<td><a href="vscode://file/home/roraja/src/xtrace-core/scripts/run_e2e.js">View in VS Code</a></td>
+</tr>
+</tbody>
+</table>
+
+<h3>3. Processing Pipeline</h3>
+
+<div class="mermaid">
+flowchart TD
+    A[Input: C++ Source File] --> B[Parse Arguments]
+    B --> C[Create Compilation Database]
+    C --> D[Initialize ClangTool]
+    D --> E[Create XTraceInjectorAction]
+    E --> F[Parse & Build AST]
+    F --> G[XTraceInjector::HandleTranslationUnit]
+    
+    G --> H[Create MethodVisitor]
+    G --> I[Create CodeRewriter]
+    
+    H --> J[Traverse AST]
+    J --> K[VisitFunctionDecl for each function]
+    K --> L[Filter & Store Methods]
+    
+    I --> M[Insert #includes]
+    L --> N[Generate Hook Code for each method]
+    N --> O[Inject Code via Clang Rewriter]
+    
+    O --> P[Output Instrumented Code]
+    
+    style A fill:#e1f5fe
+    style P fill:#4caf50
+    style G fill:#fff3e0
+</div>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<h3>1. Build and Test</h3>
+
+<pre><code class="language-bash"># Navigate to clang injector directory
+cd hooks_injector/clang_injector
+
+# Install dependencies and build
+npm run build
+
+# Test with sample file
+npm run test
+
+# Use on specific file
+./build/xtrace-clang-injector /path/to/file.cpp -- -std=c++17
+</code></pre>
+
+<h3>2. Integration with xTrace Pipeline</h3>
+
+<p>The C++ hook injection is integrated into the larger xTrace pipeline via <a href="vscode://file/home/roraja/src/xtrace-core/scripts/run_e2e.js"><code>run_e2e.js</code></a>:</p>
+
+<div class="mermaid">
+flowchart LR
+    A[Run Configuration] --> B[Git Reset & CL Fetch]
+    B --> C[Copy xTrace Library]
+    C --> D[Inject Hooks]
+    D --> E[Upload Source Code]
+    E --> F[Build Chromium]
+    F --> G[Run Tests/Chrome]
+    G --> H[Upload Recording]
+    H --> I[View in xTrace UI]
+    
+    subgraph "Hook Injection Step"
+        D1[cpp_hooks_injector] --> D2[Process Selected Folders]
+        D2 --> D3[Generate code_events.json]
+    end
+    
+    D --> D1
+</div>
+
+<h3>3. Configuration</h3>
+
+<p>Key configuration points:</p>
+
+<ul>
+<li><strong>Methods to include/exclude</strong>: Defined in <a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/src/MethodVisitor.cpp"><code>MethodVisitor.cpp</code></a> static sets</li>
+<li><strong>Build flags</strong>: Configured in <a href="vscode://file/home/roraja/src/xtrace-core/hooks_injector/clang_injector/CMakeLists.txt"><code>CMakeLists.txt</code></a></li>
+<li><strong>Runtime config</strong>: Via <a href="vscode://file/home/roraja/src/xtrace-core/scripts/run_e2e.js"><code>run_e2e.js</code></a> JSON configuration files</li>
+</ul>
+
+<h3>4. Debugging Tips</h3>
+
+<ol>
+<li><strong>Build Issues</strong>: Check LLVM/Clang version compatibility in CMakeLists.txt</li>
+<li><strong>Parse Errors</strong>: Use <code>--verbose</code> flag and check Clang compilation database</li>
+<li><strong>Missing Hooks</strong>: Verify method filtering logic in MethodVisitor</li>
+<li><strong>Runtime Issues</strong>: Check generated code syntax and xTrace library linkage</li>
+</ol>
+
+<h3>5. Next Steps</h3>
+
+<ol>
+<li>Review the <a href="vscode://file/home/roraja/src/xtrace-core/docs/002%20-%20Architecture.md">architecture documentation</a></li>
+<li>Examine <a href="vscode://file/home/roraja/src/xtrace-core/run_configs">sample configurations</a></li>
+<li>Test with simple C++ files before Chromium integration</li>
+<li>Understand the <a href="vscode://file/home/roraja/src/xtrace-core/scripts/run_e2e.js">end-to-end pipeline</a></li>
+</ol>
+
+<hr>
+
+<h2>Troubleshooting</h2>
+
+<h3>Common Issues</h3>
+
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLVM Command Line Conflict</td>
+<td><code>Option 'X' registered more than once!</code></td>
+<td>Use LLVM shared library in CMakeLists.txt</td>
+</tr>
+<tr>
+<td>Parse Failures</td>
+<td>Empty output or crash</td>
+<td>Check C++ standard flags (<code>-std=c++17</code>)</td>
+</tr>
+<tr>
+<td>Missing Methods</td>
+<td>No hooks injected</td>
+<td>Review filtering logic in MethodVisitor</td>
+</tr>
+<tr>
+<td>Build Errors</td>
+<td>Linker errors</td>
+<td>Verify Clang/LLVM development packages installed</td>
+</tr>
+</tbody>
+</table>
+
+<h3>Debug Commands</h3>
+
+<pre><code class="language-bash"># Check LLVM installation
+llvm-config --version
+llvm-config --cxxflags
+
+# Verify library linking
+ldd build/xtrace-clang-injector
+
+# Test with minimal file
+echo 'int main() { return 0; }' | ./build/xtrace-clang-injector /dev/stdin --
+</code></pre>
+
+<p>This document should get you started with understanding and contributing to the xTrace C++ hook injection system. For specific implementation details, refer to the linked source files.</p>
+
+</body>
+</html>
