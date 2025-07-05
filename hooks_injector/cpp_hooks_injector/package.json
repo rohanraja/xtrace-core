@@ -5,21 +5,26 @@
   "main": "index.ts",
   "scripts": {
     "build": "node esbuild.config.js",
+    "build-serve": "node esbuild.serve.config.js",
     "inject": "node esbuild.config.js && node dist/out.js",
     "folders": "npm run build && node esbuild.config2.js && node dist/inject_folders.js",
     "test": "npm run build && (node dist/out.js < tests/inp.cc > tests/out.cc)",
-    "inj": "node dist/out.js < tests/inp.cc > tests/out.cc"
+    "inj": "node dist/out.js < tests/inp.cc > tests/out.cc",
+    "serve": "npm run build && npm run build-serve && node dist/serve.js",
+    "test-serve": "ts-node test_serve.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^4.19.2",
     "tree-sitter": "^0.21.1",
     "tree-sitter-cpp": "^0.22.1",
     "tree-sitter-javascript": "^0.21.3",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@types/node": "^20.14.14",
     "esbuild": "^0.23.1"
   }
