@@ -419,6 +419,50 @@
 			"type": "shell",
 			"command": "tmux has-session -t xtrun 2>/dev/null || tmux new-session -d -s xtrun; tmux new-window -t xtrun -n e2e_$(date +%s) 'node ./scripts/run.js; exec $SHELL'",
 		},
+		{
+			"label": "Docker.Build.CppHooksInjector",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"build",
+				"-t",
+				"cpp-hooks-injector:latest",
+				"."
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/hooks_injector/cpp_hooks_injector"
+			},
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Docker.Run.CppHooksInjector",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"run",
+				"-it",
+				"--rm",
+				"-p",
+				"3001:3001",
+				"--name",
+				"cpp-hooks-injector",
+				"cpp-hooks-injector:latest"
+			],
+			"group": "test",
+			"dependsOn": "Docker.Build.CppHooksInjector",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared"
+			}
+		},
 	],
 	"inputs": [
 		{

@@ -8,6 +8,7 @@ import { CodeParser } from './parser';
 import { CodeLogger } from './logger';
 import { CodeFormatter } from './formatter';
 import Parser, { SyntaxNode, Tree } from 'tree-sitter';
+import {setFileAndVersion} from './config';
 
 require('dotenv').config({ path: "../../config/.env", override: true });
 
@@ -32,20 +33,24 @@ app.post('/inject', async (req, res) => {
     try {
         let sourceCode = '';
         let filename = '';
+        let codeVersion = '';
 
         // Handle different request types
         if (typeof req.body === 'string') {
             // Plain text body
             sourceCode = req.body;
             filename = req.query.filename as string || 'input.cc';
+            codeVersion = req.query.codeVersion as string || '';
         } else if (req.body && typeof req.body === 'object') {
             // JSON body
             if (req.body.code) {
                 sourceCode = req.body.code;
                 filename = req.body.filename || 'input.cc';
+                codeVersion = req.body.codeVersion || '';
             } else if (req.body.sourceCode) {
                 sourceCode = req.body.sourceCode;
                 filename = req.body.filename || 'input.cc';
+                codeVersion = req.body.codeVersion || '';
             } else {
                 return res.status(400).json({
                     error: 'Invalid request body. Expected "code" or "sourceCode" field in JSON, or plain text body.'
@@ -75,6 +80,13 @@ app.post('/inject', async (req, res) => {
             injectorUsed = "tree-sitter";
             console.log("Using legacy tree-sitter injector for HTTP request");
             
+            process.env["FileName"] = filename;
+            process.env["CodeVersion"] = codeVersion;
+            setFileAndVersion(filename, codeVersion);
+
+
+            console.log(`CodeVersion: ${codeVersion}, Filename: ${filename}`);
+
             const parser = new CodeParser();
             const tree = parser.parse(sourceCode);
 
@@ -167,6 +179,7 @@ app.post('/inject', async (req, res) => {
             originalCode: sourceCode,
             modifiedCode: modifiedSourceCode,
             filename: filename,
+            codeVersion: codeVersion,
             timestamp: new Date().toISOString(),
             statistics: {
                 originalLines: sourceCode.split('\n').length,
