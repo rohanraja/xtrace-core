@@ -38,7 +38,9 @@ POST /inject
 ```json
 {
   "code": "// Your C++ code here",
-  "filename": "optional_filename.cc"
+  "filename": "optional_filename.cc",
+  "codeVersion": "optional_version_id",
+  "skipVariablesHooking": false
 }
 ```
 
@@ -47,6 +49,17 @@ POST /inject
 Content-Type: text/plain
 
 // Your C++ code here
+```
+
+**Parameters:**
+- `code` (required): C++ source code to inject hooks into
+- `filename` (optional): Name of the file (defaults to "input.cc")
+- `codeVersion` (optional): Version identifier for the code
+- `skipVariablesHooking` (optional): Set to `true` to skip variable tracking (LocalVarUpdate calls) while preserving method entry and line logging. Defaults to `false`.
+
+For plain text requests, you can pass `skipVariablesHooking` as a query parameter:
+```
+POST /inject?skipVariablesHooking=true
 ```
 
 **Response:**
@@ -58,6 +71,8 @@ Content-Type: text/plain
   "originalCode": "...",
   "modifiedCode": "...",
   "filename": "input.cc",
+  "codeVersion": "",
+  "skipVariablesHooking": false,
   "timestamp": "2025-07-05T08:40:13.067Z",
   "statistics": {
     "originalLines": 579,
@@ -67,6 +82,35 @@ Content-Type: text/plain
   }
 }
 ```
+
+**Response Fields:**
+- `success`: Boolean indicating if injection was successful
+- `injectorUsed`: Which injector was used ("tree-sitter", "clang", or "tree-sitter-fallback")
+- `hasError`: Boolean indicating if the generated code has syntax errors
+- `originalCode`: The input C++ code
+- `modifiedCode`: The C++ code with xTrace hooks injected
+- `filename`: Name of the processed file
+- `codeVersion`: Version identifier of the code
+- `skipVariablesHooking`: Whether variable hooking was skipped for this request
+- `timestamp`: When the processing was completed
+- `statistics`: Object containing line counts and file sizes
+
+### Variable Hooking Behavior
+
+The `skipVariablesHooking` parameter controls the type of xTrace hooks that are injected:
+
+**When `skipVariablesHooking: false` (default):**
+- Injects `OnMethodEnter` calls for method entry logging
+- Injects `LogLineRun` calls for line-by-line execution tracking  
+- Injects `LocalVarUpdate` calls for variable tracking (parameters and local variables)
+- Provides comprehensive execution tracing
+
+**When `skipVariablesHooking: true`:**
+- Injects `OnMethodEnter` calls for method entry logging
+- Injects `LogLineRun` calls for line-by-line execution tracking
+- **Skips** `LocalVarUpdate` calls for variable tracking
+- Provides method flow and line execution tracking without variable details
+- Offers better performance for large files when variable tracking is not needed
 
 ### Testing
 
@@ -118,8 +162,19 @@ curl -X POST http://localhost:3001/inject \
   -H "Content-Type: application/json" \
   -d '{"code": "#include <iostream>\nint main() { return 0; }", "filename": "test.cc"}'
 
+# Inject hooks with variable hooking disabled (JSON)
+curl -X POST http://localhost:3001/inject \
+  -H "Content-Type: application/json" \
+  -d '{"code": "#include <iostream>\nint main() { return 0; }", "filename": "test.cc", "skipVariablesHooking": true}'
+
 # Inject hooks (plain text)
 curl -X POST http://localhost:3001/inject \
+  -H "Content-Type: text/plain" \
+  -d '#include <iostream>
+int main() { return 0; }'
+
+# Inject hooks with variable hooking disabled (plain text with query param)
+curl -X POST "http://localhost:3001/inject?skipVariablesHooking=true" \
   -H "Content-Type: text/plain" \
   -d '#include <iostream>
 int main() { return 0; }'
@@ -128,6 +183,7 @@ int main() { return 0; }'
 #### Using JavaScript/Node.js
 
 ```javascript
+// Basic injection
 const response = await fetch('http://localhost:3001/inject', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -139,6 +195,20 @@ const response = await fetch('http://localhost:3001/inject', {
 
 const result = await response.json();
 console.log('Modified code:', result.modifiedCode);
+
+// Injection with variable hooking disabled for better performance
+const performanceResponse = await fetch('http://localhost:3001/inject', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    code: '#include <iostream>\nint main() { return 0; }',
+    filename: 'test.cc',
+    skipVariablesHooking: true
+  })
+});
+
+const performanceResult = await performanceResponse.json();
+console.log('Skip variables hooking enabled:', performanceResult.skipVariablesHooking);
 ```
 
 ### Integration

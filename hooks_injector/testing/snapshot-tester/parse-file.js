@@ -48,8 +48,50 @@ async function buildParser() {
     return output.toString();
 }
 
+/*
+Parse file with custom configuration
+*/
+function parseFileWithConfig(filePath, config = {}) {
+    const fileNameOnly = path.basename(filePath);
+    
+    // Prepare environment variables
+    const env = {
+        ...process.env,
+        FileName: fileNameOnly,
+        "CodeVersion": "GUID_FROM_TEST"
+    };
+    
+    // If config is provided, serialize it as JSON and pass via environment variable
+    if (Object.keys(config).length > 0) {
+        env.XTRACE_CONFIG = JSON.stringify(config);
+    }
+
+    const output = execSync(
+        `node dist/out.js ${filePath}`, {
+            cwd: cppHookInjectorPath,
+            env: env
+        }
+    );
+    return output.toString();
+}
+
+function parseFileToHookedFolderWithConfig(filePath, config = {}, suffix = '') {
+    const fileDir = filePath.split(path.sep).slice(0, -1).join(path.sep);
+    const outPutDir = `${fileDir}_hooked${suffix}`;
+    const fileNameOnly = path.basename(filePath);
+    const outFileName = path.join(outPutDir, fileNameOnly);
+    const outPut = parseFileWithConfig(filePath, config);
+    if (!fs.existsSync(outPutDir)) {
+        fs.mkdirSync(outPutDir);
+    }
+    fs.writeFileSync(outFileName, outPut);
+    return outFileName;
+}
+
 module.exports = {
     parseFile,
     buildParser,
-    parseFileToHookedFolder
+    parseFileToHookedFolder,
+    parseFileWithConfig,
+    parseFileToHookedFolderWithConfig
 }

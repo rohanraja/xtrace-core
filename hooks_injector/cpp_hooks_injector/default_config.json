@@ -10,6 +10,7 @@
         "LocalToAbsoluteQuadOf"
     ],
     "run_filter": "",
+    "skipVariablesHooking": false,
     "class_vars": {
         "StyledMarkupSerializer<Strategy>::CreateMarkup": {
             "last_closed_": true

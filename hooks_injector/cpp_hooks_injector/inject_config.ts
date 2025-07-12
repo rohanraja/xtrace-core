@@ -13,18 +13,26 @@ export interface InjectConfig {
     ignored_types: string[];
     methods_which_split_run: string[];
     name: string;
+    /**
+     * Skip variable hooking (LocalVarUpdate calls) while preserving method entry and line logging.
+     * When true, only OnMethodEnter and LogLineRun calls will be generated.
+     * Default: false (maintains backward compatibility)
+     */
+    skipVariablesHooking?: boolean;
 };
 
 
 export function GetConfigFromEnv() {
-    let config: InjectConfig;
+    // Always start with default config
+    const jsonFilePath = path.join('default_config.json');
+    const jsonData = fs.readFileSync(jsonFilePath, 'utf8');
+    let config: InjectConfig = JSON.parse(jsonData);
+    
+    // If environment override is provided, merge it with default config
     if (process.env["XTRACE_CONFIG"]) {
-        config = JSON.parse(process.env["XTRACE_CONFIG"]);
-    } else {
-        // Read config from filepath provided as argument
-        const jsonFilePath = path.join('default_config.json');
-        const jsonData = fs.readFileSync(jsonFilePath, 'utf8');
-        config = JSON.parse(jsonData);
+        const envConfig = JSON.parse(process.env["XTRACE_CONFIG"]);
+        config = { ...config, ...envConfig };
     }
+    
     return config;
 }

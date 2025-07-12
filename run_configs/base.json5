@@ -19,5 +19,6 @@
     ],
     "should_skip_wpt_serve": true, // In case we don't want to run WPT server for web tests
     "run_filter": "", // If empty, run all steps otherwise comma separated list of steps to run
+    "skipVariablesHooking": false, // Set to true to skip variable tracking (LocalVarUpdate calls) while preserving method entry and line logging
     "web_page": "double_click_test.html" // File in "run_configs/html" folder or an http link
 }

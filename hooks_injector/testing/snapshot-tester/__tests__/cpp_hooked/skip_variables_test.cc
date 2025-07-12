@@ -1,0 +1,71 @@
+#include "base/strings/to_string.h"
+#include "third_party/xtrace/xtrace.h"
+#include <iostream>
+#include <string>
+
+class SimpleTest {
+public:
+  void TestMethod(int param1, const std::string &param2) {
+    blink::XTrace *xtrace = blink::XTrace::getInstance();
+    std::string xtrace_mrid = xtrace->OnMethodEnter(
+        "skip_variables_test.cc", "TestMethod", "GUID_FROM_TEST");
+    xtrace->LocalVarUpdate(xtrace_mrid, "param1", base::ToString(param1));
+    xtrace->LocalVarUpdate(xtrace_mrid, "param2", base::ToString(param2));
+    xtrace->LogLineRun(xtrace_mrid, 6);
+    int localVar1 = 42;
+    xtrace->LocalVarUpdate(xtrace_mrid, "localVar1", base::ToString(localVar1));
+
+    xtrace->LogLineRun(xtrace_mrid, 7);
+    std::string localVar2 = "test";
+    xtrace->LocalVarUpdate(xtrace_mrid, "localVar2", base::ToString(localVar2));
+
+    xtrace->LogLineRun(xtrace_mrid, 8);
+    double localVar3 = 3.14;
+    xtrace->LocalVarUpdate(xtrace_mrid, "localVar3", base::ToString(localVar3));
+
+    xtrace->LogLineRun(xtrace_mrid, 10);
+    if (param1 > 0) {
+      xtrace->LogLineRun(xtrace_mrid, 11);
+      int nestedVar = localVar1 * 2;
+      xtrace->LocalVarUpdate(xtrace_mrid, "nestedVar",
+                             base::ToString(nestedVar));
+
+      xtrace->LogLineRun(xtrace_mrid, 12);
+      localVar2 = param2 + "_modified";
+      xtrace->LocalVarUpdate(xtrace_mrid, "localVar2",
+                             base::ToString(localVar2));
+    }
+
+    xtrace->LogLineRun(xtrace_mrid, 15);
+    std::cout << "Method completed" << std::endl;
+  }
+
+  int GetValue() {
+    blink::XTrace *xtrace = blink::XTrace::getInstance();
+    std::string xtrace_mrid = xtrace->OnMethodEnter(
+        "skip_variables_test.cc", "GetValue", "GUID_FROM_TEST");
+    xtrace->LogLineRun(xtrace_mrid, 19);
+    int result = 100;
+    xtrace->LocalVarUpdate(xtrace_mrid, "result", base::ToString(result));
+
+    xtrace->LogLineRun(xtrace_mrid, 20);
+    return result;
+  }
+};
+
+void GlobalFunction(bool flag) {
+  blink::XTrace *xtrace = blink::XTrace::getInstance();
+  std::string xtrace_mrid = xtrace->OnMethodEnter(
+      "skip_variables_test.cc", "GlobalFunction", "GUID_FROM_TEST");
+  xtrace->LocalVarUpdate(xtrace_mrid, "flag", base::ToString(flag));
+  xtrace->LogLineRun(xtrace_mrid, 25);
+  int counter = 0;
+  xtrace->LocalVarUpdate(xtrace_mrid, "counter", base::ToString(counter));
+
+  xtrace->LogLineRun(xtrace_mrid, 26);
+  if (flag) {
+    xtrace->LogLineRun(xtrace_mrid, 27);
+    counter++;
+  }
+}
+

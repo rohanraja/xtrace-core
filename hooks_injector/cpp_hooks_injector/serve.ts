@@ -8,7 +8,7 @@ import { CodeParser } from './parser';
 import { CodeLogger } from './logger';
 import { CodeFormatter } from './formatter';
 import Parser, { SyntaxNode, Tree } from 'tree-sitter';
-import {setFileAndVersion} from './config';
+import {setFileAndVersion, config, setSkipVariablesHookingOverride} from './config';
 
 require('dotenv').config({ path: "../../config/.env", override: true });
 
@@ -34,6 +34,7 @@ app.post('/inject', async (req, res) => {
         let sourceCode = '';
         let filename = '';
         let codeVersion = '';
+        let skipVariablesHooking: boolean | undefined = undefined;
 
         // Handle different request types
         if (typeof req.body === 'string') {
@@ -41,16 +42,22 @@ app.post('/inject', async (req, res) => {
             sourceCode = req.body;
             filename = req.query.filename as string || 'input.cc';
             codeVersion = req.query.codeVersion as string || '';
+            // Check query params for skipVariablesHooking
+            if (req.query.skipVariablesHooking !== undefined) {
+                skipVariablesHooking = req.query.skipVariablesHooking === 'true';
+            }
         } else if (req.body && typeof req.body === 'object') {
             // JSON body
             if (req.body.code) {
                 sourceCode = req.body.code;
                 filename = req.body.filename || 'input.cc';
                 codeVersion = req.body.codeVersion || '';
+                skipVariablesHooking = req.body.skipVariablesHooking;
             } else if (req.body.sourceCode) {
                 sourceCode = req.body.sourceCode;
                 filename = req.body.filename || 'input.cc';
                 codeVersion = req.body.codeVersion || '';
+                skipVariablesHooking = req.body.skipVariablesHooking;
             } else {
                 return res.status(400).json({
                     error: 'Invalid request body. Expected "code" or "sourceCode" field in JSON, or plain text body.'
@@ -84,33 +91,45 @@ app.post('/inject', async (req, res) => {
             process.env["CodeVersion"] = codeVersion;
             setFileAndVersion(filename, codeVersion);
 
+            // Apply temporary configuration override if provided
+            if (skipVariablesHooking !== undefined) {
+                console.log(`Temporarily overriding skipVariablesHooking to: ${skipVariablesHooking}`);
+                setSkipVariablesHookingOverride(skipVariablesHooking);
+            }
 
-            console.log(`CodeVersion: ${codeVersion}, Filename: ${filename}`);
+            try {
+                console.log(`CodeVersion: ${codeVersion}, Filename: ${filename}`);
 
-            const parser = new CodeParser();
-            const tree = parser.parse(sourceCode);
+                const parser = new CodeParser();
+                const tree = parser.parse(sourceCode);
 
-            const logger = new CodeLogger(sourceCode);
-            modifiedSourceCode = logger.addLogLines(tree);
+                const logger = new CodeLogger(sourceCode);
+                modifiedSourceCode = logger.addLogLines(tree);
 
-            const formattedSourceCode = CodeFormatter.format(modifiedSourceCode);
-            modifiedSourceCode = formattedSourceCode;
+                const formattedSourceCode = CodeFormatter.format(modifiedSourceCode);
+                modifiedSourceCode = formattedSourceCode;
 
-            // Check for syntax errors after formatting
-            const formattedTree = parser.parse(formattedSourceCode);
-            hasError = formattedTree.rootNode.hasError;
-            
-            if (hasError) {
-                console.error(`XT_OUTPUT_HAS_CLANG_ERROR: true`);
-                let errorNode = null;
-                const visit = (node: SyntaxNode) => {
-                    if (node.isError) {
-                        errorNode = node;
-                        console.error(`XT_OUTPUT_ERROR_NODE: ${node.type} at line ${node.startPosition.row + 1}`);
-                    }
-                    node.namedChildren.forEach(visit);
-                };
-                visit(formattedTree.rootNode);
+                // Check for syntax errors after formatting
+                const formattedTree = parser.parse(formattedSourceCode);
+                hasError = formattedTree.rootNode.hasError;
+                
+                if (hasError) {
+                    console.error(`XT_OUTPUT_HAS_CLANG_ERROR: true`);
+                    let errorNode = null;
+                    const visit = (node: SyntaxNode) => {
+                        if (node.isError) {
+                            errorNode = node;
+                            console.error(`XT_OUTPUT_ERROR_NODE: ${node.type} at line ${node.startPosition.row + 1}`);
+                        }
+                        node.namedChildren.forEach(visit);
+                    };
+                    visit(formattedTree.rootNode);
+                }
+            } finally {
+                // Clear temporary override after processing
+                if (skipVariablesHooking !== undefined) {
+                    setSkipVariablesHookingOverride(undefined);
+                }
             }
         } else {
             // New Clang LibTooling approach
@@ -180,6 +199,7 @@ app.post('/inject', async (req, res) => {
             modifiedCode: modifiedSourceCode,
             filename: filename,
             codeVersion: codeVersion,
+            skipVariablesHooking: skipVariablesHooking !== undefined ? skipVariablesHooking : (config.skipVariablesHooking || false),
             timestamp: new Date().toISOString(),
             statistics: {
                 originalLines: sourceCode.split('\n').length,

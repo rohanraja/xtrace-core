@@ -70,6 +70,7 @@ async function main() {
   const cr_hooks_injector_folder = path.join(__dirname, '..', "hooks_injector", "cpp_hooks_injector");
   const upload_url = `http://${test_input.xtrace_server_ip}:${(test_input.xtrace_server_port || 3004)}/api/upload`;
   const xtrace_run_json = path.join(cr_debug_folder, 'xtrace.run.json');
+  const xtrace_run_log_src = path.join(cr_src_folder, 'xtrace.run.log');
   const xtrace_run_log = path.join(cr_debug_folder, 'xtrace.run.log');
   let content_shell_bin = isWin ? 'content_shell.exe' : '"./Content\ Shell.app/Contents/MacOS/Content\ Shell"';
   let chromium_bin = isWin ? 'chrome.exe' : './Chromium.app/Contents/MacOS/Chromium';
@@ -97,6 +98,10 @@ async function main() {
       web_page = "http://google.com";
       run_chrome = true;
     }
+  }
+
+  if(test_input.web_test){
+    run_chrome = false;
   }
 
 
@@ -280,7 +285,7 @@ async function main() {
     }finally{
       // Delay for 5 seconds for xtrace.run.json to be generated
       console.log("Delaying for 5 seconds for xtrace.run.json to be generated");
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      // await new Promise(resolve => setTimeout(resolve, 5000));
       alreadyRan = true;
     }
 
@@ -296,16 +301,28 @@ async function main() {
     if (fs.existsSync(xtrace_run_json)) {
       fs.rmSync(xtrace_run_json);
     }
+    if( fs.existsSync(xtrace_run_log_src)) {
+      fs.rmSync(xtrace_run_log_src);
+    }
     if (fs.existsSync(xtrace_run_log)) {
       fs.rmSync(xtrace_run_log);
     }
     // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox http://localhost:8001/clipboard-apis/async-navigator-clipboard-xtrace.html`, cr_debug_folder);
     if(!run_chrome){
       // await runInEnv(`${content_shell_bin}  --run-web-tests --no-sandbox ${test_input.web_test}`, cr_debug_folder);
-      await runInEnv(`vpython3 third_party/blink/tools/run_web_tests.py ${test_input.web_test} -t ${buildFolderName} --additional-driver-flag="${test_input.additionalFlags}" --verbose --driver-logging`, cr_src_folder);
+      // await runInEnv(`vpython3 third_party/blink/tools/run_web_tests.py ${test_input.web_test} -t ${buildFolderName} ${test_input.additionalFlags ? `--additional-driver-flag="${test_input.additionalFlags}"` : ''} --verbose --driver-logging`, cr_src_folder);
+      await runInEnv(`vpython3 third_party/blink/tools/run_wpt_tests.py ${test_input.web_test} -t ${buildFolderName} ${test_input.additionalFlags ? `--additional-driver-flag="${test_input.additionalFlags}"` : ''} --verbose`, cr_src_folder);
 
       // Delay for 5 seconds for xtrace.run.json to be generated
       await setTimeout(() => {}, 5000);
+
+      // copy xtrace.run.log to debug folder
+      if (fs.existsSync(xtrace_run_log_src)) {
+        fs.copyFileSync(xtrace_run_log_src, xtrace_run_log);
+        console.log(`Copied xtrace.run.log from ${xtrace_run_log_src} to ${xtrace_run_log}`);
+      } else {
+        console.log("xtrace.run.log source file does not exist, skipping copy");
+      }
     }
   });
 

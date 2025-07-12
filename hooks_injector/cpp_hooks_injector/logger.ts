@@ -1,5 +1,5 @@
 import { SyntaxNode, Tree } from 'tree-sitter';
-import { config, fileName, cvid, methodsToInclude, methodsToExclude, primitiveTypes, typesToExclude } from './config';
+import { config, fileName, cvid, methodsToInclude, methodsToExclude, primitiveTypes, typesToExclude, shouldSkipVariablesHooking } from './config';
 
 /**
  * Interfaces and Types
@@ -479,8 +479,8 @@ export class CodeLogger {
         if (isTopLevelFunction && index === 0 && methodInfo) {
             lineData += this.generateMethodEntryCode(methodInfo.name, methodInfo.shouldResetCodeRun);
             
-            // Add parameter logging if params exist
-            if (methodInfo.params && !methodInfo.name.includes("TEST_")) {
+            // Add parameter logging if params exist and variable hooking is not skipped
+            if (methodInfo.params && !methodInfo.name.includes("TEST_") && !shouldSkipVariablesHooking()) {
                 lineData += this.generateParameterLoggingCode(methodInfo.params);
             }
         }
@@ -489,7 +489,8 @@ export class CodeLogger {
         lineData += this.generateLineRunCode(lineNumber);
 
         // Handle variable tracking (for methods with methodInfo and non-for statements)
-        if (methodInfo && childNode.type !== "for_statement") {
+        // Skip variable tracking if SkipVariablesHooking is enabled
+        if (methodInfo && childNode.type !== "for_statement" && !shouldSkipVariablesHooking()) {
             const assignmentInfo = this.extractAssignmentInfo(childNode);
             if (assignmentInfo.identifier) {
                 lineDataAfterExec += this.generateVariableUpdateCode(
