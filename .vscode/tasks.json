@@ -202,7 +202,7 @@
 			],
 			"options": {
 				"env": {
-					"XT_RUN_FILTER": "5"
+					"XT_RUN_FILTER": "build-chrome"
 				}
 			}
 		},

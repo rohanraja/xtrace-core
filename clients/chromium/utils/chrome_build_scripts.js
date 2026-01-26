@@ -25,6 +25,7 @@ const {
  * @property {string} [web_page] - Web page URL to run in Chrome
  * @property {boolean} [should_skip_wpt_serve] - Skip starting the WPT server
  * @property {string} [xtrace_server_ip] - xTrace server IP address
+ * @property {string} [additionalBuildFlags] - Additional flags to pass to autoninja
  */
 
 /**
@@ -185,7 +186,8 @@ class ChromeBuildScripts extends AppBuildScriptBase {
       console.log("No Chrome process running or couldn't kill it");
     }
     
-    await this.runCommand(`autoninja ${this.build_target}`, this.build_path);
+    const additionalFlags = this.config.additionalBuildFlags || '';
+    await this.runCommand(`autoninja -C out/${this.buildFolderName} ${this.build_target} ${additionalFlags}`, this.src_path);
   }
 
   /**

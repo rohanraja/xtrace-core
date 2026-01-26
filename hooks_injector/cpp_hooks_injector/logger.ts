@@ -510,7 +510,23 @@ export class CodeLogger {
         );
         
         if (lineDataAfterExec) {
-            this.modifiedSourceCode[endLineNumber] += lineDataAfterExec;
+            if (lineNumber === endLineNumber) {
+                // Statement is on the same line as start, need to account for inserted code
+                const adjustedColumn = childNode.endPosition.column + lineData.length;
+                this.modifiedSourceCode[endLineNumber] = this.insertAtColumnPosition(
+                    this.modifiedSourceCode[endLineNumber],
+                    adjustedColumn,
+                    " " + lineDataAfterExec
+                );
+            } else {
+                // Statement spans multiple lines, insert at the end column of the last line
+                const endColumn = childNode.endPosition.column;
+                this.modifiedSourceCode[endLineNumber] = this.insertAtColumnPosition(
+                    this.modifiedSourceCode[endLineNumber],
+                    endColumn,
+                    " " + lineDataAfterExec
+                );
+            }
         }
     }
 
